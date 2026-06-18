@@ -40,6 +40,27 @@ async function seed() {
     })
     .onConflictDoNothing();
 
+  // Create test account
+  const testPasswordHash = await bcrypt.hash("test123", 10);
+  await db
+    .insert(users)
+    .values({
+      id: "test-001",
+      name: "Test Account",
+      email: "test@parkingagent.com",
+      passwordHash: testPasswordHash,
+      role: "member",
+      isMember: true,
+      isAdmin: false,
+      rankingScore: 85,
+      status: "good-standing",
+      membershipType: "monthly",
+      completedCourses: true,
+      joinedDate: "2026-06-18",
+      createdAt: now,
+    })
+    .onConflictDoNothing();
+
   // Create members
   const members = [
     { id: "u1", name: "Alice Johnson", email: "alice@example.com", rankingScore: 92, status: "good-standing" as const, membershipType: "monthly" as const, joinedDate: "2026-01-15", lat: 33.7701, lng: -118.1937 },
