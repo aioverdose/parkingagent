@@ -34,6 +34,14 @@ export const users = pgTable(
       .notNull()
       .default("none"),
     completedCourses: boolean("completed_courses").notNull().default(false),
+    stripeCustomerId: text("stripe_customer_id"),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    subscriptionStatus: text("subscription_status", {
+      enum: ["active", "past_due", "canceled", "incomplete", "none"],
+    })
+      .notNull()
+      .default("none"),
+    subscriptionPeriodEnd: text("subscription_period_end"),
     latitude: real("latitude"),
     longitude: real("longitude"),
     joinedDate: text("joined_date").notNull(),

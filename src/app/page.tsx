@@ -1,12 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { getStoredUser, clearAuth } from "@/lib/auth";
+import { api } from "@/lib/api";
 import type { AuthUser } from "@/lib/api";
 
 export default function Home() {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
   useEffect(() => {
     setUser(getStoredUser());
@@ -15,6 +19,21 @@ export default function Home() {
   const handleSignOut = () => {
     clearAuth();
     setUser(null);
+  };
+
+  const handleCheckout = async (priceType: string) => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    setCheckoutLoading(priceType);
+    try {
+      const { url } = await api.post<{ url: string }>("/api/stripe/checkout", { priceType });
+      window.location.href = url;
+    } catch {
+      alert("Checkout is not configured yet. Add Stripe keys to enable payments.");
+    }
+    setCheckoutLoading(null);
   };
 
   return (
@@ -212,13 +231,19 @@ export default function Home() {
               <div className="bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-8 text-center">
                 <h3 className="text-xl font-bold text-[#202124]">Monthly</h3>
                 <p className="mt-4 text-4xl font-black text-[#202124]">$14.99<span className="text-lg font-medium text-[#757575]">/month</span></p>
-                <a href="/signup" className="mt-8 inline-block w-full bg-[#0F9D58] text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#34A853] transition-colors">Get Monthly</a>
+                <button onClick={() => handleCheckout("monthly")} disabled={checkoutLoading === "monthly"}
+                  className="mt-8 w-full bg-[#0F9D58] text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#34A853] transition-colors disabled:opacity-50">
+                  {checkoutLoading === "monthly" ? "Redirecting..." : "Get Monthly"}
+                </button>
               </div>
               <div className="bg-white border border-[#4285F4] rounded-lg shadow-sm p-8 text-center relative">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#FBBB05] text-[#202124] text-xs font-bold px-3 py-1 rounded-full">Save 33%</div>
                 <h3 className="text-xl font-bold text-[#202124]">Annual</h3>
                 <p className="mt-4 text-4xl font-black text-[#202124]">$119<span className="text-lg font-medium text-[#757575]">/year</span></p>
-                <a href="/signup" className="mt-8 inline-block w-full bg-[#0F9D58] text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#34A853] transition-colors">Get Annual</a>
+                <button onClick={() => handleCheckout("annual")} disabled={checkoutLoading === "annual"}
+                  className="mt-8 w-full bg-[#0F9D58] text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#34A853] transition-colors disabled:opacity-50">
+                  {checkoutLoading === "annual" ? "Redirecting..." : "Get Annual"}
+                </button>
               </div>
             </div>
           </div>

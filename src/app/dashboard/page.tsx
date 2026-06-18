@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getStoredUser } from "@/lib/auth";
+import { getStoredUser, fetchCurrentUser } from "@/lib/auth";
 import { api } from "@/lib/api";
 
 type DashboardView = "main" | "leaving" | "need-spot" | "matched";
@@ -18,18 +18,38 @@ interface MatchData {
 
 export default function Dashboard() {
   const router = useRouter();
-  const user = getStoredUser();
+  const [user, setUser] = useState(getStoredUser());
   const [view, setView] = useState<DashboardView>("main");
   const [match, setMatch] = useState<MatchData | null>(null);
   const [countdown, setCountdown] = useState(0);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
+  const [billingLoading, setBillingLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
       router.push("/signup");
     }
   }, [user, router]);
+
+  useEffect(() => {
+    fetchCurrentUser().then((u) => {
+      if (u) {
+        setUser(u);
+      }
+    });
+  }, []);
+
+  const handleBilling = async () => {
+    setBillingLoading(true);
+    try {
+      const { url } = await api.post<{ url: string }>("/api/stripe/portal");
+      window.location.href = url;
+    } catch {
+      alert("Billing portal not available. Configure Stripe keys first.");
+    }
+    setBillingLoading(false);
+  };
 
   useEffect(() => {
     if (countdown > 0) {
@@ -130,6 +150,12 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#757575]">{user.name}</span>
+            {user.membershipType && user.membershipType !== "none" && (
+              <button onClick={handleBilling} disabled={billingLoading}
+                className="text-xs bg-gray-100 text-[#757575] px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors">
+                {billingLoading ? "Loading..." : "Manage Billing"}
+              </button>
+            )}
             <button onClick={() => { localStorage.removeItem("parking_agent_auth"); router.push("/"); }}
               className="text-sm text-[#E94335] hover:underline">Sign out</button>
           </div>
@@ -139,8 +165,13 @@ export default function Dashboard() {
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         {view === "main" && (
           <div className="w-full max-w-md text-center">
-            <div className="bg-[#E6F4EA] border border-[#0F9D58]/20 rounded-2xl p-4 mb-8">
-              <p className="text-sm text-[#0F9D58] font-semibold">Membership Active</p>
+            <div className={`rounded-2xl p-4 mb-8 ${user.isMember ? "bg-[#E6F4EA] border border-[#0F9D58]/20" : "bg-[#FCE8E6] border border-[#E94335]/30"}`}>
+              <p className={`text-sm font-semibold ${user.isMember ? "text-[#0F9D58]" : "text-[#E94335]"}`}>
+                {user.isMember ? "Membership Active" : user.status === "pending" ? "Pending — Complete Courses" : "Membership Inactive"}
+              </p>
+              {user.membershipType && user.membershipType !== "none" && (
+                <p className="text-xs text-[#757575] mt-1 capitalize">{user.membershipType} plan</p>
+              )}
             </div>
             <h1 className="text-3xl font-black text-[#202124]">Welcome, {user.name}</h1>
             <p className="text-[#757575] mt-2">What would you like to do?</p>
