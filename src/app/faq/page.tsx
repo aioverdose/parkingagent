@@ -56,12 +56,15 @@ export default function FAQ() {
             <span className="text-[#4285F4]">Parking</span>{" "}
             <span className="text-[#0F9D58]">Agent</span>
           </a>
-          <a
-            href="/membership"
-            className="bg-[#4285F4] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1A73E8] transition-colors"
-          >
-            Join Now
-          </a>
+          <div className="flex items-center gap-4">
+            <a href="/login" className="text-sm font-medium text-[#757575] hover:text-[#4285F4] transition-colors">Login</a>
+            <a
+              href="/membership"
+              className="bg-[#4285F4] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1A73E8] transition-colors"
+            >
+              Join Now
+            </a>
+          </div>
         </div>
       </nav>
 

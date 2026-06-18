@@ -86,6 +86,7 @@ export default function Signup() {
             <span className="text-[#4285F4]">Parking</span>{" "}
             <span className="text-[#0F9D58]">Agent</span>
           </a>
+          <a href="/login" className="text-sm font-medium text-[#757575] hover:text-[#4285F4] transition-colors">Login</a>
         </div>
       </nav>
 
