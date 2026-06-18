@@ -254,6 +254,26 @@ export default function Home() {
           </div>
         </section>
 
+        {/* DOWNLOAD APP */}
+        <section className="py-16 sm:py-24">
+          <div className="max-w-5xl mx-auto px-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#4285F4] text-center">Get the App</h2>
+            <p className="mt-4 text-lg sm:text-xl text-[#757575] text-center">Install Parking Agent on your phone for quick access to AI matching.</p>
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-2xl mx-auto">
+              <div className="bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-8 text-center">
+                <div className="text-5xl mb-4">📱</div>
+                <h3 className="text-lg font-bold text-[#202124]">iOS</h3>
+                <p className="mt-2 text-sm text-[#757575] leading-relaxed">Open in Safari, tap Share, then <strong>Add to Home Screen</strong>. It works like a native app.</p>
+              </div>
+              <div className="bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-8 text-center">
+                <div className="text-5xl mb-4">🤖</div>
+                <h3 className="text-lg font-bold text-[#202124]">Android</h3>
+                <p className="mt-2 text-sm text-[#757575] leading-relaxed">Open in Chrome. You'll see an <strong>Install</strong> prompt. Tap it to add to your home screen.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* FINAL CTA */}
         <section className="py-16 sm:py-24">
           <div className="max-w-3xl mx-auto px-4 text-center">
