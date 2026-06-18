@@ -228,6 +228,31 @@ export const revenueEntries = pgTable("revenue_entries", {
   revenue: real("revenue").notNull(),
 });
 
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    endpoint: text("endpoint").notNull(),
+    auth: text("auth").notNull(),
+    p256dh: text("p256dh").notNull(),
+    userAgent: text("user_agent"),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => ({
+    userIdx: index("push_sub_user_idx").on(table.userId),
+  }),
+);
+
+export const pushSubscriptionsRelations = relations(pushSubscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [pushSubscriptions.userId],
+    references: [users.id],
+  }),
+}));
+
 export const systemMetrics = pgTable("system_metrics", {
   id: text("id").primaryKey(),
   averageMatchTimeSeconds: real("average_match_time_seconds")

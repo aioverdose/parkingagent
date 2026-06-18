@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getStoredUser, fetchCurrentUser } from "@/lib/auth";
 import { api } from "@/lib/api";
 import MapView from "@/components/MapView";
+import PushNotifications from "@/components/PushNotifications";
 
 type DashboardView = "main" | "leaving" | "need-spot" | "matched";
 
@@ -207,6 +208,8 @@ export default function Dashboard() {
                 <span className="text-[#202124] font-semibold">50</span>
               </div>
             </div>
+
+            <PushNotifications />
           </div>
         )}
 

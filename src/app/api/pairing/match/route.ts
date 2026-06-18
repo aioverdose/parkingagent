@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { users, matches, spotOffers } from "@/lib/db/schema";
+import { users, matches, spotOffers, pushSubscriptions } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
 import { sendMatchNotification } from "@/lib/email";
+import { sendPushNotification } from "@/lib/push";
 
 export async function POST(req: Request) {
   try {
@@ -58,19 +59,33 @@ export async function POST(req: Request) {
       .set({ status: "matched" })
       .where(eq(spotOffers.id, offer.id));
 
-    // Send email notifications
+    // Send email + push notifications
     try {
       const [departingUser] = await db.select().from(users).where(eq(users.id, offer.userId)).limit(1);
       const [arrivingUser] = await db.select().from(users).where(eq(users.id, arrivingUserId)).limit(1);
 
       if (departingUser) {
         await sendMatchNotification(departingUser.email, departingUser.name, "departing", offer.address ?? undefined);
+        const subs = await db.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, departingUser.id));
+        for (const sub of subs) {
+          const result = await sendPushNotification(sub, "Someone is coming!", "A member is heading to your parking spot.", "/dashboard");
+          if (result === "expired") {
+            await db.delete(pushSubscriptions).where(eq(pushSubscriptions.id, sub.id));
+          }
+        }
       }
       if (arrivingUser) {
         await sendMatchNotification(arrivingUser.email, arrivingUser.name, "arriving", offer.address ?? undefined);
+        const subs = await db.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, arrivingUser.id));
+        for (const sub of subs) {
+          const result = await sendPushNotification(sub, "Spot Found!", "A parking spot has been matched for you. Head there now.", "/dashboard");
+          if (result === "expired") {
+            await db.delete(pushSubscriptions).where(eq(pushSubscriptions.id, sub.id));
+          }
+        }
       }
     } catch {
-      // Email failures are non-blocking
+      // Notification failures are non-blocking
     }
 
     return NextResponse.json({ match });
