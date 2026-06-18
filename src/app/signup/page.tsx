@@ -8,6 +8,7 @@ interface CourseModule {
   id: string;
   title: string;
   description: string;
+  content: string;
   completed: boolean;
 }
 
@@ -25,18 +26,50 @@ export default function Signup() {
       id: "cm1",
       title: "Long Beach Street Parking Laws",
       description: "Time limits, permit zones, no-parking zones, and street sweeping rules.",
+      content: `In Long Beach, street parking is regulated by the city municipal code. Key rules:
+• 2-hour time limits apply in most residential areas (look for white signs)
+• Permit zones require a residential permit — visitors must use guest permits
+• No-parking zones include: red curbs (fire hydrants), yellow curbs (loading), blue curbs (disabled)
+• Street sweeping happens 1x per week per block — check the posted schedule
+• Parking within 15 feet of a fire hydrant is illegal at all times
+• Vehicles must be moved every 72 hours on public streets (abandoned vehicle ordinance)
+• Overnight parking restrictions vary by neighborhood — look for posted signs`,
       completed: false,
     },
     {
       id: "cm2",
       title: "Rules of Participation",
       description: "Community guidelines, good-standing requirements, and code of conduct.",
+      content: `As a Parking Agent member, you agree to:
+• Only offer spots you are actively vacating (no advance reservations)
+• Arrive within the 10-minute window after being matched
+• Keep your ranking score accurate by completing matches
+• Never sell or trade spots outside the platform
+• Report no-shows and failed matches promptly
+• Maintain good-standing status by completing all courses
+• Treat all members with respect — harassment = permanent ban
+• Do not game the system (e.g., fake offers or matches)`,
       completed: false,
     },
     {
       id: "cm3",
       title: "Ranking System Overview",
       description: "How ranking works, earning points, and maintaining good-standing.",
+      content: `Your ranking score determines your priority in the AI matching queue.
+Scoring:
+• +10 points per successful match (you vacate, they arrive)
+• +5 points for accepting a match promptly
+• +20 points for completing all course modules
+• -15 points for no-show (you offered but left before match arrived)
+• -25 points for failed match (you didn't arrive after accepting)
+• -50 points for suspended status (after 3 violations)
+
+Maintaining Good-Standing:
+• Score above 40 = Good Standing (top priority)
+• Score 20-40 = Warning (reduced priority)
+• Score below 20 = Suspended (no matching until courses re-taken)
+
+Scores reset quarterly to give new members a fair chance.`,
       completed: false,
     },
   ]);
@@ -134,11 +167,12 @@ export default function Signup() {
 
               <div className="mt-8 space-y-4">
                 {modules.map((mod) => (
-                  <button key={mod.id} onClick={() => toggleModule(mod.id)}
-                    className={`w-full text-left border rounded-2xl p-5 transition-all ${
-                      mod.completed ? "border-[#0F9D58] bg-[#E6F4EA]" : "border-gray-200 bg-white hover:border-[#4285F4]"
+                  <div key={mod.id}
+                    className={`w-full text-left border rounded-2xl transition-all ${
+                      mod.completed ? "border-[#0F9D58] bg-[#E6F4EA]" : "border-gray-200 bg-white"
                     }`}>
-                    <div className="flex items-start justify-between gap-4">
+                    <button onClick={() => toggleModule(mod.id)}
+                      className="w-full text-left p-5 flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <h3 className="font-bold text-[#202124] text-base">{mod.title}</h3>
                         <p className="text-sm text-[#757575] mt-1">{mod.description}</p>
@@ -152,8 +186,11 @@ export default function Signup() {
                           </svg>
                         )}
                       </div>
+                    </button>
+                    <div className="px-5 pb-5">
+                      <p className="text-xs text-[#757575] leading-relaxed whitespace-pre-line">{mod.content}</p>
                     </div>
-                  </button>
+                  </div>
                 ))}
               </div>
 

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { matches, spotOffers } from "@/lib/db/schema";
+import { users, matches, spotOffers } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
+import { sendMatchNotification } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -56,6 +57,21 @@ export async function POST(req: Request) {
       .update(spotOffers)
       .set({ status: "matched" })
       .where(eq(spotOffers.id, offer.id));
+
+    // Send email notifications
+    try {
+      const [departingUser] = await db.select().from(users).where(eq(users.id, offer.userId)).limit(1);
+      const [arrivingUser] = await db.select().from(users).where(eq(users.id, arrivingUserId)).limit(1);
+
+      if (departingUser) {
+        await sendMatchNotification(departingUser.email, departingUser.name, "departing", offer.address ?? undefined);
+      }
+      if (arrivingUser) {
+        await sendMatchNotification(arrivingUser.email, arrivingUser.name, "arriving", offer.address ?? undefined);
+      }
+    } catch {
+      // Email failures are non-blocking
+    }
 
     return NextResponse.json({ match });
   } catch (error) {

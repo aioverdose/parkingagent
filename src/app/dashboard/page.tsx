@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getStoredUser, fetchCurrentUser } from "@/lib/auth";
 import { api } from "@/lib/api";
+import MapView from "@/components/MapView";
 
 type DashboardView = "main" | "leaving" | "need-spot" | "matched";
 
@@ -252,7 +253,8 @@ export default function Dashboard() {
               <div className="mt-6 bg-white border border-gray-200 rounded-2xl p-5 text-left space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[#757575]">Spot Location</span>
-                  <span className="text-[#202124] font-medium">{match.spotLatitude.toFixed(4)}, {match.spotLongitude.toFixed(4)}</span>
+                  <a href={`https://maps.google.com/maps?q=${match.spotLatitude},${match.spotLongitude}`} target="_blank" rel="noopener noreferrer"
+                    className="text-[#4285F4] font-medium hover:underline">{match.spotLatitude.toFixed(4)}, {match.spotLongitude.toFixed(4)}</a>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[#757575]">Status</span>
@@ -264,8 +266,8 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="mt-6 bg-[#E8F0FE] border border-[#4285F4]/20 rounded-2xl p-4">
-                <p className="text-xs text-[#757575]">Route map and directions would appear here in the full app. Head toward the spot location above.</p>
+              <div className="mt-4">
+                <MapView latitude={match.spotLatitude} longitude={match.spotLongitude} label="Parking spot location" className="h-48" />
               </div>
 
               <button onClick={handleAccept}

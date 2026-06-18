@@ -279,6 +279,25 @@ export default function Home() {
           </div>
         </section>
 
+        {/* SERVICE AREA MAP */}
+        <section className="py-16 sm:py-24">
+          <div className="max-w-5xl mx-auto px-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#4285F4] text-center">Serving Long Beach</h2>
+            <p className="mt-4 text-lg sm:text-xl text-[#757575] text-center">AI-powered parking matching across all Long Beach neighborhoods.</p>
+            <div className="mt-10 rounded-2xl overflow-hidden border border-gray-200 shadow-sm max-w-3xl mx-auto">
+              <iframe
+                src="https://maps.google.com/maps?q=Long+Beach,+CA&z=12&output=embed"
+                width="100%"
+                height="350"
+                style={{ border: 0 }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Long Beach service area"
+              />
+            </div>
+          </div>
+        </section>
+
         {/* DOWNLOAD APP */}
         <section className="py-16 sm:py-24">
           <div className="max-w-5xl mx-auto px-4">
