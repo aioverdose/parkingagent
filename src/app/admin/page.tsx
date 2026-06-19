@@ -49,6 +49,8 @@ export default function AdminDashboard() {
   const [recentMembers, setRecentMembers] = useState<Member[]>([]);
   const [topRanked, setTopRanked] = useState<Member[]>([]);
   const [modules, setModules] = useState<CourseModule[]>([]);
+  const [expiring, setExpiring] = useState(false);
+  const [expireMsg, setExpireMsg] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -208,8 +210,23 @@ export default function AdminDashboard() {
           <a href="/admin/matches" className="bg-[#0F9D58] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#34A853] transition-colors">View All Matches</a>
           <a href="/admin/cms" className="bg-[#FBBB05] text-[#202124] px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#F9A825] transition-colors">Edit CMS Content</a>
           <a href="/admin/financials" className="bg-[#757575] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#616161] transition-colors">View Financial Reports</a>
+          <button onClick={async () => {
+            setExpiring(true);
+            try {
+              const { expired } = await api.post<{ expired: number }>("/api/admin/expire-matches");
+              setExpireMsg(`Expired ${expired} stale match(es)`);
+            } catch {
+              setExpireMsg("Failed to expire matches");
+            }
+            setExpiring(false);
+            setTimeout(() => setExpireMsg(""), 3000);
+          }} disabled={expiring}
+            className="bg-[#E94335] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#D32F2F] transition-colors disabled:opacity-50">
+            {expiring ? "Expiring..." : "Expire Stale Matches"}
+          </button>
         </div>
-      </div>
+        {expireMsg && <p className="text-sm text-[#757575] mt-2">{expireMsg}</p>}
+        </div>
     </div>
   );
 }

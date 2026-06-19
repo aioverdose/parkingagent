@@ -117,10 +117,83 @@ export default function AdminFinancials() {
       <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
         <h3 className="font-semibold text-[#202124] mb-4">Export</h3>
         <div className="flex gap-3">
-          <button className="bg-[#4285F4] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1A73E8] transition-colors">Export to CSV</button>
-          <button className="border border-[#4285F4] text-[#4285F4] px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#E8F0FE] transition-colors">Export to PDF</button>
+          <button onClick={() => exportCSV(data)} className="bg-[#4285F4] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1A73E8] transition-colors">Export to CSV</button>
+          <button onClick={() => exportPDF(data)} className="border border-[#4285F4] text-[#4285F4] px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#E8F0FE] transition-colors">Export to PDF</button>
         </div>
       </div>
     </div>
   );
+}
+
+function exportCSV(data: FinancialData) {
+  const rows = [
+    ["Metric", "Value"],
+    ["Total Monthly Revenue", `$${data.totalMonthlyRevenue}`],
+    ["Total Annual Revenue", `$${data.totalAnnualRevenue}`],
+    ["Active Subscriptions", data.activeSubscriptions],
+    ["Monthly Subscriptions", data.monthlySubscriptions],
+    ["Annual Subscriptions", data.annualSubscriptions],
+    ["Avg Revenue/Member", `$${data.averageRevenuePerMember}`],
+    ["New Signups This Week", data.newSignupsThisWeek],
+    ["Churned This Month", data.churnedMembersThisMonth],
+    ...data.revenueOverTime.map((r) => [`Revenue (${r.month})`, `$${r.revenue}`]),
+  ];
+
+  const csv = rows.map((row) => row.join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `parking-agent-financials-${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportPDF(data: FinancialData) {
+  const win = window.open("", "_blank");
+  if (!win) return;
+  win.document.write(`
+    <html>
+    <head><title>Parking Agent Financials</title>
+    <style>
+      body { font-family: system-ui, sans-serif; padding: 40px; color: #202124; }
+      h1 { font-size: 24px; margin-bottom: 4px; }
+      .subtitle { color: #757575; font-size: 14px; margin-bottom: 24px; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+      .card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; }
+      .card-label { font-size: 12px; color: #757575; text-transform: uppercase; letter-spacing: 0.5px; }
+      .card-value { font-size: 24px; font-weight: bold; margin-top: 4px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+      th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #e0e0e0; font-size: 14px; }
+      th { color: #757575; font-weight: 600; }
+      .footer { margin-top: 32px; font-size: 12px; color: #bdbdbd; }
+    </style>
+    </head>
+    <body>
+      <h1>Parking Agent Financials</h1>
+      <p class="subtitle">Generated ${new Date().toLocaleDateString()}</p>
+      <div class="grid">
+        <div class="card"><div class="card-label">Monthly Revenue</div><div class="card-value" style="color:#0F9D58">$${data.totalMonthlyRevenue.toLocaleString()}</div></div>
+        <div class="card"><div class="card-label">Annual Revenue</div><div class="card-value" style="color:#4285F4">$${data.totalAnnualRevenue.toLocaleString()}</div></div>
+        <div class="card"><div class="card-label">Active Subscriptions</div><div class="card-value" style="color:#FBBB05">${data.activeSubscriptions}</div></div>
+        <div class="card"><div class="card-label">Avg Revenue/Member</div><div class="card-value" style="color:#757575">$${data.averageRevenuePerMember}</div></div>
+      </div>
+      <h2 style="font-size:18px;margin-bottom:12px">Revenue Over Time</h2>
+      <table>
+        <tr><th>Month</th><th>Revenue</th></tr>
+        ${data.revenueOverTime.map((r) => `<tr><td>${r.month}</td><td>$${r.revenue.toLocaleString()}</td></tr>`).join("")}
+      </table>
+      <h2 style="font-size:18px;margin:24px 0 12px">Subscription Summary</h2>
+      <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td>Monthly Subscriptions</td><td>${data.monthlySubscriptions}</td></tr>
+        <tr><td>Annual Subscriptions</td><td>${data.annualSubscriptions}</td></tr>
+        <tr><td>New Signups (This Week)</td><td>${data.newSignupsThisWeek}</td></tr>
+        <tr><td>Churned (This Month)</td><td>${data.churnedMembersThisMonth}</td></tr>
+      </table>
+      <p class="footer">Parking Agent — Confidential</p>
+      <script>window.print()</script>
+    </body></html>
+  `);
+  win.document.close();
 }
