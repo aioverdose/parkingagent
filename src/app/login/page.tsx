@@ -81,6 +81,9 @@ export default function LoginPage() {
             <label htmlFor="password" className="block text-sm font-medium text-[#202124] mb-1">Password</label>
             <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
+            <div className="text-right">
+              <a href="/forgot-password" className="text-xs text-[#4285F4] hover:underline">Forgot password?</a>
+            </div>
           </div>
           <button type="submit" disabled={loading}
             className="w-full bg-[#4285F4] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#1A73E8] transition-colors disabled:opacity-50">

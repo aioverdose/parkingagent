@@ -6,6 +6,28 @@ const resend = process.env.RESEND_API_KEY
 
 const FROM = "Parking Agent <noreply@parkingagent.com>";
 
+export async function sendEmail(
+  email: string,
+  subject: string,
+  text: string,
+) {
+  if (!resend) {
+    console.log(`[email] Would send "${subject}" to ${email}: ${text.slice(0, 100)}...`);
+    return;
+  }
+
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject,
+      text,
+    });
+  } catch (error) {
+    console.error("Failed to send email:", error);
+  }
+}
+
 export async function sendMatchNotification(
   email: string,
   name: string,
