@@ -11,7 +11,17 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userMatches = await db
+    const departingAlias = db.select({
+      id: users.id,
+      name: users.name,
+    }).from(users).as("departing_user");
+
+    const arrivingAlias = db.select({
+      id: users.id,
+      name: users.name,
+    }).from(users).as("arriving_user");
+
+    const raw = await db
       .select({
         id: matches.id,
         status: matches.status,
@@ -31,7 +41,22 @@ export async function GET() {
       )
       .orderBy(matches.matchedAt);
 
-    return NextResponse.json({ matches: userMatches });
+    const userIds = [...new Set(raw.flatMap((m) => [m.departingUserId, m.arrivingUserId]))];
+    const userRows = await db
+      .select({ id: users.id, name: users.name })
+      .from(users);
+
+    const userMap = new Map(userRows.map((u) => [u.id, u.name]));
+
+    const enriched = raw.map((m) => ({
+      ...m,
+      role: m.departingUserId === session.userId ? "departing" : "arriving",
+      otherUserName: userMap.get(
+        m.departingUserId === session.userId ? m.arrivingUserId : m.departingUserId,
+      ) ?? "Unknown",
+    }));
+
+    return NextResponse.json({ matches: enriched });
   } catch (error) {
     console.error("My matches error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

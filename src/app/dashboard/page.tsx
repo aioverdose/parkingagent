@@ -18,6 +18,8 @@ interface MatchData {
   arrivalAt: string | null;
   departingUserId?: string;
   arrivingUserId?: string;
+  role?: string;
+  otherUserName?: string;
 }
 
 export default function Dashboard() {
@@ -31,6 +33,8 @@ export default function Dashboard() {
   const [billingLoading, setBillingLoading] = useState(false);
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [geoError, setGeoError] = useState("");
+  const [matchHistory, setMatchHistory] = useState<MatchData[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -44,6 +48,7 @@ export default function Dashboard() {
       if (u) setUser(u);
     });
     getCurrentPosition();
+    fetchMatchHistory();
     return () => stopPolling();
   }, []);
 
@@ -70,6 +75,15 @@ export default function Dashboard() {
       },
       { enableHighAccuracy: true, timeout: 10000 },
     );
+  }
+
+  async function fetchMatchHistory() {
+    try {
+      const { matches } = await api.get<{ matches: MatchData[] }>("/api/matches/my");
+      setMatchHistory(matches);
+    } catch {
+      // ignore
+    }
   }
 
   function stopPolling() {
@@ -326,6 +340,37 @@ export default function Dashboard() {
             </div>
 
             <PushNotifications />
+
+            {matchHistory.length > 0 && (
+              <div className="mt-6">
+                <button onClick={() => setShowHistory(!showHistory)}
+                  className="text-sm text-[#4285F4] hover:underline font-medium">
+                  {showHistory ? "Hide" : "Show"} Match History ({matchHistory.length})
+                </button>
+                {showHistory && (
+                  <div className="mt-3 space-y-2 text-left max-h-64 overflow-y-auto">
+                    {matchHistory.slice().reverse().map((m) => (
+                      <div key={m.id} className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className={`font-semibold capitalize ${
+                            m.status === "completed" ? "text-[#0F9D58]" :
+                            m.status === "active" ? "text-[#4285F4]" :
+                            m.status === "cancelled" ? "text-[#E94335]" :
+                            "text-[#757575]"
+                          }`}>{m.status}</span>
+                          <span className="text-[#757575]">{new Date(m.matchedAt).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-[#757575] mt-1">
+                          {m.role === "departing" ? "Matched with" : "Arrived at"}{" "}
+                          {m.otherUserName || "a member"}
+                          {m.arrivalAt && ` — arrived ${new Date(m.arrivalAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
