@@ -21,6 +21,7 @@ export async function PATCH(
     if (typeof body.isActive === "boolean") updates.isActive = body.isActive;
     if (body.title) updates.title = body.title;
     if (body.description !== undefined) updates.description = body.description;
+    if (body.content !== undefined) updates.content = body.content;
     updates.lastUpdated = new Date().toISOString().split("T")[0];
 
     const [updated] = await db

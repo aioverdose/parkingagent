@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signup } from "@/lib/auth";
 import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
 
 interface CourseModule {
   id: string;
@@ -10,6 +11,8 @@ interface CourseModule {
   description: string;
   content: string;
   completed: boolean;
+  isActive: boolean;
+  required: boolean;
 }
 
 export default function Signup() {
@@ -20,59 +23,16 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [modules, setModules] = useState<CourseModule[]>([]);
+  const [loadingModules, setLoadingModules] = useState(true);
 
-  const [modules, setModules] = useState<CourseModule[]>([
-    {
-      id: "cm1",
-      title: "Long Beach Street Parking Laws",
-      description: "Time limits, permit zones, no-parking zones, and street sweeping rules.",
-      content: `In Long Beach, street parking is regulated by the city municipal code. Key rules:
-• 2-hour time limits apply in most residential areas (look for white signs)
-• Permit zones require a residential permit — visitors must use guest permits
-• No-parking zones include: red curbs (fire hydrants), yellow curbs (loading), blue curbs (disabled)
-• Street sweeping happens 1x per week per block — check the posted schedule
-• Parking within 15 feet of a fire hydrant is illegal at all times
-• Vehicles must be moved every 72 hours on public streets (abandoned vehicle ordinance)
-• Overnight parking restrictions vary by neighborhood — look for posted signs`,
-      completed: false,
-    },
-    {
-      id: "cm2",
-      title: "Rules of Participation",
-      description: "Community guidelines, good-standing requirements, and code of conduct.",
-      content: `As a Parking Agent member, you agree to:
-• Only offer spots you are actively vacating (no advance reservations)
-• Arrive within the 10-minute window after being matched
-• Keep your ranking score accurate by completing matches
-• Never sell or trade spots outside the platform
-• Report no-shows and failed matches promptly
-• Maintain good-standing status by completing all courses
-• Treat all members with respect — harassment = permanent ban
-• Do not game the system (e.g., fake offers or matches)`,
-      completed: false,
-    },
-    {
-      id: "cm3",
-      title: "Ranking System Overview",
-      description: "How ranking works, earning points, and maintaining good-standing.",
-      content: `Your ranking score determines your priority in the AI matching queue.
-Scoring:
-• +10 points per successful match (you vacate, they arrive)
-• +5 points for accepting a match promptly
-• +20 points for completing all course modules
-• -15 points for no-show (you offered but left before match arrived)
-• -25 points for failed match (you didn't arrive after accepting)
-• -50 points for suspended status (after 3 violations)
-
-Maintaining Good-Standing:
-• Score above 40 = Good Standing (top priority)
-• Score 20-40 = Warning (reduced priority)
-• Score below 20 = Suspended (no matching until courses re-taken)
-
-Scores reset quarterly to give new members a fair chance.`,
-      completed: false,
-    },
-  ]);
+  useEffect(() => {
+    api.get<{ modules: CourseModule[] }>("/api/courses").then(({ modules }) => {
+      setModules(modules.map((m) => ({ ...m, completed: false })));
+    }).catch(() => {
+      // fallback to empty
+    }).finally(() => setLoadingModules(false));
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +56,7 @@ Scores reset quarterly to give new members a fair chance.`,
     );
   };
 
-  const allComplete = modules.every((m) => m.completed);
+  const allComplete = modules.length > 0 && modules.every((m) => m.completed);
 
   const handleComplete = async () => {
     setLoading(true);
@@ -165,34 +125,40 @@ Scores reset quarterly to give new members a fair chance.`,
               <h1 className="text-3xl font-black text-[#202124] text-center">Required Courses</h1>
               <p className="text-center text-[#757575] mt-2">Complete all modules to activate your membership.</p>
 
-              <div className="mt-8 space-y-4">
-                {modules.map((mod) => (
-                  <div key={mod.id}
-                    className={`w-full text-left border rounded-2xl transition-all ${
-                      mod.completed ? "border-[#0F9D58] bg-[#E6F4EA]" : "border-gray-200 bg-white"
-                    }`}>
-                    <button onClick={() => toggleModule(mod.id)}
-                      className="w-full text-left p-5 flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <h3 className="font-bold text-[#202124] text-base">{mod.title}</h3>
-                        <p className="text-sm text-[#757575] mt-1">{mod.description}</p>
-                      </div>
-                      <div className={`w-6 h-6 rounded-full border-2 shrink-0 flex items-center justify-center mt-0.5 ${
-                        mod.completed ? "bg-[#0F9D58] border-[#0F9D58]" : "border-gray-300"
+              {loadingModules ? (
+                <div className="mt-8 flex justify-center">
+                  <div className="w-8 h-8 border-4 border-[#E8F0FE] border-t-[#4285F4] rounded-full animate-spin" />
+                </div>
+              ) : (
+                <div className="mt-8 space-y-4">
+                  {modules.map((mod) => (
+                    <div key={mod.id}
+                      className={`w-full text-left border rounded-2xl transition-all ${
+                        mod.completed ? "border-[#0F9D58] bg-[#E6F4EA]" : "border-gray-200 bg-white"
                       }`}>
-                        {mod.completed && (
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <path d="M3 7.5L5.5 10L11 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        )}
+                      <button onClick={() => toggleModule(mod.id)}
+                        className="w-full text-left p-5 flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-bold text-[#202124] text-base">{mod.title}</h3>
+                          <p className="text-sm text-[#757575] mt-1">{mod.description}</p>
+                        </div>
+                        <div className={`w-6 h-6 rounded-full border-2 shrink-0 flex items-center justify-center mt-0.5 ${
+                          mod.completed ? "bg-[#0F9D58] border-[#0F9D58]" : "border-gray-300"
+                        }`}>
+                          {mod.completed && (
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                              <path d="M3 7.5L5.5 10L11 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
+                        </div>
+                      </button>
+                      <div className="px-5 pb-5">
+                        <p className="text-xs text-[#757575] leading-relaxed whitespace-pre-line">{mod.content}</p>
                       </div>
-                    </button>
-                    <div className="px-5 pb-5">
-                      <p className="text-xs text-[#757575] leading-relaxed whitespace-pre-line">{mod.content}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               <button onClick={handleComplete} disabled={!allComplete || loading}
                 className={`mt-8 w-full px-6 py-3.5 rounded-xl font-bold text-base transition-colors ${
@@ -200,7 +166,7 @@ Scores reset quarterly to give new members a fair chance.`,
                     ? "bg-[#0F9D58] text-white hover:bg-[#34A853]"
                     : "bg-gray-200 text-[#BDBDBD] cursor-not-allowed"
                 }`}>
-                {loading ? "Creating account..." : allComplete ? "Complete & Activate Membership" : "Complete All Modules to Continue"}
+                {loading ? "Creating account..." : allComplete ? "Complete & Activate Membership" : loadingModules ? "Loading..." : "Complete All Modules to Continue"}
               </button>
               {error && (
                 <p className="text-center text-[#E94335] text-xs mt-4">{error}</p>

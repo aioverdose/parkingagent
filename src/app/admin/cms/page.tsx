@@ -13,6 +13,7 @@ interface CourseModule {
   id: string;
   title: string;
   description: string;
+  content: string;
   isActive: boolean;
   required: boolean;
   lastUpdated: string;
@@ -31,6 +32,7 @@ export default function AdminCMS() {
   const [versions, setVersions] = useState<ContentVersion[]>([]);
   const [activeTab, setActiveTab] = useState<"pages" | "courses">("pages");
   const [saved, setSaved] = useState(false);
+  const [editingContent, setEditingContent] = useState<Record<string, string>>({});
 
   useEffect(() => {
     api.get<{ content: PageContent; versions: ContentVersion[]; modules: CourseModule[] }>("/api/admin/cms").then((data) => {
@@ -70,6 +72,24 @@ export default function AdminCMS() {
     if (!mod) return;
     const data = await api.patch<{ module: CourseModule }>(`/api/admin/cms/modules/${id}`, { isActive: !mod.isActive });
     setModules((prev) => prev.map((m) => (m.id === id ? data.module : m)));
+  };
+
+  const handleContentChange = (id: string, value: string) => {
+    setEditingContent((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const saveModuleContent = async (id: string) => {
+    const content = editingContent[id];
+    if (!content) return;
+    const data = await api.patch<{ module: CourseModule }>(`/api/admin/cms/modules/${id}`, { content });
+    setModules((prev) => prev.map((m) => (m.id === id ? data.module : m)));
+    setEditingContent((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   if (!content) return null;
@@ -173,6 +193,19 @@ export default function AdminCMS() {
                   {mod.isActive ? "Active" : "Inactive"}
                 </button>
               </div>
+              <div className="mt-4">
+                <label className="block text-xs font-medium text-[#757575] mb-1">Course Content</label>
+                <textarea rows={8}
+                  defaultValue={mod.content || ""}
+                  onChange={(e) => handleContentChange(mod.id, e.target.value)}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#4285F4] outline-none font-mono text-xs leading-relaxed" />
+              </div>
+              {editingContent[mod.id] !== undefined && (
+                <button onClick={() => saveModuleContent(mod.id)}
+                  className="mt-2 bg-[#4285F4] text-white px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#1A73E8] transition-colors">
+                  Save Content
+                </button>
+              )}
             </div>
           ))}
         </div>

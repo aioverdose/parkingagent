@@ -163,6 +163,7 @@ export const courseModules = pgTable("course_modules", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
+  content: text("content"),
   isActive: boolean("is_active").notNull().default(true),
   required: boolean("required").notNull().default(true),
   lastUpdated: text("last_updated"),

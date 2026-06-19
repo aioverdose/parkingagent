@@ -38,6 +38,7 @@ export default function AdminLayout({
   const navLinks = [
     { href: "/admin", label: "Overview" },
     { href: "/admin/members", label: "Members" },
+    { href: "/admin/offers", label: "Offers" },
     { href: "/admin/matches", label: "Matches" },
     { href: "/admin/cms", label: "CMS" },
     { href: "/admin/financials", label: "Financials" },
