@@ -207,6 +207,7 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#757575]">{user.name}</span>
+            <a href="/profile" className="text-sm text-[#4285F4] hover:underline">Profile</a>
             {user.membershipType && user.membershipType !== "none" && (
               <button onClick={async () => {
                 setBillingLoading(true);
