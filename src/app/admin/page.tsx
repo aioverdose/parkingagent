@@ -30,6 +30,10 @@ export default function AdminDashboard() {
   const [modules, setModules] = useState<CourseModule[]>([]);
   const [expiring, setExpiring] = useState(false);
   const [expireMsg, setExpireMsg] = useState("");
+  const [seeding, setSeeding] = useState(false);
+  const [seedMsg, setSeedMsg] = useState("");
+  const [resetting, setResetting] = useState(false);
+  const [resetMsg, setResetMsg] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -149,8 +153,14 @@ export default function AdminDashboard() {
           <a href="/admin/financials" className="bg-[#757575] text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-[#616161] transition-colors">Financials</a>
           <button onClick={async () => { setExpiring(true); try { const { expired } = await api.post<{ expired: number }>("/api/admin/expire-matches"); setExpireMsg(`Expired ${expired} match(es)`); } catch { setExpireMsg("Failed"); } setExpiring(false); setTimeout(() => setExpireMsg(""), 3000); }} disabled={expiring}
             className="bg-[#E94335] text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-[#D32F2F] disabled:opacity-50">{expiring ? "..." : "Expire Stale"}</button>
+          <button onClick={async () => { setSeeding(true); setSeedMsg(""); try { const { message } = await api.post<{ message: string }>("/api/admin/seed"); setSeedMsg(message); } catch { setSeedMsg("Seed failed"); } setSeeding(false); setTimeout(() => setSeedMsg(""), 5000); }} disabled={seeding}
+            className="bg-[#4285F4] text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-[#1A73E8] disabled:opacity-50">{seeding ? "..." : "Seed Database"}</button>
+          <button onClick={async () => { setResetting(true); setResetMsg(""); try { const { message } = await api.post<{ message: string }>("/api/admin/reset-metrics"); setResetMsg(message); } catch { setResetMsg("Reset failed"); } setResetting(false); setTimeout(() => setResetMsg(""), 5000); }} disabled={resetting}
+            className="bg-[#FBBB05] text-[#202124] px-4 py-2 rounded-lg text-xs font-semibold hover:bg-[#F9A825] disabled:opacity-50">{resetting ? "..." : "Reset Metrics"}</button>
         </div>
         {expireMsg && <p className="text-xs text-[#757575] mt-2">{expireMsg}</p>}
+        {seedMsg && <p className="text-xs text-[#0F9D58] mt-2">{seedMsg}</p>}
+        {resetMsg && <p className="text-xs text-[#0F9D58] mt-2">{resetMsg}</p>}
       </Card>
     </div>
   );
