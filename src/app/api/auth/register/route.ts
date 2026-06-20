@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { users, courseModules, userCourseCompletions } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { hashPassword, createSession, setSessionCookie } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
+import { lookupReferrerByCode, createReferral, generateReferralCode, REFERRAL_COOKIE } from "@/lib/referral";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, completedModuleIds } = await req.json();
+    const { name, email, password, phone, completedModuleIds } = await req.json();
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -65,9 +67,28 @@ export async function POST(req: Request) {
       status: allRequiredComplete ? "good-standing" : "pending",
       membershipType: "none",
       completedCourses: !!allRequiredComplete,
+      phone: phone || null,
+      phoneVerified: !!phone,
       joinedDate: today,
       createdAt: now,
     });
+
+    // Generate referral code for new user
+    await generateReferralCode(userId);
+
+    // Check for referral cookie
+    try {
+      const cookieStore = await cookies();
+      const refCode = cookieStore.get(REFERRAL_COOKIE)?.value;
+      if (refCode) {
+        const referrerId = await lookupReferrerByCode(refCode);
+        if (referrerId && referrerId !== userId) {
+          await createReferral(referrerId, userId, refCode);
+        }
+      }
+    } catch {
+      // cookie access may fail in some environments — non-critical
+    }
 
     // Record course completions
     if (completedModuleIds && completedModuleIds.length > 0) {

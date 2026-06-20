@@ -117,9 +117,9 @@ export default function FAQ() {
         <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>&copy; 2026 Parking Agent. All rights reserved.</span>
           <div className="flex gap-4">
-            <a href="/legal/terms" className="hover:text-[#4285F4]">Terms</a>
+            <a href="/premium" className="hover:text-[#4285F4]">Premium</a>
+            <a href="/tos" className="hover:text-[#4285F4]">Terms</a>
             <a href="/legal/privacy" className="hover:text-[#4285F4]">Privacy</a>
-            <a href="/legal/accessibility" className="hover:text-[#4285F4]">Accessibility</a>
           </div>
         </div>
       </footer>

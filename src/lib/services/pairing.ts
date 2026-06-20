@@ -23,13 +23,16 @@ export interface ScoredOffer {
   address: string | null;
   status: string;
   createdAt: string;
+  expectedDeparture: string | null;
+  vehicleType: string | null;
+  vehicleSize: string | null;
   distanceKm: number;
   rankingScore: number;
   compositeScore: number;
 }
 
 export function scoreOffers(
-  offers: Array<{ id: string; userId: string; latitude: number; longitude: number; address: string | null; status: string; createdAt: string }>,
+  offers: Array<{ id: string; userId: string; latitude: number; longitude: number; address: string | null; status: string; createdAt: string; expectedDeparture: string | null; vehicleType: string | null; vehicleSize: string | null }>,
   userLat: number,
   userLng: number,
   rankingScores: Map<string, number>,

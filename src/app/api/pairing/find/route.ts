@@ -4,6 +4,7 @@ import { users, spotOffers } from "@/lib/db/schema";
 import { eq, and, ne, inArray } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
 import { scoreOffers } from "@/lib/services/pairing";
+import { getRouteEtaBatch, computeTimeFitScore } from "@/lib/services/osrm";
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,9 +15,14 @@ export async function GET(req: NextRequest) {
 
     const latParam = req.nextUrl.searchParams.get("lat");
     const lngParam = req.nextUrl.searchParams.get("lng");
-
     const userLat = latParam ? parseFloat(latParam) : undefined;
     const userLng = lngParam ? parseFloat(lngParam) : undefined;
+
+    const [currentUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, session.userId))
+      .limit(1);
 
     const available = await db
       .select()
@@ -36,7 +42,27 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ offers: available });
     }
 
-    const userIds = [...new Set(available.map((o) => o.userId))];
+    // Filter by vehicle compatibility
+    const compatible = currentUser
+      ? available.filter((offer) => {
+          if (!offer.vehicleType && !offer.vehicleSize) return true;
+          if (offer.vehicleType && offer.vehicleType !== currentUser.vehicleType) return false;
+          if (offer.vehicleSize && offer.vehicleSize !== currentUser.vehicleSize) return false;
+          return true;
+        })
+      : available;
+
+    if (compatible.length === 0) {
+      return NextResponse.json({ offers: [] });
+    }
+
+    // Compute OSRM ETA for each offer
+    const etaResults = await getRouteEtaBatch(
+      compatible.map((o) => ({ lat: o.latitude, lng: o.longitude })),
+      { lat: userLat, lng: userLng },
+    );
+
+    const userIds = [...new Set(compatible.map((o) => o.userId))];
     const rankingRows = await db
       .select({ id: users.id, rankingScore: users.rankingScore })
       .from(users)
@@ -46,9 +72,35 @@ export async function GET(req: NextRequest) {
       rankingRows.map((r) => [r.id, r.rankingScore ?? 0]),
     );
 
-    const scored = scoreOffers(available, userLat, userLng, rankingScores);
+    const scored = scoreOffers(compatible, userLat, userLng, rankingScores);
 
-    return NextResponse.json({ offers: scored });
+    // Merge ETA into results and compute time-fit score
+    const nowMinutes = Date.now() / 60000;
+    const offersWithEta = scored.map((offer, idx) => {
+      const eta = etaResults[idx]?.eta;
+      let timeFitScore = 0.5;
+      if (eta && offer.expectedDeparture) {
+        const depMinutes = new Date(offer.expectedDeparture).getTime() / 60000;
+        const arrivalMinutes = nowMinutes + eta.durationMinutes;
+        timeFitScore = computeTimeFitScore(arrivalMinutes, depMinutes);
+      } else if (eta) {
+        timeFitScore = 0.75;
+      }
+      return {
+        ...offer,
+        etaMinutes: eta?.durationMinutes ?? null,
+        etaDistance: eta?.distanceMeters ?? null,
+        timeFitScore,
+      };
+    });
+
+    // Sort by timeFitScore (desc), then compositeScore (asc)
+    offersWithEta.sort((a, b) => {
+      if (b.timeFitScore !== a.timeFitScore) return b.timeFitScore - a.timeFitScore;
+      return a.compositeScore - b.compositeScore;
+    });
+
+    return NextResponse.json({ offers: offersWithEta });
   } catch (error) {
     console.error("Find spots error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

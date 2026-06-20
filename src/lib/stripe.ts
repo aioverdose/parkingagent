@@ -18,17 +18,23 @@ export async function createCheckoutSession(
   email: string,
   priceId: string,
   userId: string,
+  referrerId?: string | null,
 ) {
+  const metadata: Record<string, string> = { userId };
+  if (referrerId) {
+    metadata.referrerId = referrerId;
+  }
+
   const session = await stripe.checkout.sessions.create({
     customer: customerId ?? undefined,
     customer_email: customerId ? undefined : email,
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
-    metadata: { userId },
+    metadata,
     success_url: `${process.env.NEXT_PUBLIC_BASE_URL ?? "https://parking-agent.vercel.app"}/dashboard?checkout=success`,
     cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL ?? "https://parking-agent.vercel.app"}/pricing?checkout=canceled`,
     subscription_data: {
-      metadata: { userId },
+      metadata,
     },
   });
 

@@ -53,4 +53,11 @@ export interface AuthUser {
   membershipType?: string;
   completedCourses?: boolean;
   joinedDate?: string;
+  vehicleType?: string;
+  vehicleSize?: string;
+  vehicleMake?: string;
+  vehicleModel?: string;
+  licensePlate?: string;
+  isPremium?: boolean;
+  premiumUntil?: string;
 }

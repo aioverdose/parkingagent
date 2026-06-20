@@ -2,342 +2,346 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { getStoredUser, clearAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 import type { AuthUser } from "@/lib/api";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { HoverCard } from "@/components/ui/HoverCard";
+import { TiltCard } from "@/components/ui/TiltCard";
+import { HoverButton } from "@/components/ui/HoverButton";
+
+const problems = [
+  { icon: "🚗", title: "Multi-Car Chaos", desc: "5+ cars race to the same spot when publicly listed. Parking Agent hides spots until matched — only 1 car gets it.", detail: "Other apps show public maps of available spots, creating a free-for-all where multiple drivers race to the same location. Our Uber-style matching assigns spots 1-to-1, eliminating multi-car races entirely." },
+  { icon: "⏱", title: "Time Wasted", desc: "Drivers circle blocks for 15+ minutes. Our AI matches you to a spot before you arrive.", detail: "Studies show the average driver spends 17 minutes circling for street parking. Parking Agent's proximity-based matching connects you to a departing member nearby, so you go straight to the spot." },
+  { icon: "📋", title: "Parking Tickets", desc: "Confusing zone rules cause $50+ citations. Our course covers all LB parking laws.", detail: "Long Beach has complex parking regulations: permit zones, street sweeping schedules, time limits, and no-parking areas. Our required course module covers every rule so you never get blindsided by a ticket." },
+];
+
+const steps = [
+  { num: "1", title: "Become a Member", desc: "Complete the course and activate your monthly or annual membership." },
+  { num: "2", title: "Offer or Request", desc: "Leaving? Post your spot. Need one? Request a match. AI handles the rest.", icon: "🔄" },
+  { num: "3", title: "Get Matched 1-to-1", desc: "Our AI pairs you with the closest good-standing member. No public listing, no chaos.", icon: "🤝" },
+];
+
+function FadeInUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function Home() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [faqOpen, setFaqOpen] = useState<number | null>(null);
 
-  useEffect(() => {
-    setUser(getStoredUser());
-  }, []);
-
-  const handleSignOut = () => {
-    clearAuth();
-    setUser(null);
-  };
+  useEffect(() => { setUser(getStoredUser()); }, []);
 
   const handleCheckout = async (priceType: string) => {
-    if (!user) {
-      router.push("/login");
-      return;
-    }
+    if (!user) { router.push("/signup"); return; }
     setCheckoutLoading(priceType);
     try {
       const { url } = await api.post<{ url: string }>("/api/stripe/checkout", { priceType });
       window.location.href = url;
-    } catch {
-      alert("Checkout is not configured yet. Add Stripe keys to enable payments.");
-    }
+    } catch { alert("Stripe not configured yet."); }
     setCheckoutLoading(null);
   };
 
+  const faqs = [
+    { q: "How does Parking Agent prevent multi-car chaos?", a: "Unlike other apps that show available spots on a public map (creating a free-for-all race), Parking Agent hides all spots until a match is created. When you request a spot, our AI pairs you 1-to-1 with the closest departing member. Only you get the spot location — no other drivers can see it." },
+    { q: "How does the AI matching work?", a: "Our proximity-based algorithm finds the closest good-standing member who is vacating a spot. It considers: (1) distance — the closer member gets priority, (2) ranking score — members with higher scores match first, (3) availability — only active, verified members in good standing." },
+    { q: "What does the membership cost?", a: "Monthly plans start at $14.99/month and annual plans at $119/year (save 33%). Both include full access to AI matching, course modules, route maps, and ranking system." },
+    { q: "What are the course modules?", a: "Three required modules: Long Beach Street Parking Laws (time limits, zones, rules), Rules of Participation (community guidelines), and Ranking System Overview (how scoring works). Completing all three activates your membership." },
+    { q: "What areas are covered?", a: "Currently serving all residential and commercial street parking zones within Long Beach, CA. We're expanding to nearby cities — join the waitlist to get notified." },
+  ];
+
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="flex items-center justify-between max-w-5xl mx-auto px-4 py-3">
-          <div className="text-xl font-bold tracking-tight">
+    <div className="min-h-screen bg-white">
+      {/* Nav */}
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
+          <motion.a
+            href="/"
+            className="text-lg font-bold tracking-tight"
+            whileHover={{ scale: 1.05 }}
+          >
             <span className="text-[#4285F4]">Parking</span>{" "}
             <span className="text-[#0F9D58]">Agent</span>
-          </div>
-
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="sm:hidden p-2 text-[#757575] hover:text-[#4285F4]"
-            aria-label="Toggle menu"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              {menuOpen ? (
-                <path d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
-
-          <div className="hidden sm:flex items-center gap-6">
-            {["How it works", "Membership", "FAQ"].map((label) => (
-              <a
-                key={label}
-                href={label === "How it works" ? "/how-it-works" : label === "Membership" ? "/membership" : "#"}
-                className="text-sm font-medium text-[#757575] hover:text-[#4285F4] transition-colors"
-              >
-                {label}
-              </a>
-            ))}
+          </motion.a>
+          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-[#757575]">
+            <a href="/how-it-works" className="hover:text-[#202124] transition-colors">How It Works</a>
+            <a href="/membership" className="hover:text-[#202124] transition-colors">Pricing</a>
+            <a href="/faq" className="hover:text-[#202124] transition-colors">FAQ</a>
             {user ? (
-              <>
-                <a href="/dashboard" className="text-sm font-medium text-[#0F9D58] hover:text-[#34A853] transition-colors">Dashboard</a>
-                <button onClick={handleSignOut}
-                  className="text-sm font-medium text-[#E94335] hover:underline">Sign out</button>
-              </>
+              <div className="flex items-center gap-3">
+                <a href="/dashboard" className="text-[#4285F4] hover:underline">Dashboard</a>
+                {user.isAdmin && <a href="/admin" className="text-[#E94335] hover:underline">Admin</a>}
+                <button onClick={() => { clearAuth(); setUser(null); }} className="hover:text-[#E94335] transition-colors">Sign Out</button>
+              </div>
             ) : (
-              <>
-                <a href="/login" className="text-sm font-medium text-[#757575] hover:text-[#4285F4] transition-colors">Login</a>
-                <a href="/signup"
-                  className="bg-[#4285F4] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1A73E8] transition-colors">
-                  Get Started
-                </a>
-              </>
+              <a href="/login" className="bg-[#4285F4] text-white px-4 py-2 rounded-lg hover:bg-[#1A73E8] transition-colors">Login</a>
             )}
           </div>
+          <button className="md:hidden text-[#757575]" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? "✕" : "☰"}
+          </button>
         </div>
-
         {menuOpen && (
-          <div className="sm:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-3">
-            {["How it works", "Membership", "FAQ"].map((label) => (
-              <a
-                key={label}
-                href={label === "How it works" ? "/how-it-works" : label === "Membership" ? "/membership" : "#"}
-                className="block text-sm font-medium text-[#757575] hover:text-[#4285F4] py-2"
-                onClick={() => setMenuOpen(false)}
-              >
-                {label}
-              </a>
-            ))}
+          <div className="md:hidden border-t border-gray-100 px-4 py-4 space-y-3 text-sm">
+            <a href="/how-it-works" className="block text-[#757575] hover:text-[#202124]">How It Works</a>
+            <a href="/membership" className="block text-[#757575] hover:text-[#202124]">Pricing</a>
+            <a href="/faq" className="block text-[#757575] hover:text-[#202124]">FAQ</a>
             {user ? (
               <>
-                <a href="/dashboard" className="block text-sm font-medium text-[#0F9D58] py-2" onClick={() => setMenuOpen(false)}>Dashboard</a>
-                <button onClick={() => { handleSignOut(); setMenuOpen(false); }}
-                  className="block text-sm font-medium text-[#E94335] py-2">Sign out</button>
+                <a href="/dashboard" className="block text-[#4285F4]">Dashboard</a>
+                <button onClick={() => { clearAuth(); setUser(null); }} className="block text-[#E94335]">Sign Out</button>
               </>
             ) : (
-              <>
-                <a href="/login" className="block text-sm font-medium text-[#757575] py-2" onClick={() => setMenuOpen(false)}>Login</a>
-                <a href="/signup"
-                  className="block text-center bg-[#4285F4] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1A73E8]"
-                  onClick={() => setMenuOpen(false)}>
-                  Get Started
-                </a>
-              </>
+              <a href="/login" className="block text-[#4285F4]">Login</a>
             )}
           </div>
         )}
       </nav>
 
-      <main className="flex-1">
-        <section className="max-w-5xl mx-auto px-4 pt-20 pb-32 sm:pt-28 sm:pb-40 text-center">
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-[#202124]">
-            Parking Agent
-          </h1>
-          <p className="text-xl sm:text-2xl text-[#757575] mt-4 font-medium">
-            City streets parking assistant
-          </p>
-          <p className="text-base sm:text-lg text-[#4285F4] mt-3 font-semibold">
-            Membership has its advantages
-          </p>
-          <div className="mt-10">
-            <a
-              href="/how-it-works"
-              className="inline-block bg-[#0F9D58] text-white px-8 py-4 rounded-xl text-lg font-bold shadow-lg hover:bg-[#34A853] transition-colors"
-            >
-              Get Started
-            </a>
-          </div>
-        </section>
+      {/* Hero */}
+      <motion.section
+        className="max-w-6xl mx-auto px-4 pt-20 pb-16 text-center"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <motion.div
+          className="inline-flex items-center gap-2 bg-[#E8F0FE] text-[#4285F4] text-xs font-semibold px-3 py-1.5 rounded-full mb-6"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+        >
+          <span>🔥</span> Uber-Style AI Matching
+        </motion.div>
+        <h1 className="text-4xl md:text-5xl font-black text-[#202124] leading-tight">
+          <span className="text-[#4285F4]">Parking</span>{" "}
+          <span className="text-[#0F9D58]">Agent</span>
+        </h1>
+        <p className="text-xl mt-3 text-[#757575] max-w-2xl mx-auto">
+          City streets parking assistant
+        </p>
+        <p className="text-base mt-2 text-[#757575] max-w-2xl mx-auto">
+          <span className="font-semibold text-[#202124]">The only app that uses Uber-style AI matching</span> to prevent multi-car chaos. One spot, one car, every time.
+        </p>
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <HoverButton variant="primary" onClick={() => router.push("/signup")}>
+            Get Started – Become a Member
+          </HoverButton>
+          <HoverButton variant="secondary" onClick={() => router.push("/how-it-works")}>
+            How It Works →
+          </HoverButton>
+        </div>
+      </motion.section>
 
-        {/* PROBLEMS WE SOLVE */}
-        <section className="py-16 sm:py-24 bg-gray-50">
-          <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#4285F4] text-center">Street Parking Chaos, Solved</h2>
-            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-6">
-                <div className="text-4xl mb-4">🚗</div>
-                <h3 className="text-lg font-bold text-[#202124]">Multi-Car Chaos</h3>
-                <p className="mt-2 text-[#757575] text-sm leading-relaxed">When someone posts "leaving soon," 5+ cars race to the same spot. We prevent this.</p>
-              </div>
-              <div className="bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-6">
-                <div className="text-4xl mb-4">⏱️</div>
-                <h3 className="text-lg font-bold text-[#202124]">Time Wasted</h3>
-                <p className="mt-2 text-[#757575] text-sm leading-relaxed">10–30 minutes per day circling blocks. That's 2+ hours weekly lost.</p>
-              </div>
-              <div className="bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-6">
-                <div className="text-4xl mb-4">📜</div>
-                <h3 className="text-lg font-bold text-[#202124]">Parking Tickets</h3>
-                <p className="mt-2 text-[#757575] text-sm leading-relaxed">Don't know Long Beach laws? Time limits, permit zones = expensive tickets.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* HOW IT WORKS */}
-        <section className="py-16 sm:py-24">
-          <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#4285F4] text-center">How Parking Agent Works</h2>
-            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-14 h-14 bg-[#4285F4] rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-2xl font-bold text-white">1</span>
+      {/* Problems */}
+      <section className="max-w-5xl mx-auto px-4 pb-16">
+        <FadeInUp>
+          <h2 className="text-2xl font-bold text-[#202124] text-center mb-8">Problems We Solve</h2>
+        </FadeInUp>
+        <div className="grid md:grid-cols-3 gap-4">
+          {problems.map((p, i) => (
+            <FadeInUp key={p.title} delay={i * 0.1}>
+              <Tooltip content={
+                <div>
+                  <p className="font-semibold text-[#202124] mb-1">{p.title}</p>
+                  <p className="text-xs leading-relaxed">{p.detail}</p>
                 </div>
-                <h3 className="mt-6 text-lg font-bold text-[#202124]">Become a Member</h3>
-                <p className="mt-2 text-[#757575] text-sm leading-relaxed max-w-xs mx-auto">Complete a short course on Long Beach street parking laws. Get verified.</p>
-              </div>
-              <div className="text-center">
-                <div className="w-14 h-14 bg-[#4285F4] rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-2xl font-bold text-white">2</span>
-                </div>
-                <h3 className="mt-6 text-lg font-bold text-[#202124]">Request or Offer</h3>
-                <p className="mt-2 text-[#757575] text-sm leading-relaxed max-w-xs mx-auto">"I Need a Spot" → AI finds closest deparer. "I'm Leaving" → AI matches you to someone arriving.</p>
-              </div>
-              <div className="text-center">
-                <div className="w-14 h-14 bg-[#4285F4] rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-2xl font-bold text-white">3</span>
-                </div>
-                <h3 className="mt-6 text-lg font-bold text-[#202124]">Get Matched</h3>
-                <p className="mt-2 text-[#757575] text-sm leading-relaxed max-w-xs mx-auto">Only 1 car per spot. You get route map + arrival time. No chaos.</p>
-              </div>
-            </div>
-          </div>
-        </section>
+              }>
+                <HoverCard glow className="text-center cursor-pointer">
+                  <span className="text-3xl block mb-2">{p.icon}</span>
+                  <h3 className="font-bold text-[#202124] text-sm">{p.title}</h3>
+                  <p className="text-xs text-[#757575] mt-1">{p.desc}</p>
+                </HoverCard>
+              </Tooltip>
+            </FadeInUp>
+          ))}
+        </div>
+      </section>
 
-        {/* MEMBERSHIP BENEFITS */}
-        <section className="py-16 sm:py-24 bg-gray-50">
-          <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#4285F4] text-center">What Members Get</h2>
-            <div className="mt-12 max-w-2xl mx-auto space-y-4">
-              <div className="flex items-start gap-3 bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-4">
-                <span className="text-lg mt-0.5">✅</span>
-                <p className="text-[#757575]"><span className="font-bold text-[#202124]">AI Agentic Matching</span> – Uber-style proximity pairing</p>
-              </div>
-              <div className="flex items-start gap-3 bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-4">
-                <span className="text-lg mt-0.5">✅</span>
-                <p className="text-[#757575]"><span className="font-bold text-[#202124]">No Multi-Car Chaos</span> – Spots hidden until matched</p>
-              </div>
-              <div className="flex items-start gap-3 bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-4">
-                <span className="text-lg mt-0.5">✅</span>
-                <p className="text-[#757575]"><span className="font-bold text-[#202124]">Long Beach Law Course</span> – Avoid tickets</p>
-              </div>
-              <div className="flex items-start gap-3 bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-4">
-                <span className="text-lg mt-0.5">✅</span>
-                <p className="text-[#757575]"><span className="font-bold text-[#202124]">Ranking System</span> – Good behavior = priority</p>
-              </div>
-              <div className="flex items-start gap-3 bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-4">
-                <span className="text-lg mt-0.5">✅</span>
-                <p className="text-[#757575]"><span className="font-bold text-[#202124]">Route Maps</span> – Exact directions to spot</p>
-              </div>
-            </div>
+      {/* How It Works */}
+      <section className="bg-[#FAFAFA] border-y border-gray-100 py-16">
+        <div className="max-w-5xl mx-auto px-4">
+          <FadeInUp>
+            <h2 className="text-2xl font-bold text-[#202124] text-center mb-2">How It Works</h2>
+            <p className="text-sm text-[#757575] text-center mb-10 max-w-lg mx-auto">Uber-style proximity pairing: the closest good-standing member gets the spot — no public listing, no multi-car races.</p>
+          </FadeInUp>
+          <div className="grid md:grid-cols-3 gap-4">
+            {steps.map((s, i) => (
+              <FadeInUp key={s.num} delay={i * 0.15}>
+                <TiltCard className="text-center">
+                  <div className="w-10 h-10 bg-[#4285F4]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-[#4285F4] font-bold text-sm">{s.num}</span>
+                  </div>
+                  {s.icon && <span className="text-2xl block mb-2">{s.icon}</span>}
+                  <h3 className="font-bold text-[#202124] text-sm">{s.title}</h3>
+                  <p className="text-xs text-[#757575] mt-1">{s.desc}</p>
+                </TiltCard>
+              </FadeInUp>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* PRICING */}
-        <section className="py-16 sm:py-24">
-          <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#4285F4] text-center">Membership Pricing</h2>
-            <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-2xl mx-auto">
-              <div className="bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-8 text-center">
-                <h3 className="text-xl font-bold text-[#202124]">Monthly</h3>
-                <p className="mt-4 text-4xl font-black text-[#202124]">$14.99<span className="text-lg font-medium text-[#757575]">/month</span></p>
-                <button onClick={() => handleCheckout("monthly")} disabled={checkoutLoading === "monthly"}
-                  className="mt-8 w-full bg-[#0F9D58] text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#34A853] transition-colors disabled:opacity-50">
-                  {checkoutLoading === "monthly" ? "Redirecting..." : "Get Monthly"}
+      {/* Comparison */}
+      <section className="max-w-5xl mx-auto px-4 py-16">
+        <FadeInUp>
+          <h2 className="text-2xl font-bold text-[#202124] text-center mb-8">Why Parking Agent?</h2>
+        </FadeInUp>
+        <div className="grid md:grid-cols-2 gap-6">
+          <FadeInUp delay={0.1}>
+            <TiltCard className="border-[#E94335]/30">
+              <h3 className="font-bold text-[#E94335] text-base mb-3">🚫 Other Apps</h3>
+              <ul className="space-y-2 text-sm text-[#757575]">
+                <li className="flex items-start gap-2">✕ <span><strong>Public map of spots</strong> — everyone sees the same spots simultaneously</span></li>
+                <li className="flex items-start gap-2">✕ <span><strong>Multi-car races</strong> — 5+ drivers speed to the same spot, first one wins</span></li>
+                <li className="flex items-start gap-2">✕ <span><strong>Wasted time</strong> — arrive and find the spot already taken by someone else</span></li>
+                <li className="flex items-start gap-2">✕ <span><strong>No accountability</strong> — no ranking system, no behavior tracking</span></li>
+              </ul>
+            </TiltCard>
+          </FadeInUp>
+          <FadeInUp delay={0.2}>
+            <TiltCard className="border-[#0F9D58]/30">
+              <h3 className="font-bold text-[#0F9D58] text-base mb-3">✅ Parking Agent</h3>
+              <ul className="space-y-2 text-sm text-[#757575]">
+                <li className="flex items-start gap-2">✓ <span><strong>Hidden until matched</strong> — spots are invisible until AI creates a 1-to-1 match</span></li>
+                <li className="flex items-start gap-2">✓ <span><strong>One car per spot</strong> — match is exclusive, no other driver can see or claim it</span></li>
+                <li className="flex items-start gap-2">✓ <span><strong>Proximity-based pairing</strong> — closest good-standing member gets matched first</span></li>
+                <li className="flex items-start gap-2">✓ <span><strong>Uber-style ranking</strong> — good-standing members get priority matching</span></li>
+              </ul>
+            </TiltCard>
+          </FadeInUp>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="bg-[#FAFAFA] border-y border-gray-100 py-16">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <FadeInUp>
+            <h2 className="text-2xl font-bold text-[#202124] mb-2">Simple Pricing</h2>
+            <p className="text-sm text-[#757575] mb-8">No hidden fees. No long-term contracts.</p>
+          </FadeInUp>
+          <div className="grid md:grid-cols-2 gap-6 max-w-xl mx-auto">
+            <FadeInUp delay={0.1}>
+              <TiltCard className="text-center">
+                <h3 className="font-bold text-[#202124] text-lg">Monthly</h3>
+                <p className="text-3xl font-black text-[#4285F4] mt-2">$14.99</p>
+                <p className="text-xs text-[#757575] mt-1">per month</p>
+                <ul className="mt-4 space-y-1.5 text-sm text-[#757575]">
+                  <li>✓ AI proximity matching</li>
+                  <li>✓ Course modules</li>
+                  <li>✓ Ranking system</li>
+                  <li>✓ Route maps</li>
+                </ul>
+                <HoverButton variant="primary" onClick={() => handleCheckout("monthly")} disabled={!!checkoutLoading} className="mt-5 w-full">
+                  {checkoutLoading === "monthly" ? "Loading..." : "Start Monthly"}
+                </HoverButton>
+              </TiltCard>
+            </FadeInUp>
+            <FadeInUp delay={0.2}>
+              <TiltCard className="text-center border-[#4285F4]/30 relative">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0F9D58] text-white text-xs font-bold px-3 py-1 rounded-full">Best Value</div>
+                <h3 className="font-bold text-[#202124] text-lg">Annual</h3>
+                <p className="text-3xl font-black text-[#0F9D58] mt-2">$119</p>
+                <p className="text-xs text-[#757575] mt-1">$9.92/month — save 33%</p>
+                <ul className="mt-4 space-y-1.5 text-sm text-[#757575]">
+                  <li>✓ Everything in Monthly</li>
+                  <li>✓ Priority matching</li>
+                  <li>✓ Early access to new cities</li>
+                  <li>✓ Cancel anytime</li>
+                </ul>
+                <HoverButton variant="success" onClick={() => handleCheckout("annual")} disabled={!!checkoutLoading} className="mt-5 w-full">
+                  {checkoutLoading === "annual" ? "Loading..." : "Start Annual"}
+                </HoverButton>
+              </TiltCard>
+            </FadeInUp>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="max-w-3xl mx-auto px-4 py-16">
+        <FadeInUp>
+          <h2 className="text-2xl font-bold text-[#202124] text-center mb-8">Frequently Asked Questions</h2>
+        </FadeInUp>
+        <div className="space-y-2">
+          {faqs.map((faq, i) => (
+            <FadeInUp key={i} delay={i * 0.05}>
+              <motion.div
+                className="border border-gray-200 rounded-xl overflow-hidden"
+                whileHover={{ boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
+              >
+                <button onClick={() => setFaqOpen(faqOpen === i ? null : i)} className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 hover:bg-gray-50 transition-colors">
+                  <span className="font-medium text-[#202124] text-sm">{faq.q}</span>
+                  <span className={`text-[#757575] transition-transform ${faqOpen === i ? "rotate-180" : ""}`}>▾</span>
                 </button>
-              </div>
-              <div className="bg-white border border-[#4285F4] rounded-lg shadow-sm p-8 text-center relative">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#FBBB05] text-[#202124] text-xs font-bold px-3 py-1 rounded-full">Save 33%</div>
-                <h3 className="text-xl font-bold text-[#202124]">Annual</h3>
-                <p className="mt-4 text-4xl font-black text-[#202124]">$119<span className="text-lg font-medium text-[#757575]">/year</span></p>
-                <button onClick={() => handleCheckout("annual")} disabled={checkoutLoading === "annual"}
-                  className="mt-8 w-full bg-[#0F9D58] text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#34A853] transition-colors disabled:opacity-50">
-                  {checkoutLoading === "annual" ? "Redirecting..." : "Get Annual"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+                {faqOpen === i && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className="px-5 pb-4 text-sm text-[#757575] leading-relaxed"
+                  >
+                    {faq.a}
+                  </motion.div>
+                )}
+              </motion.div>
+            </FadeInUp>
+          ))}
+        </div>
+      </section>
 
-        {/* FAQ */}
-        <section className="py-16 sm:py-24 bg-gray-50">
-          <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#4285F4] text-center">Frequently Asked Questions</h2>
-            <div className="mt-12 max-w-2xl mx-auto space-y-4">
-              <details className="bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-4 group">
-                <summary className="font-bold text-[#202124] cursor-pointer list-none flex items-center justify-between">
-                  Is Parking Agent selling parking spots?
-                  <svg className="w-5 h-5 text-[#757575] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
-                </summary>
-                <p className="mt-3 text-[#757575] text-sm leading-relaxed">No. We're a membership platform. Parking arrangements are between members.</p>
-              </details>
-              <details className="bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-4 group">
-                <summary className="font-bold text-[#202124] cursor-pointer list-none flex items-center justify-between">
-                  Do I need to complete the course?
-                  <svg className="w-5 h-5 text-[#757575] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
-                </summary>
-                <p className="mt-3 text-[#757575] text-sm leading-relaxed">Yes. All members must complete a short course on Long Beach parking laws.</p>
-              </details>
-              <details className="bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-4 group">
-                <summary className="font-bold text-[#202124] cursor-pointer list-none flex items-center justify-between">
-                  Can I cancel my membership?
-                  <svg className="w-5 h-5 text-[#757575] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
-                </summary>
-                <p className="mt-3 text-[#757575] text-sm leading-relaxed">Yes. Monthly members can cancel anytime.</p>
-              </details>
-            </div>
-          </div>
-        </section>
+      {/* Final CTA */}
+      <motion.section
+        className="bg-[#4285F4] py-16"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="max-w-2xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-black text-white">Ready to never race for parking again?</h2>
+          <p className="text-white/80 mt-3 text-lg">Join Parking Agent and get Uber-style AI matching for street parking.</p>
+          <motion.a
+            href="/signup"
+            className="inline-block bg-white text-[#4285F4] hover:bg-gray-100 mt-6 px-8 py-3 text-base font-bold rounded-xl"
+            whileHover={{ scale: 1.05, boxShadow: "0 8px 24px rgba(0,0,0,0.25)" }}
+            whileTap={{ scale: 0.97 }}
+          >
+            Get Started
+          </motion.a>
+        </div>
+      </motion.section>
 
-        {/* SERVICE AREA MAP */}
-        <section className="py-16 sm:py-24">
-          <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#4285F4] text-center">Serving Long Beach</h2>
-            <p className="mt-4 text-lg sm:text-xl text-[#757575] text-center">AI-powered parking matching across all Long Beach neighborhoods.</p>
-            <div className="mt-10 rounded-2xl overflow-hidden border border-gray-200 shadow-sm max-w-3xl mx-auto">
-              <iframe
-                src="https://maps.google.com/maps?q=Long+Beach,+CA&z=12&output=embed"
-                width="100%"
-                height="350"
-                style={{ border: 0 }}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Long Beach service area"
-              />
-            </div>
+      {/* Footer */}
+      <footer className="border-t border-gray-200 py-8">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#757575]">
+          <div className="font-bold tracking-tight">
+            <span className="text-[#4285F4]">Parking</span> <span className="text-[#0F9D58]">Agent</span>
           </div>
-        </section>
-
-        {/* DOWNLOAD APP */}
-        <section className="py-16 sm:py-24">
-          <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#4285F4] text-center">Get the App</h2>
-            <p className="mt-4 text-lg sm:text-xl text-[#757575] text-center">Install Parking Agent on your phone for quick access to AI matching.</p>
-            <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-2xl mx-auto">
-              <div className="bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-8 text-center">
-                <div className="text-5xl mb-4">📱</div>
-                <h3 className="text-lg font-bold text-[#202124]">iOS</h3>
-                <p className="mt-2 text-sm text-[#757575] leading-relaxed">Open in Safari, tap Share, then <strong>Add to Home Screen</strong>. It works like a native app.</p>
-              </div>
-              <div className="bg-white border border-[#BDBDBD] rounded-lg shadow-sm p-8 text-center">
-                <div className="text-5xl mb-4">🤖</div>
-                <h3 className="text-lg font-bold text-[#202124]">Android</h3>
-                <p className="mt-2 text-sm text-[#757575] leading-relaxed">Open in Chrome. You'll see an <strong>Install</strong> prompt. Tap it to add to your home screen.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* FINAL CTA */}
-        <section className="py-16 sm:py-24">
-          <div className="max-w-3xl mx-auto px-4 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#4285F4]">Stop Wasting Time on Street Parking</h2>
-            <p className="mt-4 text-lg sm:text-xl text-[#757575]">Join Parking Agent today. Get matched instantly, no chaos.</p>
-            <a href="/signup" className="mt-8 inline-block bg-[#0F9D58] text-white px-10 py-4 rounded-lg text-lg font-bold shadow-lg hover:bg-[#34A853] transition-colors">Get Started – Become a Member</a>
-            <p className="mt-4 text-sm text-[#BDBDBD]">First 100 members get 1 month free.</p>
-          </div>
-        </section>
-      </main>
-
-      <footer className="border-t border-gray-200 py-10 text-center text-xs text-[#BDBDBD]">
-        <div className="max-w-5xl mx-auto px-4 flex flex-col items-center gap-4">
           <div className="flex gap-4">
-            <a href="/legal/terms" className="hover:text-[#4285F4]">Terms</a>
-            <a href="/legal/privacy" className="hover:text-[#4285F4]">Privacy</a>
-            <a href="/legal/accessibility" className="hover:text-[#4285F4]">Accessibility</a>
+            <a href="/premium" className="hover:text-[#202124]">Premium Real-Time Service</a>
+            <a href="/profile" className="hover:text-[#202124]">Free Schedule Matching</a>
+            <a href="/tos" className="hover:text-[#202124]">Terms of Service</a>
+            <a href="/legal/privacy" className="hover:text-[#202124]">Privacy</a>
+            <a href="/legal/accessibility" className="hover:text-[#202124]">Accessibility</a>
+            <a href="/faq" className="hover:text-[#202124]">FAQ</a>
           </div>
-          <p>&copy; 2026 Parking Agent. Long Beach, CA.</p>
-          <p className="max-w-lg">Parking Agent is a membership platform. We do not own, sell, or control parking spots.</p>
+          <p>© 2026 Parking Agent. All rights reserved.</p>
         </div>
       </footer>
     </div>

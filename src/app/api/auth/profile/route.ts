@@ -11,7 +11,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, email, currentPassword, newPassword } = await req.json();
+    const { name, email, currentPassword, newPassword, vehicleType, vehicleSize, vehicleMake, vehicleModel, licensePlate } = await req.json();
 
     const [user] = await db
       .select()
@@ -23,7 +23,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const updates: Record<string, string> = {};
+    const updates: Record<string, string | null> = {};
     const now = new Date().toISOString();
 
     if (name) updates.name = name;
@@ -39,6 +39,12 @@ export async function PUT(req: Request) {
       }
       updates.email = email;
     }
+
+    if (vehicleType !== undefined) updates.vehicleType = vehicleType === "" ? null : vehicleType;
+    if (vehicleSize !== undefined) updates.vehicleSize = vehicleSize === "" ? null : vehicleSize;
+    if (vehicleMake !== undefined) updates.vehicleMake = vehicleMake === "" ? null : vehicleMake;
+    if (vehicleModel !== undefined) updates.vehicleModel = vehicleModel === "" ? null : vehicleModel;
+    if (licensePlate !== undefined) updates.licensePlate = licensePlate === "" ? null : licensePlate;
 
     if (newPassword) {
       if (!currentPassword) {

@@ -7,6 +7,7 @@ import { v4 as uuid } from "uuid";
 import { sendMatchNotification } from "@/lib/email";
 import { sendPushNotification } from "@/lib/push";
 import { scoreOffers } from "@/lib/services/pairing";
+import { getRouteEta } from "@/lib/services/osrm";
 
 export async function POST(req: Request) {
   try {
@@ -91,6 +92,20 @@ export async function POST(req: Request) {
       );
     }
 
+    // Compute ETA via OSRM
+    let etaMinutes: number | null = null;
+    try {
+      const eta = await getRouteEta(
+        body.lat ?? 33.77,
+        body.lng ?? -118.19,
+        targetOffer.latitude,
+        targetOffer.longitude,
+      );
+      etaMinutes = eta?.durationMinutes ?? null;
+    } catch {
+      // ETA is optional
+    }
+
     const now = new Date().toISOString();
 
     const match = {
@@ -101,6 +116,7 @@ export async function POST(req: Request) {
       status: "active" as const,
       matchedAt: now,
       arrivalAt: null,
+      etaMinutes,
       spotLatitude: targetOffer.latitude,
       spotLongitude: targetOffer.longitude,
     };

@@ -66,6 +66,7 @@ export async function signup(params: {
   name: string;
   email: string;
   password: string;
+  phone?: string;
   completedModuleIds?: string[];
 }): Promise<AuthUser | null> {
   try {

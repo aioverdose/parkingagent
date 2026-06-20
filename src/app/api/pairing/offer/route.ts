@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { latitude, longitude, address } = await req.json();
+    const { latitude, longitude, address, expectedDeparture, vehicleType, vehicleSize } = await req.json();
 
     if (latitude === undefined || longitude === undefined) {
       return NextResponse.json(
@@ -21,14 +21,17 @@ export async function POST(req: Request) {
       );
     }
 
-    const offer = {
+    const offer: typeof spotOffers.$inferInsert = {
       id: uuid(),
       userId: session.userId,
       latitude,
       longitude,
       address: address ?? "",
-      status: "available" as const,
+      status: "available",
       createdAt: new Date().toISOString(),
+      expectedDeparture: expectedDeparture ?? null,
+      vehicleType: vehicleType ?? null,
+      vehicleSize: vehicleSize ?? null,
     };
 
     await db.insert(spotOffers).values(offer);

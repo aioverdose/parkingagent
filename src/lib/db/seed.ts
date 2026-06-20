@@ -9,6 +9,7 @@ import {
   cmsVersions,
   revenueEntries,
   systemMetrics,
+  referralCodes,
 } from "./schema";
 import { v4 as uuid } from "uuid";
 import bcrypt from "bcryptjs";
@@ -93,12 +94,20 @@ async function seed() {
     }).onConflictDoNothing();
   }
 
-  // Spot offers
-  await db.insert(spotOffers).values({ id: "so1", userId: "u1", latitude: 33.7705, longitude: -118.193, address: "123 Pine Ave, Long Beach, CA", status: "available", createdAt: now }).onConflictDoNothing();
-  await db.insert(spotOffers).values({ id: "so2", userId: "u2", latitude: 33.771, longitude: -118.194, address: "456 Elm St, Long Beach, CA", status: "available", createdAt: now }).onConflictDoNothing();
+  // Referral codes for all users
+  const alphanum = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  function genCode() { let c = "PA-"; for (let i = 0; i < 6; i++) c += alphanum[Math.floor(Math.random() * alphanum.length)]; return c; }
+  for (const m of members) {
+    await db.insert(referralCodes).values({ id: uuid(), userId: m.id, code: genCode(), createdAt: now }).onConflictDoNothing();
+  }
+
+  // Spot offers (with vehicle constraints + expected departure)
+  const depTime = new Date(Date.now() + 30 * 60000).toISOString();
+  await db.insert(spotOffers).values({ id: "so1", userId: "u1", latitude: 33.7705, longitude: -118.193, address: "123 Pine Ave, Long Beach, CA", status: "available", createdAt: now, expectedDeparture: depTime, vehicleType: "car", vehicleSize: "standard" }).onConflictDoNothing();
+  await db.insert(spotOffers).values({ id: "so2", userId: "u2", latitude: 33.771, longitude: -118.194, address: "456 Elm St, Long Beach, CA", status: "available", createdAt: now, expectedDeparture: depTime, vehicleType: "car", vehicleSize: "compact" }).onConflictDoNothing();
 
   // Matches
-  await db.insert(matches).values({ id: "m1", spotOfferId: "so1", departingUserId: "u1", arrivingUserId: "u2", status: "active", matchedAt: now, arrivalAt: null, spotLatitude: 33.7705, spotLongitude: -118.193 }).onConflictDoNothing();
+  await db.insert(matches).values({ id: "m1", spotOfferId: "so1", departingUserId: "u1", arrivingUserId: "u2", status: "active", matchedAt: now, arrivalAt: null, etaMinutes: 8, spotLatitude: 33.7705, spotLongitude: -118.193 }).onConflictDoNothing();
   await db.insert(matches).values({ id: "m-002", spotOfferId: null, departingUserId: "u6", arrivingUserId: "u3", status: "completed", matchedAt: "2026-06-18T08:15:00.000Z", arrivalAt: "2026-06-18T08:22:00.000Z", spotLatitude: 33.7695, spotLongitude: -118.1925 }).onConflictDoNothing();
   await db.insert(matches).values({ id: "m-003", spotOfferId: null, departingUserId: "u5", arrivingUserId: "u1", status: "cancelled", matchedAt: "2026-06-17T17:45:00.000Z", arrivalAt: null, spotLatitude: 33.772, spotLongitude: -118.191 }).onConflictDoNothing();
   await db.insert(matches).values({ id: "m-004", spotOfferId: null, departingUserId: "u2", arrivingUserId: "u3", status: "expired", matchedAt: "2026-06-17T14:00:00.000Z", arrivalAt: null, spotLatitude: 33.771, spotLongitude: -118.194 }).onConflictDoNothing();

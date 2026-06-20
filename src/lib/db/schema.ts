@@ -34,6 +34,13 @@ export const users = pgTable(
       .notNull()
       .default("none"),
     completedCourses: boolean("completed_courses").notNull().default(false),
+    vehicleType: text("vehicle_type", { enum: ["car", "motorcycle", "bike", "truck"] }),
+    vehicleSize: text("vehicle_size", { enum: ["compact", "standard", "large"] }),
+    vehicleMake: text("vehicle_make"),
+    vehicleModel: text("vehicle_model"),
+    licensePlate: text("license_plate"),
+    phone: text("phone"),
+    phoneVerified: boolean("phone_verified").notNull().default(false),
     stripeCustomerId: text("stripe_customer_id"),
     stripeSubscriptionId: text("stripe_subscription_id"),
     subscriptionStatus: text("subscription_status", {
@@ -44,6 +51,8 @@ export const users = pgTable(
     subscriptionPeriodEnd: text("subscription_period_end"),
     latitude: real("latitude"),
     longitude: real("longitude"),
+    isPremium: boolean("is_premium").notNull().default(false),
+    premiumUntil: text("premium_until"),
     joinedDate: text("joined_date").notNull(),
     createdAt: text("created_at").notNull(),
     updatedAt: text("updated_at"),
@@ -59,6 +68,9 @@ export const usersRelations = relations(users, ({ many }) => ({
   departingMatches: many(matches, { relationName: "departingUser" }),
   arrivingMatches: many(matches, { relationName: "arrivingUser" }),
   courseCompletions: many(userCourseCompletions),
+  referralCodes: many(referralCodes),
+  referredBy: many(referrals, { relationName: "referrer" }),
+  referredUsers: many(referrals, { relationName: "referred" }),
 }));
 
 export const sessions = pgTable("sessions", {
@@ -93,6 +105,13 @@ export const spotOffers = pgTable(
     })
       .notNull()
       .default("available"),
+    expectedDeparture: text("expected_departure"),
+    vehicleType: text("vehicle_type", {
+      enum: ["car", "motorcycle", "bike", "truck"],
+    }),
+    vehicleSize: text("vehicle_size", {
+      enum: ["compact", "standard", "large"],
+    }),
     createdAt: text("created_at").notNull(),
   },
   (table) => ({
@@ -132,6 +151,7 @@ export const matches = pgTable(
       .default("active"),
     matchedAt: text("matched_at").notNull(),
     arrivalAt: text("arrival_at"),
+    etaMinutes: integer("eta_minutes"),
     spotLatitude: real("spot_latitude").notNull(),
     spotLongitude: real("spot_longitude").notNull(),
   },
@@ -277,6 +297,168 @@ export const passwordResetTokensRelations = relations(passwordResetTokens, ({ on
     references: [users.id],
   }),
 }));
+
+export const referralCodes = pgTable(
+  "referral_codes",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    code: text("code").notNull().unique(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => ({
+    codeIdx: uniqueIndex("referral_code_idx").on(table.code),
+    userIdx: index("referral_code_user_idx").on(table.userId),
+  }),
+);
+
+export const referralCodesRelations = relations(referralCodes, ({ one }) => ({
+  user: one(users, {
+    fields: [referralCodes.userId],
+    references: [users.id],
+  }),
+}));
+
+export const referrals = pgTable(
+  "referrals",
+  {
+    id: text("id").primaryKey(),
+    referrerId: text("referrer_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    referredId: text("referred_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    codeUsed: text("code_used").notNull(),
+    status: text("status", {
+      enum: ["pending", "converted", "rewarded"],
+    })
+      .notNull()
+      .default("pending"),
+    convertedAt: text("converted_at"),
+    rewardedAt: text("rewarded_at"),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    invoiceId: text("invoice_id"),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => ({
+    referrerIdx: index("referrals_referrer_idx").on(table.referrerId),
+    referredIdx: index("referrals_referred_idx").on(table.referredId),
+    statusIdx: index("referrals_status_idx").on(table.status),
+  }),
+);
+
+export const referralsRelations = relations(referrals, ({ one }) => ({
+  referrer: one(users, {
+    fields: [referrals.referrerId],
+    references: [users.id],
+    relationName: "referrer",
+  }),
+  referred: one(users, {
+    fields: [referrals.referredId],
+    references: [users.id],
+    relationName: "referred",
+  }),
+}));
+
+// ── Phone Verification ─────────────────────────────────────────
+
+export const phoneVerifications = pgTable(
+  "phone_verifications",
+  {
+    id: text("id").primaryKey(),
+    phone: text("phone").notNull(),
+    code: text("code").notNull(),
+    userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+    verified: boolean("verified").notNull().default(false),
+    expiresAt: text("expires_at").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => ({
+    phoneIdx: index("pv_phone_idx").on(table.phone),
+  }),
+);
+
+// ── Optional Parking Match ──────────────────────────────────────
+
+export const parkingMatchSchedules = pgTable(
+  "parking_match_schedules",
+  {
+    id: text("id").primaryKey(),
+    memberId: text("member_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    leavingTime: integer("leaving_time").notNull(),
+    arrivalLookingTime: integer("arrival_looking_time").notNull(),
+    neighborhoodId: text("neighborhood_id"),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at"),
+  },
+  (table) => ({
+    memberIdx: index("pms_member_idx").on(table.memberId),
+    activeIdx: index("pms_active_idx").on(table.isActive),
+  }),
+);
+
+export const parkingMatchSchedulesRelations = relations(
+  parkingMatchSchedules,
+  ({ one }) => ({
+    member: one(users, {
+      fields: [parkingMatchSchedules.memberId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const parkingMatches = pgTable(
+  "parking_matches",
+  {
+    id: text("id").primaryKey(),
+    leavingMemberId: text("leaving_member_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    arrivingMemberId: text("arriving_member_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    leavingScheduleId: text("leaving_schedule_id")
+      .notNull()
+      .references(() => parkingMatchSchedules.id, { onDelete: "set null" }),
+    arrivingScheduleId: text("arriving_schedule_id")
+      .notNull()
+      .references(() => parkingMatchSchedules.id, { onDelete: "set null" }),
+    status: text("status", {
+      enum: ["pending", "confirmed", "cancelled", "expired"],
+    })
+      .notNull()
+      .default("pending"),
+    toleranceMinutes: integer("tolerance_minutes").notNull().default(15),
+    matchedAt: text("matched_at").notNull(),
+    confirmedAt: text("confirmed_at"),
+  },
+  (table) => ({
+    leavingIdx: index("pm_leaving_idx").on(table.leavingMemberId),
+    arrivingIdx: index("pm_arriving_idx").on(table.arrivingMemberId),
+    statusIdx: index("pm_status_idx").on(table.status),
+  }),
+);
+
+export const parkingMatchesRelations = relations(parkingMatches, ({ one }) => ({
+  leavingMember: one(users, {
+    fields: [parkingMatches.leavingMemberId],
+    references: [users.id],
+    relationName: "leavingMember",
+  }),
+  arrivingMember: one(users, {
+    fields: [parkingMatches.arrivingMemberId],
+    references: [users.id],
+    relationName: "arrivingMember",
+  }),
+}));
+
+// ── System Metrics ──────────────────────────────────────────────
 
 export const systemMetrics = pgTable("system_metrics", {
   id: text("id").primaryKey(),
