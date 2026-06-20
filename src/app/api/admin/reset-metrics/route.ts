@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { systemMetrics, revenueEntries } from "@/lib/db/schema";
 import { v4 as uuid } from "uuid";
 import { sql } from "drizzle-orm";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST() {
   try {
@@ -30,12 +30,11 @@ export async function POST() {
       await db.insert(revenueEntries).values({ id: uuid(), ...r });
     }
 
-    return NextResponse.json({
+    return ok({
       success: true,
       message: "Metrics and revenue data reset to defaults.",
     });
   } catch (error) {
-    console.error("Reset metrics error:", error);
-    return NextResponse.json({ error: "Reset failed." }, { status: 500 });
+    return handleError(error, "Reset metrics error");
   }
 }

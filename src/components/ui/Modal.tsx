@@ -22,7 +22,7 @@ export function Modal({ open, onClose, title, children, wide = false }: ModalPro
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true" onClick={onClose}>
       <div className="fixed inset-0 bg-black/40" />
       <div ref={ref} onClick={(e) => e.stopPropagation()}
         className={`relative bg-white rounded-2xl shadow-xl max-h-[85vh] overflow-y-auto z-10 ${wide ? "max-w-2xl w-full mx-4" : "max-w-md w-full mx-4"}`}>

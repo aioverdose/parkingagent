@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { courseModules } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function PATCH(
   req: Request,
@@ -11,7 +11,7 @@ export async function PATCH(
   try {
     const session = await verifySession();
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const { id } = await params;
@@ -31,12 +31,11 @@ export async function PATCH(
       .returning();
 
     if (!updated) {
-      return NextResponse.json({ error: "Module not found" }, { status: 404 });
+      return err("Module not found", 404);
     }
 
-    return NextResponse.json({ module: updated });
+    return ok({ module: updated });
   } catch (error) {
-    console.error("Admin module PATCH error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Admin module PATCH error");
   }
 }

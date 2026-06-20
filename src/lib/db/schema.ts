@@ -53,6 +53,19 @@ export const users = pgTable(
     longitude: real("longitude"),
     isPremium: boolean("is_premium").notNull().default(false),
     premiumUntil: text("premium_until"),
+    tier: text("tier", { enum: ["free", "premium", "premium_pending"] }).notNull().default("free"),
+    signupNumber: integer("signup_number"),
+    ranking: integer("ranking").notNull().default(5),
+    matchCount: integer("match_count").notNull().default(0),
+    cancelCount: integer("cancel_count").notNull().default(0),
+    noShowCount: integer("no_show_count").notNull().default(0),
+    neighborhood: text("neighborhood"),
+    anchorCount: integer("anchor_count").notNull().default(0),
+    successfulMatches: integer("successful_matches").notNull().default(0),
+    failedMatches: integer("failed_matches").notNull().default(0),
+    scoutLevel: integer("scout_level").notNull().default(1),
+    scoutPoints: integer("scout_points").notNull().default(0),
+    scoutBadges: text("scout_badges").notNull().default("[]"),
     joinedDate: text("joined_date").notNull(),
     createdAt: text("created_at").notNull(),
     updatedAt: text("updated_at"),
@@ -71,6 +84,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   referralCodes: many(referralCodes),
   referredBy: many(referrals, { relationName: "referrer" }),
   referredUsers: many(referrals, { relationName: "referred" }),
+  scoutAnchors: many(spotAnchors, { relationName: "scoutAnchors" }),
+  minerClaims: many(spotAnchors, { relationName: "minerClaims" }),
 }));
 
 export const sessions = pgTable("sessions", {
@@ -455,6 +470,91 @@ export const parkingMatchesRelations = relations(parkingMatches, ({ one }) => ({
     fields: [parkingMatches.arrivingMemberId],
     references: [users.id],
     relationName: "arrivingMember",
+  }),
+}));
+
+// ── Departure Beacons ───────────────────────────────────────────
+
+export const parkingBeacons = pgTable(
+  "parking_beacons",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    departureTime: text("departure_time").notNull(),
+    latitude: real("latitude").notNull(),
+    longitude: real("longitude").notNull(),
+    radius: integer("radius").notNull().default(5),
+    status: text("status", {
+      enum: ["searching", "matched", "expired"],
+    })
+      .notNull()
+      .default("searching"),
+    matchedMemberId: text("matched_member_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    matchedAt: text("matched_at"),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => ({
+    userIdx: index("pb_user_idx").on(table.userId),
+    statusIdx: index("pb_status_idx").on(table.status),
+  }),
+);
+
+export const parkingBeaconsRelations = relations(parkingBeacons, ({ one }) => ({
+  user: one(users, {
+    fields: [parkingBeacons.userId],
+    references: [users.id],
+  }),
+  matchedMember: one(users, {
+    fields: [parkingBeacons.matchedMemberId],
+    references: [users.id],
+  }),
+}));
+
+// ── Spot Anchors ────────────────────────────────────────────────
+
+export const spotAnchors = pgTable(
+  "spot_anchors",
+  {
+    id: text("id").primaryKey(),
+    scoutId: text("scout_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    latitude: real("latitude").notNull(),
+    longitude: real("longitude").notNull(),
+    neighborhood: text("neighborhood").notNull().default("Unknown"),
+    timestamp: real("timestamp").notNull(),
+    status: text("status", {
+      enum: ["active", "claimed", "completed", "failed"],
+    })
+      .notNull()
+      .default("active"),
+    minerId: text("miner_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at"),
+  },
+  (table) => ({
+    scoutIdx: index("sa_scout_idx").on(table.scoutId),
+    statusIdx: index("sa_status_idx").on(table.status),
+    minerIdx: index("sa_miner_idx").on(table.minerId),
+  }),
+);
+
+export const spotAnchorsRelations = relations(spotAnchors, ({ one }) => ({
+  scout: one(users, {
+    fields: [spotAnchors.scoutId],
+    references: [users.id],
+    relationName: "scoutAnchors",
+  }),
+  miner: one(users, {
+    fields: [spotAnchors.minerId],
+    references: [users.id],
+    relationName: "minerClaims",
   }),
 }));
 

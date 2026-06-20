@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { verifySession } from "@/lib/auth-server";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function GET(req: Request) {
   try {
     const session = await verifySession();
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const { searchParams } = new URL(req.url);
@@ -46,9 +46,8 @@ export async function GET(req: Request) {
       );
     }
 
-    return NextResponse.json({ members: allUsers });
+    return ok({ members: allUsers });
   } catch (error) {
-    console.error("Admin members error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Admin members error");
   }
 }

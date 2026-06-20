@@ -1,25 +1,23 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { spotOffers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
+import { validate, pairingOfferSchema } from "@/lib/validation";
+import { rateLimit, rateLimitedResponse } from "@/lib/rateLimit";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST(req: Request) {
   try {
+    const rl = rateLimit(req, 20);
+    if (!rl.allowed) return rateLimitedResponse(rl.resetAt);
+
     const session = await verifySession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
-    const { latitude, longitude, address, expectedDeparture, vehicleType, vehicleSize } = await req.json();
-
-    if (latitude === undefined || longitude === undefined) {
-      return NextResponse.json(
-        { error: "Latitude and longitude are required" },
-        { status: 400 },
-      );
-    }
+    const { latitude, longitude, address, expectedDeparture, vehicleType, vehicleSize } = validate(pairingOfferSchema, await req.json());
 
     const offer: typeof spotOffers.$inferInsert = {
       id: uuid(),
@@ -36,10 +34,9 @@ export async function POST(req: Request) {
 
     await db.insert(spotOffers).values(offer);
 
-    return NextResponse.json({ offer });
+    return ok({ offer });
   } catch (error) {
-    console.error("Pairing offer error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Pairing offer error");
   }
 }
 
@@ -47,7 +44,7 @@ export async function GET(req: Request) {
   try {
     const session = await verifySession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const offers = await db
@@ -55,9 +52,8 @@ export async function GET(req: Request) {
       .from(spotOffers)
       .where(eq(spotOffers.status, "available"));
 
-    return NextResponse.json({ offers });
+    return ok({ offers });
   } catch (error) {
-    console.error("Pairing offers GET error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Pairing offers GET error");
   }
 }

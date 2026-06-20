@@ -1,26 +1,24 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { parkingMatchSchedules } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
 import { minutesFromMidnight, runMatchingForAll } from "@/lib/services/parkingMatch";
+import { validate, parkingMatchScheduleSchema } from "@/lib/validation";
+import { rateLimit, rateLimitedResponse } from "@/lib/rateLimit";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST(req: Request) {
   try {
+    const rl = rateLimit(req, 10);
+    if (!rl.allowed) return rateLimitedResponse(rl.resetAt);
+
     const session = await verifySession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
-    const { leavingTime, arrivalLookingTime, neighborhoodId } = await req.json();
-
-    if (!leavingTime || !arrivalLookingTime) {
-      return NextResponse.json(
-        { error: "leavingTime and arrivalLookingTime are required" },
-        { status: 400 },
-      );
-    }
+    const { leavingTime, arrivalLookingTime, neighborhoodId } = validate(parkingMatchScheduleSchema, await req.json());
 
     const now = new Date().toISOString();
 
@@ -51,14 +49,13 @@ export async function POST(req: Request) {
       // Matching failures are non-blocking
     }
 
-    return NextResponse.json({
+    return ok({
       schedule,
       matchesCreated,
       message: "Your schedule has been submitted. We'll start searching for matches.",
     });
   } catch (error) {
-    console.error("Parking match schedule error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Parking match schedule error");
   }
 }
 
@@ -66,7 +63,7 @@ export async function GET(req: Request) {
   try {
     const session = await verifySession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const schedules = await db
@@ -77,9 +74,8 @@ export async function GET(req: Request) {
       )
       .orderBy(parkingMatchSchedules.createdAt);
 
-    return NextResponse.json({ schedules });
+    return ok({ schedules });
   } catch (error) {
-    console.error("Parking match schedules GET error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Parking match schedules GET error");
   }
 }

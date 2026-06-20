@@ -60,4 +60,18 @@ export interface AuthUser {
   licensePlate?: string;
   isPremium?: boolean;
   premiumUntil?: string;
+  tier?: "free" | "premium";
+  ranking?: number;
+  matchCount?: number;
+  cancelCount?: number;
+  noShowCount?: number;
+  neighborhood?: string;
+  signupNumber?: number;
+  earlyAdopter?: boolean;
+  anchorCount?: number;
+  successfulMatches?: number;
+  failedMatches?: number;
+  scoutLevel?: number;
+  scoutPoints?: number;
+  scoutBadges?: string;
 }

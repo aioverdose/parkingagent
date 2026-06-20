@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { REFERRAL_COOKIE, REFERRAL_COOKIE_MAX_AGE } from "@/lib/referral-constants";
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const ref = req.nextUrl.searchParams.get("ref");
   const response = NextResponse.next();
 

@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users, matches, spotOffers, pushSubscriptions } from "@/lib/db/schema";
 import { eq, and, ne, inArray } from "drizzle-orm";
@@ -8,23 +7,25 @@ import { sendMatchNotification } from "@/lib/email";
 import { sendPushNotification } from "@/lib/push";
 import { scoreOffers } from "@/lib/services/pairing";
 import { getRouteEta } from "@/lib/services/osrm";
+import { validate, pairingMatchSchema } from "@/lib/validation";
+import { rateLimit, rateLimitedResponse } from "@/lib/rateLimit";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST(req: Request) {
   try {
+    const rl = rateLimit(req, 20);
+    if (!rl.allowed) return rateLimitedResponse(rl.resetAt);
+
     const session = await verifySession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
-    const body = await req.json();
+    const body = validate(pairingMatchSchema, await req.json());
     const { offerId, arrivingUserId, mode, lat, lng } = body;
 
-    if (!arrivingUserId) {
-      return NextResponse.json(
-        { error: "arrivingUserId is required" },
-        { status: 400 },
-      );
-    }
+    const userLat = lat ?? 33.77;
+    const userLng = lng ?? -118.19;
 
     let targetOffer: typeof spotOffers.$inferSelect | null = null;
 
@@ -38,17 +39,11 @@ export async function POST(req: Request) {
         .limit(1);
 
       if (!offer) {
-        return NextResponse.json(
-          { error: "Spot offer not found or already taken" },
-          { status: 404 },
-        );
+        return err("Spot offer not found or already taken", 404);
       }
 
       if (offer.userId === arrivingUserId) {
-        return NextResponse.json(
-          { error: "Cannot match with yourself" },
-          { status: 400 },
-        );
+        return err("Cannot match with yourself", 400);
       }
 
       targetOffer = offer;
@@ -64,10 +59,7 @@ export async function POST(req: Request) {
         );
 
       if (available.length === 0) {
-        return NextResponse.json(
-          { error: "No available spots found" },
-          { status: 404 },
-        );
+        return err("No available spots found", 404);
       }
 
       const userIds = [...new Set(available.map((o) => o.userId))];
@@ -80,24 +72,19 @@ export async function POST(req: Request) {
         rankingRows.map((r) => [r.id, r.rankingScore ?? 0]),
       );
 
-      const userLat = lat ?? 33.77;
-      const userLng = lng ?? -118.19;
       const scored = scoreOffers(available, userLat, userLng, rankingScores);
 
       targetOffer = scored[0] as typeof spotOffers.$inferSelect;
     } else {
-      return NextResponse.json(
-        { error: "Provide offerId or lat/lng for auto-matching" },
-        { status: 400 },
-      );
+      return err("Provide offerId or lat/lng for auto-matching", 400);
     }
 
     // Compute ETA via OSRM
     let etaMinutes: number | null = null;
     try {
       const eta = await getRouteEta(
-        body.lat ?? 33.77,
-        body.lng ?? -118.19,
+        userLat,
+        userLng,
         targetOffer.latitude,
         targetOffer.longitude,
       );
@@ -195,9 +182,8 @@ export async function POST(req: Request) {
       // Notification failures are non-blocking
     }
 
-    return NextResponse.json({ match });
+    return ok({ match });
   } catch (error) {
-    console.error("Pairing match error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Pairing match error");
   }
 }

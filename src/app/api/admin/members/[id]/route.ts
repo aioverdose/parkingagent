@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function PATCH(
   req: Request,
@@ -11,14 +11,14 @@ export async function PATCH(
   try {
     const session = await verifySession();
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const { id } = await params;
     const { status } = await req.json();
 
     if (!status || !["good-standing", "suspended", "pending"].includes(status)) {
-      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+      return err("Invalid status", 400);
     }
 
     const [updated] = await db
@@ -41,12 +41,11 @@ export async function PATCH(
       });
 
     if (!updated) {
-      return NextResponse.json({ error: "Member not found" }, { status: 404 });
+      return err("Member not found", 404);
     }
 
-    return NextResponse.json({ member: updated });
+    return ok({ member: updated });
   } catch (error) {
-    console.error("Admin member update error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Admin member update error");
   }
 }

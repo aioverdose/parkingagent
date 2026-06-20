@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { revenueEntries, users } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function GET() {
   try {
     const session = await verifySession();
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const revenueData = await db
@@ -53,7 +53,7 @@ export async function GET() {
       }),
     );
 
-    return NextResponse.json({
+    return ok({
       financials: {
         totalMonthlyRevenue,
         totalAnnualRevenue,
@@ -71,7 +71,6 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Financials error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Financials error");
   }
 }

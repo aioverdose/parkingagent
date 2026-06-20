@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
 import { markReferralConverted, handleReferralReward } from "@/lib/referral";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST(req: Request) {
   try {
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
         process.env.STRIPE_WEBHOOK_SECRET ?? "",
       );
     } catch {
-      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+      return err("Invalid signature", 400);
     }
 
     const data = event.data.object as any;
@@ -141,10 +141,9 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ received: true });
+    return ok({ received: true });
   } catch (error) {
-    console.error("Webhook error:", error);
-    return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
+    return handleError(error, "Webhook error");
   }
 }
 

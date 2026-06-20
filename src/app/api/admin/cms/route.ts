@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { cmsContent, cmsVersions, courseModules } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function GET() {
   try {
     const session = await verifySession();
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const entries = await db.select().from(cmsContent);
@@ -22,10 +22,9 @@ export async function GET() {
       grouped[entry.page][entry.key] = entry.value;
     }
 
-    return NextResponse.json({ content: grouped, versions, modules });
+    return ok({ content: grouped, versions, modules });
   } catch (error) {
-    console.error("Admin CMS GET error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Admin CMS GET error");
   }
 }
 
@@ -33,16 +32,13 @@ export async function PUT(req: Request) {
   try {
     const session = await verifySession();
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const { page, key, value } = await req.json();
 
     if (!page || !key || value === undefined) {
-      return NextResponse.json(
-        { error: "page, key, and value are required" },
-        { status: 400 },
-      );
+      return err("page, key, and value are required", 400);
     }
 
     const now = new Date().toISOString().split("T")[0];
@@ -68,9 +64,8 @@ export async function PUT(req: Request) {
       });
     }
 
-    return NextResponse.json({ success: true });
+    return ok({ success: true });
   } catch (error) {
-    console.error("Admin CMS PUT error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Admin CMS PUT error");
   }
 }

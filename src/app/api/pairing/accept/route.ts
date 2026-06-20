@@ -1,24 +1,22 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { matches, spotOffers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
+import { validate, pairingAcceptSchema } from "@/lib/validation";
+import { rateLimit, rateLimitedResponse } from "@/lib/rateLimit";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST(req: Request) {
   try {
+    const rl = rateLimit(req, 20);
+    if (!rl.allowed) return rateLimitedResponse(rl.resetAt);
+
     const session = await verifySession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
-    const { matchId, action } = await req.json();
-
-    if (!matchId || !["accept", "cancel"].includes(action)) {
-      return NextResponse.json(
-        { error: "matchId and action are required" },
-        { status: 400 },
-      );
-    }
+    const { matchId, action } = validate(pairingAcceptSchema, await req.json());
 
     const [match] = await db
       .select()
@@ -27,7 +25,7 @@ export async function POST(req: Request) {
       .limit(1);
 
     if (!match) {
-      return NextResponse.json({ error: "Match not found" }, { status: 404 });
+      return err("Match not found", 404);
     }
 
     if (action === "accept") {
@@ -57,9 +55,8 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ success: true });
+    return ok({ success: true });
   } catch (error) {
-    console.error("Pairing accept error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Pairing accept error");
   }
 }

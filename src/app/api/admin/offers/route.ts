@@ -1,14 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { users, spotOffers } from "@/lib/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function GET(req: NextRequest) {
   try {
     const session = await verifySession();
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const statusParam = req.nextUrl.searchParams.get("status");
@@ -44,9 +45,8 @@ export async function GET(req: NextRequest) {
       userEmail: userMap.get(o.userId)?.email ?? "",
     }));
 
-    return NextResponse.json({ offers: enriched });
+    return ok({ offers: enriched });
   } catch (error) {
-    console.error("Admin offers error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Admin offers error");
   }
 }

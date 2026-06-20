@@ -1,7 +1,7 @@
-self.addEventListener("push", (event: PushEvent) => {
+self.addEventListener("push", (event) => {
   const data = event.data?.json() ?? { title: "Parking Agent", body: "You have a new notification" };
 
-  const options: NotificationOptions = {
+  const options = {
     body: data.body,
     icon: "/pwa-icon.svg",
     badge: "/pwa-icon.svg",
@@ -16,7 +16,7 @@ self.addEventListener("push", (event: PushEvent) => {
   );
 });
 
-self.addEventListener("notificationclick", (event: NotificationEvent) => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const url = event.notification.data?.url ?? "/dashboard";
   event.waitUntil(
@@ -28,6 +28,6 @@ self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
-self.addEventListener("activate", (event: ExtendableEvent) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(clients.claim());
 });

@@ -1,22 +1,23 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { pushSubscriptions } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
+import { validate, pushSubscribeSchema } from "@/lib/validation";
+import { rateLimit, rateLimitedResponse } from "@/lib/rateLimit";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST(req: Request) {
   try {
+    const rl = rateLimit(req, 10);
+    if (!rl.allowed) return rateLimitedResponse(rl.resetAt);
+
     const session = await verifySession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
-    const { endpoint, auth, p256dh, userAgent } = await req.json();
-
-    if (!endpoint || !auth || !p256dh) {
-      return NextResponse.json({ error: "Missing subscription details" }, { status: 400 });
-    }
+    const { endpoint, auth, p256dh, userAgent } = validate(pushSubscribeSchema, await req.json());
 
     const [existing] = await db
       .select()
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
       .limit(1);
 
     if (existing) {
-      return NextResponse.json({ ok: true });
+      return ok({ ok: true });
     }
 
     await db.insert(pushSubscriptions).values({
@@ -43,9 +44,8 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
     });
 
-    return NextResponse.json({ ok: true });
+    return ok({ ok: true });
   } catch (error) {
-    console.error("Push subscribe error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Push subscribe error");
   }
 }

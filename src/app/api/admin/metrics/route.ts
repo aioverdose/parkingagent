@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users, matches, spotOffers, systemMetrics } from "@/lib/db/schema";
 import { eq, and, gte, sql } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function GET() {
   try {
     const session = await verifySession();
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const today = new Date().toISOString().split("T")[0];
@@ -57,7 +57,7 @@ export async function GET() {
       .where(eq(systemMetrics.id, "default"))
       .limit(1);
 
-    return NextResponse.json({
+    return ok({
       metrics: {
         totalMembers: Number(totalMembers?.count ?? 0),
         activeMembers: Number(activeMembers?.count ?? 0),
@@ -70,7 +70,6 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Metrics error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Metrics error");
   }
 }

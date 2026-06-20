@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { cmsContent } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function GET(req: Request) {
   try {
@@ -29,9 +29,8 @@ export async function GET(req: Request) {
       grouped[entry.page][entry.key] = entry.value;
     }
 
-    return NextResponse.json({ content: grouped, entries });
+    return ok({ content: grouped, entries });
   } catch (error) {
-    console.error("CMS content error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "CMS content error");
   }
 }

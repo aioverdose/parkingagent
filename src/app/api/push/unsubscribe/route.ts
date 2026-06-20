@@ -1,21 +1,18 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { pushSubscriptions } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
+import { validate, pushUnsubscribeSchema } from "@/lib/validation";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST(req: Request) {
   try {
     const session = await verifySession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
-    const { endpoint } = await req.json();
-
-    if (!endpoint) {
-      return NextResponse.json({ error: "Missing endpoint" }, { status: 400 });
-    }
+    const { endpoint } = validate(pushUnsubscribeSchema, await req.json());
 
     await db
       .delete(pushSubscriptions)
@@ -26,9 +23,8 @@ export async function POST(req: Request) {
         ),
       );
 
-    return NextResponse.json({ ok: true });
+    return ok({ ok: true });
   } catch (error) {
-    console.error("Push unsubscribe error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Push unsubscribe error");
   }
 }

@@ -1,21 +1,20 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { courseModules } from "@/lib/db/schema";
 import { verifySession } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function GET() {
   try {
     const session = await verifySession();
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const modules = await db.select().from(courseModules);
-    return NextResponse.json({ modules });
+    return ok({ modules });
   } catch (error) {
-    console.error("Admin modules GET error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Admin modules GET error");
   }
 }
 
@@ -23,13 +22,13 @@ export async function POST(req: Request) {
   try {
     const session = await verifySession();
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const { title, description, required } = await req.json();
 
     if (!title) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+      return err("Title is required", 400);
     }
 
     const mod = {
@@ -42,9 +41,8 @@ export async function POST(req: Request) {
     };
 
     await db.insert(courseModules).values(mod);
-    return NextResponse.json({ module: mod });
+    return ok({ module: mod });
   } catch (error) {
-    console.error("Admin modules POST error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Admin modules POST error");
   }
 }

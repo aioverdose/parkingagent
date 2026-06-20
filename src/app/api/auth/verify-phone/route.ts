@@ -1,14 +1,16 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { phoneVerifications, users } from "@/lib/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { validate, verifyPhoneSchema } from "@/lib/validation";
+import { rateLimit, rateLimitedResponse } from "@/lib/rateLimit";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST(req: Request) {
   try {
-    const { phone, code } = await req.json();
-    if (!phone || !code) {
-      return NextResponse.json({ error: "Phone and code required" }, { status: 400 });
-    }
+    const rl = rateLimit(req, 5);
+    if (!rl.allowed) return rateLimitedResponse(rl.resetAt);
+
+    const { phone, code } = validate(verifyPhoneSchema, await req.json());
 
     const cleanPhone = phone.replace(/\D/g, "");
 
@@ -25,24 +27,22 @@ export async function POST(req: Request) {
       .limit(1);
 
     if (!verification) {
-      return NextResponse.json({ error: "No verification code found. Request a new code." }, { status: 400 });
+      return err("No verification code found. Request a new code.", 400);
     }
 
     if (new Date(verification.expiresAt) < new Date()) {
-      return NextResponse.json({ error: "Code expired. Request a new code." }, { status: 400 });
+      return err("Code expired. Request a new code.", 400);
     }
 
     if (verification.code !== code) {
-      return NextResponse.json({ error: "Invalid code" }, { status: 400 });
+      return err("Invalid code", 400);
     }
 
-    // Mark as verified
     await db
       .update(phoneVerifications)
       .set({ verified: true })
       .where(eq(phoneVerifications.id, verification.id));
 
-    // If userId is associated, mark phone as verified on user record
     if (verification.userId) {
       await db
         .update(users)
@@ -50,13 +50,12 @@ export async function POST(req: Request) {
         .where(eq(users.id, verification.userId));
     }
 
-    return NextResponse.json({
+    return ok({
       success: true,
       message: "Phone verified successfully",
       phone: cleanPhone,
     });
   } catch (error) {
-    console.error("Verify phone error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Verify phone error");
   }
 }

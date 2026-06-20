@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { cmsVersions } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST() {
   try {
     const session = await verifySession();
     if (!session || session.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     await db
@@ -16,9 +16,8 @@ export async function POST() {
       .set({ status: "published" })
       .where(eq(cmsVersions.status, "draft"));
 
-    return NextResponse.json({ success: true });
+    return ok({ success: true });
   } catch (error) {
-    console.error("Admin CMS publish error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Admin CMS publish error");
   }
 }

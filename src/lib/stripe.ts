@@ -1,9 +1,5 @@
 import Stripe from "stripe";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn("STRIPE_SECRET_KEY is not set");
-}
-
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "sk_test_placeholder", {
   typescript: true,
 });
@@ -31,8 +27,8 @@ export async function createCheckoutSession(
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
     metadata,
-    success_url: `${process.env.NEXT_PUBLIC_BASE_URL ?? "https://parking-agent.vercel.app"}/dashboard?checkout=success`,
-    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL ?? "https://parking-agent.vercel.app"}/pricing?checkout=canceled`,
+    success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?checkout=success`,
+    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing?checkout=canceled`,
     subscription_data: {
       metadata,
     },
@@ -44,7 +40,7 @@ export async function createCheckoutSession(
 export async function createBillingPortalSession(customerId: string) {
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
-    return_url: `${process.env.NEXT_PUBLIC_BASE_URL ?? "https://parking-agent.vercel.app"}/dashboard`,
+    return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`,
   });
 
   return session;

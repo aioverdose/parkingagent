@@ -1,21 +1,19 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users, referrals } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
 import { stripe, createCheckoutSession, PRICES } from "@/lib/stripe";
+import { validate, stripeCheckoutSchema } from "@/lib/validation";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST(req: Request) {
   try {
     const session = await verifySession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
-    const { priceType } = await req.json();
-    if (!priceType || !["monthly", "annual"].includes(priceType)) {
-      return NextResponse.json({ error: "Invalid price type" }, { status: 400 });
-    }
+    const { priceType } = validate(stripeCheckoutSchema, await req.json());
 
     const priceId = PRICES[priceType];
     const [user] = await db
@@ -25,7 +23,7 @@ export async function POST(req: Request) {
       .limit(1);
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return err("User not found", 404);
     }
 
     // Find referrer from referral record (pending status = signed up but not yet paid)
@@ -45,9 +43,8 @@ export async function POST(req: Request) {
       referral?.referrerId,
     );
 
-    return NextResponse.json({ url: checkoutSession.url });
+    return ok({ url: checkoutSession.url });
   } catch (error) {
-    console.error("Checkout error:", error);
-    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
+    return handleError(error, "Checkout error");
   }
 }

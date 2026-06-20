@@ -1,16 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { users, spotOffers } from "@/lib/db/schema";
 import { eq, and, ne, inArray } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
 import { scoreOffers } from "@/lib/services/pairing";
 import { getRouteEtaBatch, computeTimeFitScore } from "@/lib/services/osrm";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function GET(req: NextRequest) {
   try {
     const session = await verifySession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const latParam = req.nextUrl.searchParams.get("lat");
@@ -35,11 +36,11 @@ export async function GET(req: NextRequest) {
       );
 
     if (available.length === 0) {
-      return NextResponse.json({ offers: [] });
+      return ok({ offers: [] });
     }
 
     if (userLat === undefined || userLng === undefined) {
-      return NextResponse.json({ offers: available });
+      return ok({ offers: available });
     }
 
     // Filter by vehicle compatibility
@@ -53,7 +54,7 @@ export async function GET(req: NextRequest) {
       : available;
 
     if (compatible.length === 0) {
-      return NextResponse.json({ offers: [] });
+      return ok({ offers: [] });
     }
 
     // Compute OSRM ETA for each offer
@@ -100,9 +101,8 @@ export async function GET(req: NextRequest) {
       return a.compositeScore - b.compositeScore;
     });
 
-    return NextResponse.json({ offers: offersWithEta });
+    return ok({ offers: offersWithEta });
   } catch (error) {
-    console.error("Find spots error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Find spots error");
   }
 }

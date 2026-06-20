@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users, parkingMatchSchedules } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 import bcrypt from "bcryptjs";
 import { minutesFromMidnight, runMatchingForAll } from "@/lib/services/parkingMatch";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST() {
   try {
@@ -12,7 +12,7 @@ export async function POST() {
     const passwordHash = await bcrypt.hash("demopass", 10);
 
     // ── Demo Member A: "Alex Rivera" ────────────────────────────
-    // leaves at 17:30, looks for spot at 08:00
+    // Premium member, top scout
     const demoAId = "demo-member-a";
     const [existingA] = await db
       .select()
@@ -35,16 +35,27 @@ export async function POST() {
         completedCourses: true,
         vehicleType: "car",
         vehicleSize: "standard",
+        tier: "premium",
         isPremium: true,
         premiumUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        ranking: 5,
+        matchCount: 8,
+        cancelCount: 0,
+        noShowCount: 0,
+        neighborhood: "Downtown Long Beach",
+        anchorCount: 15,
+        successfulMatches: 12,
+        failedMatches: 1,
+        scoutLevel: 4,
+        scoutPoints: 850,
+        scoutBadges: JSON.stringify(["First Anchor", "Spot Hunter", "Gold Scout"]),
         joinedDate: "2026-06-01",
         createdAt: now,
       });
     }
 
     // ── Demo Member B: "Jordan Chen" ────────────────────────────
-    // leaves at 08:10 (close to A's 08:00 arrival)
-    // looks for spot at 17:45 (close to A's 17:30 leaving)
+    // Free member, active scout
     const demoBId = "demo-member-b";
     const [existingB] = await db
       .select()
@@ -67,13 +78,24 @@ export async function POST() {
         completedCourses: true,
         vehicleType: "car",
         vehicleSize: "compact",
+        ranking: 4,
+        matchCount: 3,
+        cancelCount: 1,
+        noShowCount: 0,
+        neighborhood: "Downtown Long Beach",
+        anchorCount: 8,
+        successfulMatches: 6,
+        failedMatches: 2,
+        scoutLevel: 3,
+        scoutPoints: 420,
+        scoutBadges: JSON.stringify(["First Anchor"]),
         joinedDate: "2026-05-15",
         createdAt: now,
       });
     }
 
     // ── Demo Member C: "Sam Taylor" ────────────────────────────
-    // leaves at 09:00, looks for spot at 18:00
+    // Free member, beginner scout
     const demoCId = "demo-member-c";
     const [existingC] = await db
       .select()
@@ -96,6 +118,17 @@ export async function POST() {
         completedCourses: true,
         vehicleType: "motorcycle",
         vehicleSize: "compact",
+        ranking: 3,
+        matchCount: 1,
+        cancelCount: 0,
+        noShowCount: 0,
+        neighborhood: "Downtown Long Beach",
+        anchorCount: 3,
+        successfulMatches: 2,
+        failedMatches: 0,
+        scoutLevel: 2,
+        scoutPoints: 180,
+        scoutBadges: JSON.stringify(["First Anchor"]),
         joinedDate: "2026-06-10",
         createdAt: now,
       });
@@ -177,7 +210,7 @@ export async function POST() {
       // Non-blocking
     }
 
-    return NextResponse.json({
+    return ok({
       message: "Demo data created successfully.",
       demoMembersCreated: [demoAId, demoBId, demoCId].filter(
         (id) => ![existingA, existingB, existingC].find((u) => u?.id === id),
@@ -187,7 +220,6 @@ export async function POST() {
       note: "Log in as any demo member to test matching. Demo passwords are 'demopass'.",
     });
   } catch (error) {
-    console.error("Demo data creation error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Demo data creation error");
   }
 }

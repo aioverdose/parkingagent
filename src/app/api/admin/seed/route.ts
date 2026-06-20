@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import {
   users, spotOffers, matches, courseModules, cmsContent,
@@ -7,6 +6,7 @@ import {
 } from "@/lib/db/schema";
 import { v4 as uuid } from "uuid";
 import bcrypt from "bcryptjs";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST() {
   try {
@@ -28,7 +28,9 @@ export async function POST() {
       id: "admin-001", name: "Admin", email: "admin@parkingagent.com",
       passwordHash: adminHash, role: "admin", isMember: true, isAdmin: true,
       rankingScore: 100, status: "good-standing", membershipType: "annual",
-      completedCourses: true, joinedDate: "2026-01-01", createdAt: now,
+      completedCourses: true, tier: "premium", ranking: 5,
+      matchCount: 0, cancelCount: 0, noShowCount: 0, neighborhood: "Long Beach",
+      joinedDate: "2026-01-01", createdAt: now,
     }).onConflictDoNothing();
 
     // Test account
@@ -36,32 +38,36 @@ export async function POST() {
       id: "test-001", name: "Test Account", email: "test@parkingagent.com",
       passwordHash: testHash, role: "member", isMember: true, isAdmin: false,
       rankingScore: 85, status: "good-standing", membershipType: "monthly",
-      completedCourses: true, joinedDate: "2026-06-18", createdAt: now,
+      completedCourses: true, tier: "free", ranking: 5,
+      matchCount: 0, cancelCount: 0, noShowCount: 0, neighborhood: "Long Beach",
+      joinedDate: "2026-06-18", createdAt: now,
     }).onConflictDoNothing();
 
-    // 8 members
-    const members = [
+    const memberData = [
       { id: "u1", name: "Alice Johnson", email: "alice@example.com", rs: 92, lat: 33.7701, lng: -118.1937, mp: "monthly", jd: "2026-01-15" },
       { id: "u2", name: "Bob Smith", email: "bob@example.com", rs: 78, lat: 33.7715, lng: -118.1945, mp: "annual", jd: "2026-02-20" },
-      { id: "u3", name: "Carol Davis", email: "carol@example.com", rs: 45, lat: 33.769, lng: -118.192, mp: "monthly", jd: "2026-03-10", st: "suspended" },
-      { id: "u4", name: "David Lee", email: "david@example.com", rs: 0, lat: null, lng: null, mp: "none", jd: "2026-06-17", st: "pending", mb: false, co: false },
+      { id: "u3", name: "Carol Davis", email: "carol@example.com", rs: 45, lat: 33.769, lng: -118.192, mp: "monthly", jd: "2026-03-10", st: "suspended" as const },
+      { id: "u4", name: "David Lee", email: "david@example.com", rs: 0, lat: null, lng: null, mp: "none", jd: "2026-06-17", st: "pending" as const, mb: false, co: false },
       { id: "u5", name: "Eva Martinez", email: "eva@example.com", rs: 88, lat: 33.772, lng: -118.191, mp: "monthly", jd: "2026-04-05" },
       { id: "u6", name: "Frank Wilson", email: "frank@example.com", rs: 95, lat: 33.768, lng: -118.195, mp: "annual", jd: "2026-01-01" },
-      { id: "u7", name: "Grace Kim", email: "grace@example.com", rs: 30, lat: null, lng: null, mp: "monthly", jd: "2026-05-12", st: "suspended" },
-      { id: "u8", name: "Henry Brown", email: "henry@example.com", rs: 0, lat: null, lng: null, mp: "none", jd: "2026-06-18", st: "pending", mb: false, co: false },
+      { id: "u7", name: "Grace Kim", email: "grace@example.com", rs: 30, lat: null, lng: null, mp: "monthly", jd: "2026-05-12", st: "suspended" as const },
+      { id: "u8", name: "Henry Brown", email: "henry@example.com", rs: 0, lat: null, lng: null, mp: "none", jd: "2026-06-18", st: "pending" as const, mb: false, co: false },
     ];
 
-    for (const m of members) {
+    for (const m of memberData) {
       await db.insert(users).values({
         id: m.id, name: m.name, email: m.email, passwordHash: memberHash,
-        role: "member", isMember: m.mb !== false, isAdmin: false, rankingScore: m.rs,
-        status: m.st || "good-standing", membershipType: m.mp, completedCourses: m.co !== false,
+        role: "member", isMember: (m as any).mb !== false, isAdmin: false, rankingScore: m.rs,
+        status: (m as any).st || "good-standing", membershipType: m.mp,
+        completedCourses: (m as any).co !== false,
+        tier: "free", ranking: Math.min(5, Math.max(1, Math.floor(m.rs / 20))),
+        matchCount: 0, cancelCount: 0, noShowCount: 0, neighborhood: "Long Beach",
         joinedDate: m.jd, createdAt: now, latitude: m.lat, longitude: m.lng,
-      }).onConflictDoNothing();
+      } as any).onConflictDoNothing();
     }
 
     // Referral codes for all seed users
-    for (const m of members) {
+    for (const m of memberData) {
       await db.insert(referralCodes).values({ id: uuid(), userId: m.id, code: genCode(), createdAt: now }).onConflictDoNothing();
     }
     await db.insert(referralCodes).values({ id: uuid(), userId: "admin-001", code: genCode(), createdAt: now }).onConflictDoNothing();
@@ -122,12 +128,11 @@ export async function POST() {
     // System metrics
     await db.insert(systemMetrics).values({ id: "default", averageMatchTimeSeconds: 4.2, averageArrivalTimeMinutes: 6.8 }).onConflictDoNothing();
 
-    return NextResponse.json({
+    return ok({
       success: true,
       message: "Database seeded successfully with admin, test account, 8 members, offers, matches, courses, CMS, revenue, and metrics.",
     });
   } catch (error) {
-    console.error("Seed error:", error);
-    return NextResponse.json({ error: "Seed failed. See server logs." }, { status: 500 });
+    return handleError(error, "Seed error");
   }
 }

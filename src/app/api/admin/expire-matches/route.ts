@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { matches, spotOffers } from "@/lib/db/schema";
 import { eq, and, lt } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest) {
       (cronSecret && cronSecret === process.env.CRON_SECRET);
 
     if (!isAuthorized) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
     const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
@@ -44,9 +45,8 @@ export async function POST(req: NextRequest) {
       expired++;
     }
 
-    return NextResponse.json({ expired });
+    return ok({ expired });
   } catch (error) {
-    console.error("Expire matches error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Expire matches error");
   }
 }

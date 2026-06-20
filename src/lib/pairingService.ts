@@ -1,3 +1,5 @@
+import { haversineDistanceKm } from "@/lib/geo";
+
 export interface User {
   id: string;
   name: string;
@@ -99,24 +101,6 @@ const mockMatches: Match[] = [
   },
 ];
 
-function haversineDistance(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
 export function findClosestGoodStandingMember(
   latitude: number,
   longitude: number,
@@ -133,8 +117,8 @@ export function findClosestGoodStandingMember(
 
   candidates.sort(
     (a, b) =>
-      haversineDistance(latitude, longitude, a.latitude, a.longitude) -
-      haversineDistance(latitude, longitude, b.latitude, b.longitude)
+      haversineDistanceKm(latitude, longitude, a.latitude, a.longitude) -
+      haversineDistanceKm(latitude, longitude, b.latitude, b.longitude)
   );
 
   return candidates[0];

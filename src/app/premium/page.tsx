@@ -8,10 +8,13 @@ import { HoverButton } from "@/components/ui/HoverButton";
 import { HoverCard } from "@/components/ui/HoverCard";
 
 const benefits = [
-  { title: "Live GPS-based ETA", desc: "See exactly how far available spots are with real-time ETA." },
-  { title: "Instant matches", desc: "Get matched with members leaving their spot right now." },
-  { title: "Priority matching", desc: "Premium members get priority over free users." },
-  { title: "Live notifications", desc: "Get notified when a spot opens near you." },
+  { title: "Real-time GPS-based ETA", desc: "Drop a pin on the map and see exactly how far available spots are with live ETA." },
+  { title: "Drop a Pin on the Map", desc: "Mark exactly where you're arriving on an interactive map." },
+  { title: "Preliminary requests to matching users", desc: "System sends non-intrusive alerts to members who match your time and proximity." },
+  { title: "Expanding radius alerts", desc: "Alerts expand in radius as you get closer if no match is found (5, 10, 15, 20 blocks)." },
+  { title: "Departure Beacon", desc: "Send a beacon when departing. System finds incoming members in your area." },
+  { title: "Higher ranking priority", desc: "Premium members get priority over free users in matching." },
+  { title: "Unlimited matches", desc: "No restrictions on how many matches you can make." },
 ];
 
 export default function PremiumPage() {
@@ -37,6 +40,8 @@ export default function PremiumPage() {
     setLoading(false);
   };
 
+  const isPremium = user?.tier === "premium" || user?.isPremium === true;
+
   return (
     <div className="min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
@@ -61,7 +66,7 @@ export default function PremiumPage() {
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F9D58" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></svg>
             </div>
             <h1 className="text-3xl font-black text-[#202124] mt-6">You&apos;re now a Premium member!</h1>
-            <p className="text-[#757575] mt-2">You can use real-time parking matching now.</p>
+            <p className="text-[#757575] mt-2">You now have access to real-time parking, departure beacon, and priority matching.</p>
             <div className="mt-8 space-y-3">
               <HoverButton onClick={() => router.push("/dashboard")} className="w-full max-w-xs mx-auto">
                 Go to Dashboard
@@ -71,13 +76,13 @@ export default function PremiumPage() {
               </button>
             </div>
           </div>
-        ) : user?.isPremium ? (
+        ) : isPremium ? (
           <div className="text-center">
             <div className="w-20 h-20 bg-[#FFF3E0] rounded-full flex items-center justify-center mx-auto">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#F9A825" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
             </div>
             <h1 className="text-3xl font-black text-[#202124] mt-6">You&apos;re already Premium</h1>
-            <p className="text-[#757575] mt-2">Enjoy real-time parking matching and priority service.</p>
+            <p className="text-[#757575] mt-2">Enjoy real-time parking, departure beacon, and priority service.</p>
             <div className="mt-8">
               <HoverButton onClick={() => router.push("/dashboard")} className="w-full max-w-xs mx-auto">
                 Go to Dashboard
@@ -92,7 +97,7 @@ export default function PremiumPage() {
               </div>
               <h1 className="text-3xl font-black text-[#202124] mt-6">Upgrade to Premium</h1>
               <p className="text-[#757575] mt-2 max-w-md mx-auto">
-                Get real-time parking service with instant matches, live GPS-based ETA, and priority matching.
+                Get real-time parking service with GPS-based ETA, interactive map pin drop, departure beacon, and priority matching.
               </p>
             </div>
 
@@ -117,7 +122,7 @@ export default function PremiumPage() {
                 ))}
               </ul>
               <HoverButton onClick={handleUpgrade} disabled={loading} className="w-full mt-6">
-                {loading ? "Processing..." : "Subscribe to Premium"}
+                {loading ? "Processing..." : "Subscribe to Premium ($4.99/month)"}
               </HoverButton>
             </div>
 

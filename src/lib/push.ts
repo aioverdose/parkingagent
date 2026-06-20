@@ -20,10 +20,7 @@ export async function sendPushNotification(
   body: string,
   url?: string,
 ) {
-  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
-    console.log(`[push] Would send: "${title} - ${body}" to ${subscription.endpoint.slice(0, 50)}...`);
-    return;
-  }
+  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return;
 
   try {
     await webPush.sendNotification(
@@ -36,11 +33,11 @@ export async function sendPushNotification(
       },
       JSON.stringify({ title, body, url }),
     );
-  } catch (error: any) {
-    if (error.statusCode === 410 || error.statusCode === 404) {
-      console.log("[push] Subscription expired, should be removed");
+  } catch (error: unknown) {
+    const err = error as { statusCode?: number };
+    if (err.statusCode === 410 || err.statusCode === 404) {
       return "expired";
     }
-    console.error("[push] Failed to send:", error);
+    console.error("[push] Failed to send notification");
   }
 }

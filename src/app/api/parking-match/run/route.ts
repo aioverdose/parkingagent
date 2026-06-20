@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { runMatchingForAll } from "@/lib/services/parkingMatch";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST(req: Request) {
   try {
@@ -14,12 +14,11 @@ export async function POST(req: Request) {
 
     const matchesCreated = await runMatchingForAll();
 
-    return NextResponse.json({
+    return ok({
       matchesCreated,
       message: `Matching complete. ${matchesCreated} new match(es) created.`,
     });
   } catch (error) {
-    console.error("Parking match run error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Parking match run error");
   }
 }

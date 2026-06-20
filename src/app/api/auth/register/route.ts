@@ -1,51 +1,42 @@
-import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { users, courseModules, userCourseCompletions } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { hashPassword, createSession, setSessionCookie } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
+import { validate, registerSchema } from "@/lib/validation";
+import { rateLimit, rateLimitedResponse } from "@/lib/rateLimit";
+import { ok, err, handleError } from "@/lib/apiResponse";
 import { lookupReferrerByCode, createReferral, generateReferralCode, REFERRAL_COOKIE } from "@/lib/referral";
+import { getTierForSignup, getBadges } from "@/lib/earlyAdopter";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, phone, completedModuleIds } = await req.json();
+    const rl = rateLimit(req, 5);
+    if (!rl.allowed) return rateLimitedResponse(rl.resetAt);
 
-    if (!name || !email || !password) {
-      return NextResponse.json(
-        { error: "All fields are required" },
-        { status: 400 },
-      );
-    }
-
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
-        { status: 400 },
-      );
-    }
-
-    const emailLower = email.toLowerCase();
+    const { name, email, password, phone, completedModuleIds } = validate(registerSchema, await req.json());
 
     const [existing] = await db
       .select()
       .from(users)
-      .where(eq(users.email, emailLower))
+      .where(eq(users.email, email))
       .limit(1);
 
     if (existing) {
-      return NextResponse.json(
-        { error: "Email already registered" },
-        { status: 409 },
-      );
+      return err("Email already registered", 409);
     }
+
+    // Count existing members to assign signup number
+    const allUsers = await db.select({ id: users.id }).from(users);
+    const signupNumber = allUsers.length + 1;
+    const tier = getTierForSignup(signupNumber);
 
     const passwordHash = await hashPassword(password);
     const now = new Date().toISOString();
     const today = now.split("T")[0];
     const userId = `member-${Date.now()}`;
 
-    // Check if all required modules are completed
     const allModules = await db
       .select()
       .from(courseModules)
@@ -58,7 +49,7 @@ export async function POST(req: Request) {
     await db.insert(users).values({
       id: userId,
       name,
-      email: emailLower,
+      email,
       passwordHash,
       role: "member",
       isMember: !!allRequiredComplete,
@@ -71,12 +62,13 @@ export async function POST(req: Request) {
       phoneVerified: !!phone,
       joinedDate: today,
       createdAt: now,
+      tier,
+      signupNumber,
+      scoutBadges: JSON.stringify(getBadges(signupNumber)),
     });
 
-    // Generate referral code for new user
     await generateReferralCode(userId);
 
-    // Check for referral cookie
     try {
       const cookieStore = await cookies();
       const refCode = cookieStore.get(REFERRAL_COOKIE)?.value;
@@ -90,7 +82,6 @@ export async function POST(req: Request) {
       // cookie access may fail in some environments — non-critical
     }
 
-    // Record course completions
     if (completedModuleIds && completedModuleIds.length > 0) {
       for (const moduleId of completedModuleIds) {
         await db.insert(userCourseCompletions).values({
@@ -104,24 +95,26 @@ export async function POST(req: Request) {
 
     const { token, expiresAt } = await createSession(
       userId,
-      emailLower,
+      email,
       "member",
     );
 
     await setSessionCookie(token, expiresAt);
 
-    return NextResponse.json({
+    return ok({
       user: {
         id: userId,
         name,
-        email: emailLower,
+        email,
         role: "member",
         isMember: !!allRequiredComplete,
         isAdmin: false,
+        tier,
+        signupNumber,
+        earlyAdopter: tier === "free",
       },
     });
   } catch (error) {
-    console.error("Register error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Register error");
   }
 }

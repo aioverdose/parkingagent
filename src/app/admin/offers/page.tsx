@@ -16,7 +16,7 @@ export default function AdminOffersPage() {
   const [selected, setSelected] = useState<SpotOffer | null>(null);
 
   useEffect(() => { fetchOffers(); }, [statusFilter]);
-  async function fetchOffers() { try { const { offers } = await api.get<{ offers: SpotOffer[] }>(`/api/admin/offers?status=${statusFilter}`); setOffers(offers); } catch {} }
+  async function fetchOffers() { try { const { offers } = await api.get<{ offers: SpotOffer[] }>(`/api/admin/offers?status=${statusFilter}`); setOffers(offers); } catch { console.error("Failed to fetch offers"); } }
 
   return (
     <div>

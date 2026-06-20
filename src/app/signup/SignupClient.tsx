@@ -34,6 +34,11 @@ export default function Signup() {
   const [modules, setModules] = useState<CourseModule[]>([]);
   const [loadingModules, setLoadingModules] = useState(true);
   const [devCode, setDevCode] = useState("");
+  const [signupCount, setSignupCount] = useState<{ count: number; remaining: number; isFull: boolean } | null>(null);
+
+  useEffect(() => {
+    api.get<{ count: number; remaining: number; isFull: boolean }>("/api/signup-count").then(setSignupCount).catch(() => {});
+  }, []);
 
   // Restore pending signup data from TOS redirect
   useEffect(() => {
@@ -46,7 +51,7 @@ export default function Signup() {
         if (data.password) setPassword(data.password);
         if (data.phone) setPhone(data.phone);
         if (data.phoneVerified) setPhoneVerified(true);
-      } catch {}
+      } catch { console.error("Failed to restore pending signup"); }
       sessionStorage.removeItem("pending_signup");
     }
   }, []);
@@ -145,7 +150,33 @@ export default function Signup() {
             <div>
               <h1 className="text-3xl font-black text-[#202124] text-center">Sign Up</h1>
               <p className="text-center text-[#757575] mt-2 text-sm">Create your Parking Agent membership account</p>
-              <form onSubmit={handleFormSubmit} className="mt-8 space-y-4">
+
+              {/* First 100 Free banner */}
+              {signupCount && !signupCount.isFull && (
+                <div className="mt-6 bg-gradient-to-r from-[#E8F0FE] to-[#E6F4EA] border border-[#4285F4]/20 rounded-xl p-4 text-center">
+                  <p className="text-sm font-bold text-[#4285F4]">
+                    🚀 {signupCount.remaining} FREE spot{signupCount.remaining !== 1 ? "s" : ""} remaining
+                  </p>
+                  <div className="mt-2 w-full bg-white/60 rounded-full h-2 overflow-hidden">
+                    <div className="bg-gradient-to-r from-[#4285F4] to-[#0F9D58] h-full rounded-full transition-all duration-500" style={{ width: `${(signupCount.count / 100) * 100}%` }} />
+                  </div>
+                  <p className="text-xs text-[#757575] mt-2">
+                    First 100 users get FREE forever — unlimited schedule matching, Early Adopter badge, no monthly fees.
+                  </p>
+                </div>
+              )}
+              {signupCount?.isFull && (
+                <div className="mt-6 bg-[#FCE8E6] border border-[#E94335]/20 rounded-xl p-4 text-center">
+                  <p className="text-sm font-bold text-[#E94335]">
+                    🎉 First 100 spots are filled
+                  </p>
+                  <p className="text-xs text-[#757575] mt-1">
+                    New members join at <strong>$4.99/month</strong> for premium access.
+                  </p>
+                </div>
+              )}
+
+              <form onSubmit={handleFormSubmit} className="mt-6 space-y-4">
                 {error && <div className="bg-[#FCE8E6] border border-[#E94335]/30 text-[#E94335] text-sm p-3 rounded-xl">{error}</div>}
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-[#202124] mb-1">Name</label>

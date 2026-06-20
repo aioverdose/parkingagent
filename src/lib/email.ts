@@ -11,10 +11,7 @@ export async function sendEmail(
   subject: string,
   text: string,
 ) {
-  if (!resend) {
-    console.log(`[email] Would send "${subject}" to ${email}: ${text.slice(0, 100)}...`);
-    return;
-  }
+  if (!resend) return;
 
   try {
     await resend.emails.send({
@@ -23,8 +20,8 @@ export async function sendEmail(
       subject,
       text,
     });
-  } catch (error) {
-    console.error("Failed to send email:", error);
+  } catch {
+    console.error("Failed to send email");
   }
 }
 
@@ -34,10 +31,7 @@ export async function sendMatchNotification(
   type: "arriving" | "departing",
   spotAddress?: string,
 ) {
-  if (!resend) {
-    console.log(`[email] Would send ${type} notification to ${email}`);
-    return;
-  }
+  if (!resend) return;
 
   const subject = type === "arriving"
     ? "🎯 Spot Found! Head to your matched parking spot"
@@ -54,7 +48,7 @@ export async function sendMatchNotification(
       subject,
       text,
     });
-  } catch (error) {
-    console.error("Failed to send email:", error);
+  } catch {
+    console.error("Failed to send email");
   }
 }

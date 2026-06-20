@@ -1,39 +1,32 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { verifyPassword, createSession, setSessionCookie } from "@/lib/auth-server";
+import { validate, loginSchema } from "@/lib/validation";
+import { rateLimit, rateLimitedResponse } from "@/lib/rateLimit";
+import { ok, err, handleError } from "@/lib/apiResponse";
+import { isEarlyAdopter } from "@/lib/earlyAdopter";
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    const rl = rateLimit(req, 10);
+    if (!rl.allowed) return rateLimitedResponse(rl.resetAt);
 
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 },
-      );
-    }
+    const { email, password } = validate(loginSchema, await req.json());
 
     const [user] = await db
       .select()
       .from(users)
-      .where(eq(users.email, email.toLowerCase()))
+      .where(eq(users.email, email))
       .limit(1);
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 },
-      );
+      return err("Invalid email or password", 401);
     }
 
     const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 },
-      );
+      return err("Invalid email or password", 401);
     }
 
     const { token, expiresAt } = await createSession(
@@ -44,7 +37,7 @@ export async function POST(req: Request) {
 
     await setSessionCookie(token, expiresAt);
 
-    return NextResponse.json({
+    return ok({
       user: {
         id: user.id,
         name: user.name,
@@ -52,10 +45,12 @@ export async function POST(req: Request) {
         role: user.role,
         isMember: user.isMember,
         isAdmin: user.isAdmin,
+        tier: user.tier,
+        signupNumber: user.signupNumber ?? undefined,
+        earlyAdopter: user.signupNumber ? isEarlyAdopter(user.signupNumber) : undefined,
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Login error");
   }
 }

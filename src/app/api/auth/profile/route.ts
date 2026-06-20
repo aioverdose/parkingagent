@@ -1,17 +1,18 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { verifySession, hashPassword, verifyPassword } from "@/lib/auth-server";
+import { validate, profileUpdateSchema } from "@/lib/validation";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function PUT(req: Request) {
   try {
     const session = await verifySession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return err("Unauthorized", 401);
     }
 
-    const { name, email, currentPassword, newPassword, vehicleType, vehicleSize, vehicleMake, vehicleModel, licensePlate } = await req.json();
+    const { name, email, currentPassword, newPassword, vehicleType, vehicleSize, vehicleMake, vehicleModel, licensePlate } = validate(profileUpdateSchema, await req.json());
 
     const [user] = await db
       .select()
@@ -20,7 +21,7 @@ export async function PUT(req: Request) {
       .limit(1);
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return err("User not found", 404);
     }
 
     const updates: Record<string, string | null> = {};
@@ -35,33 +36,30 @@ export async function PUT(req: Request) {
         .where(eq(users.email, email))
         .limit(1);
       if (existing) {
-        return NextResponse.json({ error: "Email already in use" }, { status: 409 });
+        return err("Email already in use", 409);
       }
       updates.email = email;
     }
 
-    if (vehicleType !== undefined) updates.vehicleType = vehicleType === "" ? null : vehicleType;
-    if (vehicleSize !== undefined) updates.vehicleSize = vehicleSize === "" ? null : vehicleSize;
+    if (vehicleType !== undefined) updates.vehicleType = vehicleType;
+    if (vehicleSize !== undefined) updates.vehicleSize = vehicleSize;
     if (vehicleMake !== undefined) updates.vehicleMake = vehicleMake === "" ? null : vehicleMake;
     if (vehicleModel !== undefined) updates.vehicleModel = vehicleModel === "" ? null : vehicleModel;
     if (licensePlate !== undefined) updates.licensePlate = licensePlate === "" ? null : licensePlate;
 
     if (newPassword) {
       if (!currentPassword) {
-        return NextResponse.json(
-          { error: "Current password is required to set a new password" },
-          { status: 400 },
-        );
+        return err("Current password is required to set a new password", 400);
       }
       const valid = await verifyPassword(currentPassword, user.passwordHash);
       if (!valid) {
-        return NextResponse.json({ error: "Current password is incorrect" }, { status: 403 });
+        return err("Current password is incorrect", 403);
       }
       updates.passwordHash = await hashPassword(newPassword);
     }
 
     if (Object.keys(updates).length === 0) {
-      return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+      return err("No fields to update", 400);
     }
 
     updates.updatedAt = now;
@@ -75,9 +73,8 @@ export async function PUT(req: Request) {
       .limit(1);
 
     const { passwordHash: _, ...safeUser } = updated;
-    return NextResponse.json({ user: safeUser });
+    return ok({ user: safeUser });
   } catch (error) {
-    console.error("Profile update error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Profile update error");
   }
 }

@@ -44,8 +44,13 @@ export default function Home() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
+  const [signupCount, setSignupCount] = useState<{ count: number; remaining: number; isFull: boolean } | null>(null);
 
   useEffect(() => { setUser(getStoredUser()); }, []);
+
+  useEffect(() => {
+    api.get<{ count: number; remaining: number; isFull: boolean }>("/api/signup-count").then(setSignupCount).catch(() => {});
+  }, []);
 
   const handleCheckout = async (priceType: string) => {
     if (!user) { router.push("/signup"); return; }
@@ -115,7 +120,7 @@ export default function Home() {
 
       {/* Hero */}
       <motion.section
-        className="max-w-6xl mx-auto px-4 pt-20 pb-16 text-center"
+        className="max-w-6xl mx-auto px-4 pt-16 pb-16 text-center"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -126,7 +131,7 @@ export default function Home() {
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
         >
-          <span>🔥</span> Uber-Style AI Matching
+          <span>🚀</span> EARLY ACCESS: First 100 Users Get FREE Forever!
         </motion.div>
         <h1 className="text-4xl md:text-5xl font-black text-[#202124] leading-tight">
           <span className="text-[#4285F4]">Parking</span>{" "}
@@ -138,9 +143,43 @@ export default function Home() {
         <p className="text-base mt-2 text-[#757575] max-w-2xl mx-auto">
           <span className="font-semibold text-[#202124]">The only app that uses Uber-style AI matching</span> to prevent multi-car chaos. One spot, one car, every time.
         </p>
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+
+        {/* First 100 Free Counter */}
+        <div className="mt-8 max-w-lg mx-auto bg-gradient-to-r from-[#E8F0FE] to-[#E6F4EA] border border-[#4285F4]/20 rounded-2xl p-6 text-center">
+          {signupCount ? (
+            signupCount.isFull ? (
+              <>
+                <div className="text-3xl mb-2">🎉</div>
+                <h2 className="text-lg font-bold text-[#202124]">We've reached 100 users!</h2>
+                <p className="text-sm text-[#757575] mt-2">
+                  The first 100 got <strong>FREE forever</strong> access.<br />
+                  New users: <strong>$4.99/month</strong> for unlimited schedule matching + premium features.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-black text-[#4285F4]">{signupCount.remaining}</div>
+                <p className="text-xs text-[#757575] mt-1">FREE spots remaining</p>
+                <div className="mt-3 w-full bg-white/60 rounded-full h-2.5 overflow-hidden">
+                  <div className="bg-gradient-to-r from-[#4285F4] to-[#0F9D58] h-full rounded-full transition-all duration-500" style={{ width: `${(signupCount.count / 100) * 100}%` }} />
+                </div>
+                <p className="text-xs text-[#757575] mt-2">
+                  <strong>{signupCount.count}</strong> of 100 signed up —{" "}
+                  {signupCount.count < 100 ? "FREE forever" : "spots filled!"}
+                </p>
+                <p className="text-xs text-[#0F9D58] font-semibold mt-1">
+                  ✅ Unlimited schedule matching · Free forever · Early Adopter badge
+                </p>
+              </>
+            )
+          ) : (
+            <div className="w-6 h-6 border-2 border-[#4285F4] border-t-transparent rounded-full animate-spin mx-auto" />
+          )}
+        </div>
+
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
           <HoverButton variant="primary" onClick={() => router.push("/signup")}>
-            Get Started – Become a Member
+            {signupCount?.isFull ? "Sign Up at $4.99/month" : "Join for Free Now"}
           </HoverButton>
           <HoverButton variant="secondary" onClick={() => router.push("/how-it-works")}>
             How It Works →
@@ -194,6 +233,44 @@ export default function Home() {
               </FadeInUp>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Spot Scout Feature */}
+      <section className="bg-[#FFF8E1] border-y border-[#FBBB05]/20 py-16">
+        <div className="max-w-5xl mx-auto px-4">
+          <FadeInUp>
+            <div className="text-center mb-8">
+              <span className="text-4xl">🕵️</span>
+              <h2 className="text-2xl font-bold text-[#202124] mt-2">Spot Scout Mode</h2>
+              <p className="text-sm text-[#757575] mt-1 max-w-md mx-auto">
+                Passengers in the car can join as scouts who anchor open parking spots they see while traveling.
+              </p>
+            </div>
+          </FadeInUp>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { icon: "📍", title: "Anchor Spots", desc: "See an open spot? Tap to anchor it. GPS logs the exact location." },
+              { icon: "🎯", title: "Match with Miners", desc: "System finds nearby members looking for a spot and sends them a notification." },
+              { icon: "🏆", title: "Earn Rewards", desc: "Successful parks earn points, levels, badges, and ranking boosts." },
+            ].map((f, i) => (
+              <FadeInUp key={f.title} delay={i * 0.1}>
+                <TiltCard className="text-center">
+                  <div className="text-3xl mb-2">{f.icon}</div>
+                  <h3 className="font-bold text-[#202124] text-sm">{f.title}</h3>
+                  <p className="text-xs text-[#757575] mt-1">{f.desc}</p>
+                </TiltCard>
+              </FadeInUp>
+            ))}
+          </div>
+          <FadeInUp delay={0.3}>
+            <div className="text-center mt-8">
+              <a href="/signup"
+                className="inline-block bg-gradient-to-r from-[#F9A825] to-[#FBBB05] text-white px-8 py-3 rounded-xl font-bold hover:shadow-lg transition-all">
+                🕵️ Start Scouting
+              </a>
+            </div>
+          </FadeInUp>
         </div>
       </section>
 
@@ -334,7 +411,8 @@ export default function Home() {
             <span className="text-[#4285F4]">Parking</span> <span className="text-[#0F9D58]">Agent</span>
           </div>
           <div className="flex gap-4">
-            <a href="/premium" className="hover:text-[#202124]">Premium Real-Time Service</a>
+            <a href="/scout" className="hover:text-[#202124]">Spot Scout</a>
+            <a href="/premium" className="hover:text-[#202124]">Premium</a>
             <a href="/profile" className="hover:text-[#202124]">Free Schedule Matching</a>
             <a href="/tos" className="hover:text-[#202124]">Terms of Service</a>
             <a href="/legal/privacy" className="hover:text-[#202124]">Privacy</a>

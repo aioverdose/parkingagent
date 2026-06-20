@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { courseModules } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function GET() {
   try {
@@ -11,9 +11,8 @@ export async function GET() {
       .where(eq(courseModules.isActive, true))
       .orderBy(courseModules.lastUpdated);
 
-    return NextResponse.json({ modules });
+    return ok({ modules });
   } catch (error) {
-    console.error("Courses error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleError(error, "Courses error");
   }
 }
