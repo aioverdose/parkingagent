@@ -461,6 +461,9 @@ export const parkingMatches = pgTable(
     rated: boolean("rated").notNull().default(false),
     rating: integer("rating"),
     alarmMinutes: integer("alarm_minutes").notNull().default(0),
+    matchState: text("match_state", {
+      enum: ["matched", "waiting_arrival", "arrived", "ready_to_depart", "departing", "complete", "cancelled"],
+    }).notNull().default("matched"),
   },
   (table) => ({
     leavingIdx: index("pm_leaving_idx").on(table.leavingMemberId),

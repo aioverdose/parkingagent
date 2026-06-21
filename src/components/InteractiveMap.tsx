@@ -7,12 +7,19 @@ export interface PinPosition {
   lng: number;
 }
 
+export interface GeofenceCircle {
+  center: PinPosition;
+  radiusMeters: number;
+  color?: string;
+}
+
 export default function InteractiveMap({
   center,
   onPinDrop,
   pinPosition,
   livePosition,
   spotPosition,
+  geofence,
   className = "",
 }: {
   center: PinPosition;
@@ -20,6 +27,7 @@ export default function InteractiveMap({
   pinPosition?: PinPosition | null;
   livePosition?: PinPosition | null;
   spotPosition?: PinPosition | null;
+  geofence?: GeofenceCircle | null;
   className?: string;
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -27,6 +35,7 @@ export default function InteractiveMap({
   const markerRef = useRef<any>(null);
   const liveMarkerRef = useRef<any>(null);
   const spotMarkerRef = useRef<any>(null);
+  const geofenceRef = useRef<any>(null);
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -70,6 +79,18 @@ export default function InteractiveMap({
         spotMarkerRef.current = L.marker([spotPosition.lat, spotPosition.lng], { icon: spotIcon }).addTo(map);
       }
 
+      // Geofence circle
+      if (geofence) {
+        geofenceRef.current = L.circle([geofence.center.lat, geofence.center.lng], {
+          radius: geofence.radiusMeters,
+          color: geofence.color || "#4285F4",
+          fillColor: geofence.color || "#4285F4",
+          fillOpacity: 0.1,
+          weight: 2,
+          dashArray: "8 8",
+        }).addTo(map);
+      }
+
       mapInstanceRef.current = map;
     }
 
@@ -80,8 +101,9 @@ export default function InteractiveMap({
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
+      geofenceRef.current = null;
     };
-  }, [center.lat, center.lng, spotPosition?.lat, spotPosition?.lng]);
+  }, [center.lat, center.lng, spotPosition?.lat, spotPosition?.lng, geofence?.center.lat, geofence?.center.lng, geofence?.radiusMeters]);
 
   // Pin position marker (user's selected spot - red)
   useEffect(() => {

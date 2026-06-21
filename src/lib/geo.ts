@@ -33,3 +33,12 @@ export function haversineDistanceMiles(
 ): number {
   return haversine(lat1, lng1, lat2, lng2, R_MILES);
 }
+
+export function isInsideGeofence(
+  lat: number, lng: number,
+  centerLat: number, centerLng: number,
+  radiusMeters: number,
+): boolean {
+  const distKm = haversineDistanceKm(lat, lng, centerLat, centerLng);
+  return distKm * 1000 <= radiusMeters;
+}

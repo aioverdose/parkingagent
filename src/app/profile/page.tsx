@@ -55,13 +55,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState(getStoredUser());
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [vehicleType, setVehicleType] = useState("");
-  const [vehicleSize, setVehicleSize] = useState("");
-  const [vehicleMake, setVehicleMake] = useState("");
-  const [vehicleModel, setVehicleModel] = useState("");
-  const [licensePlate, setLicensePlate] = useState("");
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -81,7 +75,6 @@ export default function ProfilePage() {
   const [showMatches, setShowMatches] = useState(true);
   const [leavingTime, setLeavingTime] = useState("");
   const [arrivalLookingTime, setArrivalLookingTime] = useState("");
-  const [neighborhood, setNeighborhood] = useState("");
   const [t1Message, setT1Message] = useState("");
   const [t1Error, setT1Error] = useState("");
   const [t1Loading, setT1Loading] = useState(false);
@@ -105,11 +98,6 @@ export default function ProfilePage() {
     fetchCurrentUser().then((u) => {
       if (u) {
         setUser(u); setName(u.name); setEmail(u.email);
-        setVehicleType(u.vehicleType || "");
-        setVehicleSize(u.vehicleSize || "");
-        setVehicleMake(u.vehicleMake || "");
-        setVehicleModel(u.vehicleModel || "");
-        setLicensePlate(u.licensePlate || "");
         setNeighborhood(u.neighborhood || "");
       }
     });
@@ -184,20 +172,12 @@ export default function ProfilePage() {
     try {
       const { user: updated } = await api.put<{ user: any }>("/api/auth/profile", {
         name, email,
-        vehicleType: vehicleType || undefined,
-        vehicleSize: vehicleSize || undefined,
-        vehicleMake: vehicleMake || undefined,
-        vehicleModel: vehicleModel || undefined,
-        licensePlate: licensePlate || undefined,
         neighborhood: neighborhood || undefined,
-        currentPassword: currentPassword || undefined,
-        newPassword: newPassword || undefined,
       });
       if (updated) {
         localStorage.setItem("spotimization_auth", JSON.stringify(updated));
         setUser(updated);
         setMessage("Profile updated successfully");
-        setCurrentPassword(""); setNewPassword("");
       }
     } catch (err: any) {
       setError(err.message || "Failed to update profile");
@@ -383,63 +363,9 @@ export default function ProfilePage() {
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
               </div>
 
-              <hr className="my-4" />
-              <h2 className="text-lg font-semibold text-[#202124]">Vehicle Info</h2>
-              <p className="text-xs text-[#757575] -mt-3 mb-4">Used for spot compatibility matching</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="vehicleType" className="block text-sm font-medium text-[#202124] mb-1">Type</label>
-                  <select id="vehicleType" value={vehicleType} onChange={(e) => setVehicleType(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none bg-white">
-                    <option value="">Any</option>
-                    <option value="car">Car</option>
-                    <option value="motorcycle">Motorcycle</option>
-                    <option value="bike">Bike</option>
-                    <option value="truck">Truck</option>
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="vehicleSize" className="block text-sm font-medium text-[#202124] mb-1">Size</label>
-                  <select id="vehicleSize" value={vehicleSize} onChange={(e) => setVehicleSize(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none bg-white">
-                    <option value="">Any</option>
-                    <option value="compact">Compact</option>
-                    <option value="standard">Standard</option>
-                    <option value="large">Large</option>
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="vehicleMake" className="block text-sm font-medium text-[#202124] mb-1">Make</label>
-                  <input id="vehicleMake" type="text" value={vehicleMake} onChange={(e) => setVehicleMake(e.target.value)} placeholder="e.g. Toyota"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
-                </div>
-                <div>
-                  <label htmlFor="vehicleModel" className="block text-sm font-medium text-[#202124] mb-1">Model</label>
-                  <input id="vehicleModel" type="text" value={vehicleModel} onChange={(e) => setVehicleModel(e.target.value)} placeholder="e.g. Camry"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="licensePlate" className="block text-sm font-medium text-[#202124] mb-1">License Plate</label>
-                <input id="licensePlate" type="text" value={licensePlate} onChange={(e) => setLicensePlate(e.target.value)} placeholder="ABC1234"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
-              </div>
               <div>
                 <label htmlFor="neighborhood" className="block text-sm font-medium text-[#202124] mb-1">Neighborhood</label>
                 <input id="neighborhood" type="text" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} placeholder="e.g. Downtown, Midtown"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
-              </div>
-              <hr className="my-4" />
-              <h2 className="text-lg font-semibold text-[#202124]">Change Password</h2>
-              <p className="text-xs text-[#757575] -mt-3 mb-4">Leave blank to keep current password</p>
-              <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-[#202124] mb-1">Current Password</label>
-                <input id="currentPassword" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
-              </div>
-              <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-[#202124] mb-1">New Password</label>
-                <input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
               </div>
               <button type="submit" disabled={loading}
@@ -734,36 +660,10 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* Scout Profile Section */}
-          <hr className="mb-2" />
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-semibold text-[#202124]">{"\uD83D\uDD75\uFE0F"} Spot Scout</h2>
-              <Badge variant="success">Free</Badge>
-            </div>
-            <p className="text-xs text-[#757575] mb-3">
-              Anchor open spots you see while traveling and earn points, levels, and badges.
-            </p>
-            <div className="flex items-center justify-between mb-3 text-xs">
-              <div className="text-center flex-1 bg-gray-50 rounded-lg p-2 mx-1">
-                <p className="text-[#757575] text-[10px]">Level</p>
-                <p className="font-bold text-[#202124]">{user.scoutLevel || 1}</p>
-                <p className="text-[10px] text-[#4285F4]">{["Rookie","Beginner","Junior","Experienced","Master","Legend","Top"][(user.scoutLevel || 1) - 1] || "Rookie"} Scout</p>
-              </div>
-              <div className="text-center flex-1 bg-gray-50 rounded-lg p-2 mx-1">
-                <p className="text-[#757575] text-[10px]">Points</p>
-                <p className="font-bold text-[#202124]">{user.scoutPoints || 0}</p>
-              </div>
-              <div className="text-center flex-1 bg-gray-50 rounded-lg p-2 mx-1">
-                <p className="text-[#757575] text-[10px]">Badges</p>
-                <p className="font-bold text-[#202124]">
-                  {user.scoutBadges ? JSON.parse(user.scoutBadges).length : 0}
-                </p>
-              </div>
-            </div>
-            <button onClick={() => router.push("/scout")}
-              className="w-full bg-gradient-to-r from-[#F9A825] to-[#FBBB05] text-white px-6 py-3 rounded-xl font-bold text-sm hover:shadow-lg transition-all">
-              {"\uD83D\uDD75\uFE0F"} Go to Scout Mode
+
+          <div className="text-center mt-6">
+            <button onClick={() => router.push("/forgot-password")} className="text-sm text-[#4285F4] hover:underline">
+              Change password
             </button>
           </div>
         </div>

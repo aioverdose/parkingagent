@@ -53,9 +53,13 @@ export interface ParkingMatchResult {
   arrivalLookingTime: number;
   toleranceMinutes: number;
   status: string;
+  matchState: string;
   matchedAt: string;
   anonymousPartner: string;
   partnerVehicleInfo: { type: string | null; size: string | null } | null;
+  spotLatitude: number | null;
+  spotLongitude: number | null;
+  alarmMinutes: number;
 }
 
 export async function runMatchingForAll(): Promise<number> {
@@ -162,6 +166,13 @@ export async function getMatchesForMember(
       ? await db.select().from(parkingMatchSchedules).where(eq(parkingMatchSchedules.id, row.leavingScheduleId)).limit(1)
       : await db.select().from(parkingMatchSchedules).where(eq(parkingMatchSchedules.id, row.arrivingScheduleId)).limit(1);
 
+    // Get spot location from the leaving member's schedule
+    const [leavingSchedule] = await db
+      .select({ latitude: parkingMatchSchedules.latitude, longitude: parkingMatchSchedules.longitude })
+      .from(parkingMatchSchedules)
+      .where(eq(parkingMatchSchedules.id, row.leavingScheduleId))
+      .limit(1);
+
     results.push({
       matchId: row.id,
       leavingMemberId: row.leavingMemberId,
@@ -174,11 +185,15 @@ export async function getMatchesForMember(
         : (ls[0]?.leavingTime ?? 0),
       toleranceMinutes: row.toleranceMinutes,
       status: row.status,
+      matchState: row.matchState ?? "matched",
       matchedAt: row.matchedAt,
       anonymousPartner: hashMemberId(partnerId),
       partnerVehicleInfo: partner
         ? { type: partner.vehicleType, size: partner.vehicleSize }
         : null,
+      spotLatitude: leavingSchedule?.latitude ?? null,
+      spotLongitude: leavingSchedule?.longitude ?? null,
+      alarmMinutes: row.alarmMinutes,
     });
   }
 

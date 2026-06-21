@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { liveLocations, parkingMatches } from "@/lib/db/schema";
+import { liveLocations, parkingMatches, parkingMatchSchedules } from "@/lib/db/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
@@ -7,6 +7,9 @@ import { z } from "zod";
 import { validate } from "@/lib/validation";
 import { rateLimit, rateLimitedResponse } from "@/lib/rateLimit";
 import { ok, err, handleError } from "@/lib/apiResponse";
+import { isInsideGeofence } from "@/lib/geo";
+
+const GEOFENCE_RADIUS_M = 75;
 
 const pushLocationSchema = z.object({
   matchId: z.string().min(1),
@@ -45,7 +48,28 @@ export async function POST(req: Request) {
       timestamp: new Date().toISOString(),
     });
 
-    return ok({ recorded: true });
+    let newMatchState: string | null = null;
+    if (match.matchState === "matched") {
+      const [schedule] = await db
+        .select({ latitude: parkingMatchSchedules.latitude, longitude: parkingMatchSchedules.longitude })
+        .from(parkingMatchSchedules)
+        .where(eq(parkingMatchSchedules.id, match.leavingScheduleId))
+        .limit(1);
+      const spotLat = schedule?.latitude;
+      const spotLng = schedule?.longitude;
+      if (spotLat && spotLng) {
+        const inside = isInsideGeofence(latitude, longitude, spotLat, spotLng, GEOFENCE_RADIUS_M);
+        if (inside) {
+          await db
+            .update(parkingMatches)
+            .set({ matchState: "arrived" })
+            .where(eq(parkingMatches.id, matchId));
+          newMatchState = "arrived";
+        }
+      }
+    }
+
+    return ok({ recorded: true, matchState: newMatchState });
   } catch (error) {
     return handleError(error, "Live location error");
   }
@@ -84,6 +108,12 @@ export async function GET(req: Request) {
       .orderBy(desc(liveLocations.timestamp))
       .limit(1);
 
+    const [schedule] = await db
+      .select({ latitude: parkingMatchSchedules.latitude, longitude: parkingMatchSchedules.longitude })
+      .from(parkingMatchSchedules)
+      .where(eq(parkingMatchSchedules.id, match.leavingScheduleId))
+      .limit(1);
+
     return ok({
       location: location
         ? {
@@ -97,8 +127,11 @@ export async function GET(req: Request) {
       match: {
         id: match.id,
         status: match.status,
+        matchState: match.matchState,
         confirmed: match.confirmed,
         alarmMinutes: match.alarmMinutes,
+        spotLatitude: schedule?.latitude ?? null,
+        spotLongitude: schedule?.longitude ?? null,
       },
     });
   } catch (error) {
