@@ -1,0 +1,300 @@
+"use client";
+
+import { useState, useEffect, useRef, use } from "react";
+import { useRouter } from "next/navigation";
+import { getStoredUser, fetchCurrentUser } from "@/lib/auth";
+import { api } from "@/lib/api";
+import { HoverButton } from "@/components/ui/HoverButton";
+import { Badge } from "@/components/ui/Badge";
+import InteractiveMap from "@/components/InteractiveMap";
+
+const POLL_INTERVAL = 3000;
+
+function haversineMiles(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 3959;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+export default function LiveTracking({ params }: { params: Promise<{ matchId: string }> }) {
+  const { matchId } = use(params);
+  const router = useRouter();
+  const [user, setUser] = useState(getStoredUser());
+  const [match, setMatch] = useState<any>(null);
+  const [liveLocation, setLiveLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<string>("");
+  const [etaMinutes, setEtaMinutes] = useState<number | null>(null);
+  const [alarmMinutes, setAlarmMinutes] = useState(5);
+  const [alarmMessage, setAlarmMessage] = useState("");
+  const [alarmTriggered, setAlarmTriggered] = useState(false);
+  const [error, setError] = useState("");
+  const [isArriving, setIsArriving] = useState(false);
+  const [gpsStatus, setGpsStatus] = useState("waiting");
+  const watchIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!user) { router.push("/login"); return; }
+    fetchCurrentUser().then(setUser);
+  }, []);
+
+  // Load match info
+  useEffect(() => {
+    if (!user || !matchId) return;
+    (async () => {
+      try {
+        const { matches } = await api.get<{ matches: any[] }>("/api/parking-match/my-matches");
+        const m = matches.find((x: any) => x.matchId === matchId);
+        if (m) {
+          setMatch(m);
+          setIsArriving(m.arrivingMemberId === user?.id);
+        } else {
+          setError("Match not found");
+        }
+      } catch {
+        setError("Failed to load match");
+      }
+    })();
+  }, [user, matchId]);
+
+  // If arriving user: start GPS watcher
+  useEffect(() => {
+    if (!isArriving || !matchId || !navigator.geolocation) return;
+
+    setGpsStatus("starting");
+    const pushLocation = async (lat: number, lng: number, heading?: number, speed?: number) => {
+      try {
+        await api.post("/api/live/location", { matchId, latitude: lat, longitude: lng, heading, speed });
+      } catch {}
+    };
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        pushLocation(latitude, longitude, pos.coords.heading ?? undefined, pos.coords.speed ?? undefined);
+        setGpsStatus("active");
+      },
+      () => setGpsStatus("error"),
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 2000 },
+    );
+
+    return () => {
+      if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+    };
+  }, [isArriving, matchId]);
+
+  // If departing user: poll for arriving user's location
+  useEffect(() => {
+    if (isArriving || !matchId) return;
+
+    const poll = async () => {
+      try {
+        const data = await api.get<{
+          location: { latitude: number; longitude: number; timestamp: string } | null;
+          match: { alarmMinutes: number; id: string };
+        }>(`/api/live/location?matchId=${matchId}`);
+        if (data.location) {
+          setLiveLocation({ lat: data.location.latitude, lng: data.location.longitude });
+          setLastUpdate(data.location.timestamp);
+
+          // Calculate ETA from current position to spot
+          if (match && match.spotLatitude && match.spotLongitude) {
+            const dist = haversineMiles(data.location.latitude, data.location.longitude, match.spotLatitude, match.spotLongitude);
+            const eta = Math.round(dist * 30);
+            setEtaMinutes(Math.max(1, eta));
+
+            // Check alarm
+            if (data.match.alarmMinutes > 0 && eta <= data.match.alarmMinutes && !alarmTriggered) {
+              setAlarmTriggered(true);
+              if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("Arriving soon!", { body: `Member is ${eta} minutes away!` });
+              }
+            }
+          }
+        }
+      } catch {}
+    };
+    poll();
+    const interval = setInterval(poll, POLL_INTERVAL);
+    return () => clearInterval(interval);
+  }, [isArriving, matchId, match, alarmTriggered]);
+
+  const handleSetAlarm = async () => {
+    try {
+      const res = await api.post<{ alarmMinutes: number; message: string }>("/api/live/alarm", { matchId, alarmMinutes });
+      setAlarmMessage(res.message);
+    } catch {
+      setAlarmMessage("Failed to set alarm");
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-[#E94335] text-lg font-bold">{error}</p>
+          <button onClick={() => router.push("/profile")} className="mt-4 text-[#4285F4] underline">Back to Profile</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="flex items-center justify-between max-w-5xl mx-auto px-4 py-3">
+          <a href="/profile" className="text-lg font-bold tracking-tight">
+            <span className="text-[#4285F4]">spotimization</span>
+          </a>
+          <div className="flex items-center gap-3">
+            <Badge variant={isArriving ? "info" : "success"}>
+              {isArriving ? "Arriving" : "Departing"}
+            </Badge>
+            <button onClick={() => router.push("/profile")} className="text-sm text-[#4285F4] hover:underline">Profile</button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-2xl mx-auto px-4 py-8">
+        {/* Match Info */}
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-[#202124]">Live Tracking</h1>
+          {match && (
+            <p className="text-sm text-[#757575] mt-1">
+              {isArriving
+                ? "Sharing your location with the departing member"
+                : `Tracking ${match.anonymousPartner}`}
+            </p>
+          )}
+        </div>
+
+        {/* GPS Status */}
+        {isArriving && (
+          <div className="mb-4 text-center">
+            <span className={`inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full ${
+              gpsStatus === "active" ? "bg-[#E6F4EA] text-[#0F9D58]" :
+              gpsStatus === "starting" ? "bg-[#E8F0FE] text-[#4285F4]" :
+              "bg-[#FCE8E6] text-[#E94335]"
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${
+                gpsStatus === "active" ? "bg-[#0F9D58] animate-pulse" :
+                gpsStatus === "starting" ? "bg-[#4285F4]" : "bg-[#E94335]"
+              }`} />
+              {gpsStatus === "active" ? "Sharing live location" :
+               gpsStatus === "starting" ? "Starting GPS..." : "GPS error"}
+            </span>
+          </div>
+        )}
+
+        {/* Map */}
+        <div className="rounded-xl overflow-hidden border border-gray-200 mb-6">
+          <InteractiveMap
+            center={{ lat: 33.7701, lng: -118.1937 }}
+            onPinDrop={() => {}}
+            pinPosition={null}
+            spotPosition={
+              match && match.spotLatitude && match.spotLongitude
+                ? { lat: match.spotLatitude as number, lng: match.spotLongitude as number }
+                : null
+            }
+            livePosition={liveLocation}
+            className="w-full h-80"
+          />
+        </div>
+
+        {/* ETA Card */}
+        {!isArriving && etaMinutes !== null && (
+          <div className={`rounded-2xl p-6 text-center mb-6 border-2 transition-all ${
+            alarmTriggered ? "border-[#E94335] bg-[#FCE8E6] animate-pulse" : "border-[#4285F4] bg-[#E8F0FE]"
+          }`}>
+            <p className="text-xs text-[#757575] uppercase tracking-wider mb-1">
+              {alarmTriggered ? "ALARM - ARRIVING NOW!" : "Estimated arrival"}
+            </p>
+            <p className={`text-4xl font-black ${alarmTriggered ? "text-[#E94335]" : "text-[#4285F4]"}`}>
+              {etaMinutes} min
+            </p>
+            <p className="text-xs text-[#757575] mt-2">
+              Last updated: {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : "waiting..."}
+            </p>
+          </div>
+        )}
+
+        {!isArriving && etaMinutes === null && (
+          <div className="rounded-2xl bg-gray-50 border border-gray-200 p-6 text-center mb-6">
+            <div className="w-6 h-6 border-2 border-[#4285F4] border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-xs text-[#757575] mt-3">Waiting for the arriving member to share location...</p>
+          </div>
+        )}
+
+        {/* Arriving user status */}
+        {isArriving && (
+          <div className="rounded-2xl bg-[#E6F4EA] border border-[#0F9D58]/30 p-6 text-center mb-6">
+            <div className="w-4 h-4 bg-[#0F9D58] rounded-full animate-pulse mx-auto mb-2" />
+            <p className="font-bold text-[#0F9D58]">Your location is being shared</p>
+            <p className="text-xs text-[#757575] mt-1">The departing member can see your approach in real-time</p>
+          </div>
+        )}
+
+        {/* Alarm Setting (departing user only) */}
+        {!isArriving && (
+          <div className="border border-gray-200 rounded-2xl p-6 mb-6">
+            <h2 className="font-bold text-[#202124] text-sm mb-1">Set Arrival Alarm</h2>
+            <p className="text-xs text-[#757575] mb-4">
+              Get notified when the arriving member is within a certain distance, so you have time to get to your vehicle.
+            </p>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min={1}
+                max={15}
+                value={alarmMinutes}
+                onChange={(e) => setAlarmMinutes(Number(e.target.value))}
+                className="flex-1 accent-[#4285F4]"
+              />
+              <span className="text-sm font-bold text-[#202124] w-12 text-right">{alarmMinutes} min</span>
+            </div>
+            <p className="text-xs text-[#757575] mt-2">
+              We'll notify you when the arriving member is ~{alarmMinutes} minutes away, giving you time to head to your car.
+            </p>
+            <div className="flex gap-2 mt-4">
+              <HoverButton onClick={handleSetAlarm} className="flex-1">
+                {alarmMessage ? "Updated!" : "Set Alarm"}
+              </HoverButton>
+            </div>
+            {alarmMessage && (
+              <p className="text-xs text-[#0F9D58] mt-2 text-center">{alarmMessage}</p>
+            )}
+            {alarmTriggered && (
+              <div className="mt-4 bg-[#E94335]/10 border border-[#E94335]/30 rounded-xl p-4 text-center">
+                <p className="text-lg font-black text-[#E94335]">{"\uD83D\uDD14"} ARRIVING NOW!</p>
+                <p className="text-sm text-[#757575] mt-1">Time to head to your vehicle!</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Match Details Summary */}
+        {match && (
+          <div className="border border-gray-200 rounded-2xl p-4 text-xs text-[#757575]">
+            <p><strong className="text-[#202124]">Match:</strong> {match.anonymousPartner}</p>
+            {match.arrivalLookingTime && (
+              <p><strong className="text-[#202124]">Arrival:</strong> {formatTime(match.arrivalLookingTime)}</p>
+            )}
+            {match.leavingTime && (
+              <p><strong className="text-[#202124]">Departure:</strong> {formatTime(match.leavingTime)}</p>
+            )}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function formatTime(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+}

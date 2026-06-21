@@ -5,7 +5,7 @@ export default function CommunityGuidelines() {
     <div className="flex flex-col min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
-          <a href="/" className="text-lg font-bold tracking-tight"><span className="text-[#4285F4]">Spot</span> <span className="text-[#0F9D58]">Mining</span></a>
+          <a href="/" className="text-lg font-bold tracking-tight"><span className="text-[#4285F4]">Spotimization</span></a>
           <div className="flex gap-6">
             <a href="/terms" className="text-sm font-medium text-[#757575] hover:text-[#202124] transition-colors">Terms</a>
             <a href="/privacy" className="text-sm font-medium text-[#757575] hover:text-[#202124] transition-colors">Privacy</a>
@@ -41,7 +41,7 @@ export default function CommunityGuidelines() {
           <Card>
             <h2 className="font-bold text-[#202124] text-sm mb-2">3. No Commercial Use</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
-              Spot Mining is designed for individual members sharing street parking information.
+              Spotimization is designed for individual members sharing street parking information.
               Commercial use, including but not limited to operating a paid parking service,
               reselling spot information, or using the platform for business purposes without
               explicit authorization, is strictly prohibited.
@@ -63,7 +63,7 @@ export default function CommunityGuidelines() {
             <p className="text-sm text-[#757575] leading-relaxed">
               All members must comply with local parking laws, traffic regulations, and all applicable
               laws. This includes observing time limits, permit requirements, street sweeping schedules,
-              no-parking zones, and any other restrictions. Spot Mining is not responsible for any
+              no-parking zones, and any other restrictions. Spotimization is not responsible for any
               violations incurred by members.
             </p>
           </Card>
@@ -83,7 +83,7 @@ export default function CommunityGuidelines() {
             <p className="text-sm text-[#757575] leading-relaxed">
               Violations of these Community Guidelines may result in warnings, temporary suspension,
               or permanent termination of your account. Serious or repeated violations will result in
-              immediate and permanent removal from the platform. Spot Mining reserves the right to
+              immediate and permanent removal from the platform. Spotimization reserves the right to
               take any action it deems appropriate in its sole discretion.
             </p>
           </Card>
@@ -92,13 +92,13 @@ export default function CommunityGuidelines() {
 
       <footer className="border-t border-gray-200 py-6">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-[10px] text-[#757575]">
-          <div className="font-bold tracking-tight"><span className="text-[#4285F4]">Spot</span> <span className="text-[#0F9D58]">Mining</span></div>
+          <div className="font-bold tracking-tight">Spotimization</div>
           <div className="flex gap-4">
             <a href="/" className="hover:text-[#202124]">Home</a>
             <a href="/terms" className="hover:text-[#202124]">Terms</a>
             <a href="/privacy" className="hover:text-[#202124]">Privacy</a>
           </div>
-          <p>&copy; 2026 Spot Mining. All rights reserved.</p>
+          <p>&copy; 2026 Spotimization. All rights reserved.</p>
         </div>
       </footer>
     </div>

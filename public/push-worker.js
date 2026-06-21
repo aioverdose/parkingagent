@@ -1,5 +1,5 @@
 self.addEventListener('push', (event) => {
-  const data = event.data?.json() ?? { title: 'Spot Mining', body: 'You have a new notification' };
+  const data = event.data?.json() ?? { title: 'Spotimization', body: 'You have a new notification' };
 
   const notification = {
     title: data.title,

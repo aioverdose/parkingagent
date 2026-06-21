@@ -548,6 +548,16 @@ export default function ProfilePage() {
                           </div>
                         )}
 
+                        {/* Live Track Button */}
+                        {m.status === "confirmed" && (
+                          <div className="mt-1.5">
+                            <button onClick={() => router.push(`/live/${m.matchId}`)}
+                              className="text-[10px] bg-[#4285F4] text-white px-2.5 py-1 rounded-lg font-medium hover:bg-[#1A73E8] w-full">
+                              {"\uD83D\uDCCD"} Live Track
+                            </button>
+                          </div>
+                        )}
+
                         {/* Post-match parking confirmation */}
                         {m.status === "confirmed" && m.confirmed === false && (
                           <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3">

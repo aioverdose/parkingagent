@@ -11,16 +11,22 @@ export default function InteractiveMap({
   center,
   onPinDrop,
   pinPosition,
+  livePosition,
+  spotPosition,
   className = "",
 }: {
   center: PinPosition;
   onPinDrop: (lat: number, lng: number) => void;
   pinPosition?: PinPosition | null;
+  livePosition?: PinPosition | null;
+  spotPosition?: PinPosition | null;
   className?: string;
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
+  const liveMarkerRef = useRef<any>(null);
+  const spotMarkerRef = useRef<any>(null);
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -53,6 +59,17 @@ export default function InteractiveMap({
         }
       });
 
+      // Spot position marker (green pin for the parking spot)
+      if (spotPosition) {
+        const spotIcon = L.divIcon({
+          className: "custom-spot-pin",
+          html: `<svg width="36" height="36" viewBox="0 0 24 24" fill="#0F9D58" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`,
+          iconSize: [36, 36],
+          iconAnchor: [18, 36],
+        });
+        spotMarkerRef.current = L.marker([spotPosition.lat, spotPosition.lng], { icon: spotIcon }).addTo(map);
+      }
+
       mapInstanceRef.current = map;
     }
 
@@ -64,15 +81,16 @@ export default function InteractiveMap({
         mapInstanceRef.current = null;
       }
     };
-  }, [center.lat, center.lng]);
+  }, [center.lat, center.lng, spotPosition?.lat, spotPosition?.lng]);
 
+  // Pin position marker (user's selected spot - red)
   useEffect(() => {
-    if (!mapInstanceRef.current || !pinPosition) return;
+    if (!mapInstanceRef.current) return;
     (async () => {
       const L = await import("leaflet");
       if (markerRef.current) {
-        markerRef.current.setLatLng([pinPosition.lat, pinPosition.lng]);
-      } else {
+        if (pinPosition) markerRef.current.setLatLng([pinPosition.lat, pinPosition.lng]);
+      } else if (pinPosition) {
         const icon = L.divIcon({
           className: "custom-pin",
           html: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#E94335" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`,
@@ -83,6 +101,26 @@ export default function InteractiveMap({
       }
     })();
   }, [pinPosition?.lat, pinPosition?.lng]);
+
+  // Live position marker (approaching user - blue)
+  useEffect(() => {
+    if (!mapInstanceRef.current || !livePosition) return;
+    (async () => {
+      const L = await import("leaflet");
+      if (liveMarkerRef.current) {
+        liveMarkerRef.current.setLatLng([livePosition.lat, livePosition.lng]);
+      } else {
+        const liveIcon = L.divIcon({
+          className: "custom-live-pin",
+          html: `<div style="width:20px;height:20px;background:#4285F4;border:3px solid white;border-radius:50%;box-shadow:0 0 8px rgba(66,133,244,0.6);animation:pulse 2s infinite;"></div>`,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+        });
+        liveMarkerRef.current = L.marker([livePosition.lat, livePosition.lng], { icon: liveIcon }).addTo(mapInstanceRef.current);
+      }
+      mapInstanceRef.current.setView([livePosition.lat, livePosition.lng], mapInstanceRef.current.getZoom());
+    })();
+  }, [livePosition?.lat, livePosition?.lng]);
 
   return (
     <div ref={mapRef} className={`rounded-xl ${className}`} style={{ minHeight: 250 }} />

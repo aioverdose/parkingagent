@@ -460,6 +460,7 @@ export const parkingMatches = pgTable(
     failedAt: text("failed_at"),
     rated: boolean("rated").notNull().default(false),
     rating: integer("rating"),
+    alarmMinutes: integer("alarm_minutes").notNull().default(0),
   },
   (table) => ({
     leavingIdx: index("pm_leaving_idx").on(table.leavingMemberId),
@@ -591,6 +592,41 @@ export const favoriteMembersRelations = relations(favoriteMembers, ({ one }) => 
   }),
   member: one(users, {
     fields: [favoriteMembers.memberId],
+    references: [users.id],
+  }),
+}));
+
+// ── Live Locations ─────────────────────────────────────────────
+
+export const liveLocations = pgTable(
+  "live_locations",
+  {
+    id: text("id").primaryKey(),
+    matchId: text("match_id")
+      .notNull()
+      .references(() => parkingMatches.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    latitude: real("latitude").notNull(),
+    longitude: real("longitude").notNull(),
+    heading: real("heading"),
+    speed: real("speed"),
+    timestamp: text("timestamp").notNull(),
+  },
+  (table) => ({
+    matchIdx: index("ll_match_idx").on(table.matchId),
+    userIdx: index("ll_user_idx").on(table.userId),
+  }),
+);
+
+export const liveLocationsRelations = relations(liveLocations, ({ one }) => ({
+  match: one(parkingMatches, {
+    fields: [liveLocations.matchId],
+    references: [parkingMatches.id],
+  }),
+  user: one(users, {
+    fields: [liveLocations.userId],
     references: [users.id],
   }),
 }));

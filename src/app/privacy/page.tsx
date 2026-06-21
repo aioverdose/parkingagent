@@ -5,7 +5,7 @@ export default function PrivacyPolicy() {
     <div className="flex flex-col min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
-          <a href="/" className="text-lg font-bold tracking-tight"><span className="text-[#4285F4]">Spot</span> <span className="text-[#0F9D58]">Mining</span></a>
+          <a href="/" className="text-lg font-bold tracking-tight"><span className="text-[#4285F4]">Spotimization</span></a>
           <div className="flex gap-6">
             <a href="/terms" className="text-sm font-medium text-[#757575] hover:text-[#202124] transition-colors">Terms</a>
             <a href="/guidelines" className="text-sm font-medium text-[#757575] hover:text-[#202124] transition-colors">Guidelines</a>
@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
           <Card>
             <h2 className="font-bold text-[#202124] text-sm mb-2">1. Information We Collect</h2>
             <p className="text-sm text-[#757575] leading-relaxed mb-3">
-              When you use Spot Mining, we collect the following information:
+              When you use Spotimization, we collect the following information:
             </p>
             <ul className="list-disc list-inside space-y-1 text-sm text-[#757575] leading-relaxed">
               <li><strong>Name and Email:</strong> Your name and email address when you create an account</li>
@@ -99,13 +99,13 @@ export default function PrivacyPolicy() {
 
       <footer className="border-t border-gray-200 py-6">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-[10px] text-[#757575]">
-          <div className="font-bold tracking-tight"><span className="text-[#4285F4]">Spot</span> <span className="text-[#0F9D58]">Mining</span></div>
+          <div className="font-bold tracking-tight">Spotimization</div>
           <div className="flex gap-4">
             <a href="/" className="hover:text-[#202124]">Home</a>
             <a href="/terms" className="hover:text-[#202124]">Terms</a>
             <a href="/guidelines" className="hover:text-[#202124]">Guidelines</a>
           </div>
-          <p>&copy; 2026 Spot Mining. All rights reserved.</p>
+          <p>&copy; 2026 Spotimization. All rights reserved.</p>
         </div>
       </footer>
     </div>
