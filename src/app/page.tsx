@@ -136,9 +136,14 @@ export default function Home() {
         <h1 className="text-4xl md:text-5xl font-black text-[#202124] leading-tight">
           Street Parking
         </h1>
-        <p className="text-xl mt-3 text-[#757575] max-w-2xl mx-auto">
+        <motion.p
+          className="text-4xl md:text-5xl font-black text-[#202124] max-w-2xl mx-auto"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 150, damping: 5, mass: 0.5 }}
+        >
           Assist
-        </p>
+        </motion.p>
 
         {/* First 100 Free Counter */}
         <div className="mt-8 max-w-lg mx-auto bg-gradient-to-r from-[#E8F0FE] to-[#E6F4EA] border border-[#4285F4]/20 rounded-2xl p-6 text-center">
