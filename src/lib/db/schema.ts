@@ -41,6 +41,7 @@ export const users = pgTable(
     licensePlate: text("license_plate"),
     phone: text("phone"),
     phoneVerified: boolean("phone_verified").notNull().default(false),
+    pushSubscription: text("push_subscription"),
     stripeCustomerId: text("stripe_customer_id"),
     stripeSubscriptionId: text("stripe_subscription_id"),
     subscriptionStatus: text("subscription_status", {
@@ -53,7 +54,7 @@ export const users = pgTable(
     longitude: real("longitude"),
     isPremium: boolean("is_premium").notNull().default(false),
     premiumUntil: text("premium_until"),
-    tier: text("tier", { enum: ["free", "premium", "premium_pending"] }).notNull().default("free"),
+    tier: text("tier", { enum: ["free", "free_1year", "premium", "premium_pending"] }).notNull().default("free"),
     signupNumber: integer("signup_number"),
     ranking: integer("ranking").notNull().default(5),
     matchCount: integer("match_count").notNull().default(0),
@@ -408,6 +409,9 @@ export const parkingMatchSchedules = pgTable(
     leavingTime: integer("leaving_time").notNull(),
     arrivalLookingTime: integer("arrival_looking_time").notNull(),
     neighborhoodId: text("neighborhood_id"),
+    latitude: real("latitude"),
+    longitude: real("longitude"),
+    carType: text("car_type", { enum: ["small", "standard", "large"] }),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: text("created_at").notNull(),
     updatedAt: text("updated_at"),
@@ -451,7 +455,11 @@ export const parkingMatches = pgTable(
       .default("pending"),
     toleranceMinutes: integer("tolerance_minutes").notNull().default(15),
     matchedAt: text("matched_at").notNull(),
+    confirmed: boolean("confirmed").notNull().default(false),
     confirmedAt: text("confirmed_at"),
+    failedAt: text("failed_at"),
+    rated: boolean("rated").notNull().default(false),
+    rating: integer("rating"),
   },
   (table) => ({
     leavingIdx: index("pm_leaving_idx").on(table.leavingMemberId),
@@ -555,6 +563,35 @@ export const spotAnchorsRelations = relations(spotAnchors, ({ one }) => ({
     fields: [spotAnchors.minerId],
     references: [users.id],
     relationName: "minerClaims",
+  }),
+}));
+
+export const favoriteMembers = pgTable(
+  "favorite_members",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    memberId: text("member_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => ({
+    userIdx: index("fm_user_idx").on(table.userId),
+    memberIdx: index("fm_member_idx").on(table.memberId),
+  }),
+);
+
+export const favoriteMembersRelations = relations(favoriteMembers, ({ one }) => ({
+  user: one(users, {
+    fields: [favoriteMembers.userId],
+    references: [users.id],
+  }),
+  member: one(users, {
+    fields: [favoriteMembers.memberId],
+    references: [users.id],
   }),
 }));
 

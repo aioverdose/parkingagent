@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       return err("Unauthorized", 401);
     }
 
-    const { leavingTime, arrivalLookingTime, neighborhoodId } = validate(parkingMatchScheduleSchema, await req.json());
+    const { leavingTime, arrivalLookingTime, neighborhoodId, latitude, longitude, carType } = validate(parkingMatchScheduleSchema, await req.json());
 
     const now = new Date().toISOString();
 
@@ -34,6 +34,9 @@ export async function POST(req: Request) {
       leavingTime: minutesFromMidnight(leavingTime),
       arrivalLookingTime: minutesFromMidnight(arrivalLookingTime),
       neighborhoodId: neighborhoodId ?? null,
+      latitude: latitude ?? null,
+      longitude: longitude ?? null,
+      carType: carType ?? null,
       isActive: true,
       createdAt: now,
       updatedAt: now,

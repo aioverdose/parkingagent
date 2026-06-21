@@ -151,6 +151,9 @@ export const parkingMatchScheduleSchema = z.object({
   leavingTime: z.string().min(1, "leavingTime is required"),
   arrivalLookingTime: z.string().min(1, "arrivalLookingTime is required"),
   neighborhoodId: z.string().optional(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+  carType: z.enum(["small", "standard", "large"]).optional(),
 });
 
 // ── Parking match actions ───────────────────────────────────────

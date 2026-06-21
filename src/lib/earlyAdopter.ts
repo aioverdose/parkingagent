@@ -4,14 +4,16 @@ export function isEarlyAdopter(signupNumber: number): boolean {
   return signupNumber <= FIRST_100_CAP;
 }
 
-export function getTierForSignup(signupNumber: number): "free" | "premium_pending" {
-  return isEarlyAdopter(signupNumber) ? "free" : "premium_pending";
+export function getTierForSignup(signupNumber: number): "free_1year" | "premium" {
+  return isEarlyAdopter(signupNumber) ? "free_1year" : "premium";
 }
 
 export function getBadges(signupNumber: number): string[] {
   const badges: string[] = [];
   if (isEarlyAdopter(signupNumber)) {
-    badges.push("Early Adopter");
+    badges.push("Early Adopter (1 Year Free)");
+  } else {
+    badges.push("Premium Member");
   }
   return badges;
 }

@@ -60,7 +60,7 @@ export interface AuthUser {
   licensePlate?: string;
   isPremium?: boolean;
   premiumUntil?: string;
-  tier?: "free" | "premium";
+  tier?: "free" | "free_1year" | "premium" | "premium_pending";
   ranking?: number;
   matchCount?: number;
   cancelCount?: number;

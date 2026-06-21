@@ -10,6 +10,7 @@ export interface PinPosition {
 export default function InteractiveMap({
   center,
   onPinDrop,
+  pinPosition,
   className = "",
 }: {
   center: PinPosition;
@@ -64,6 +65,24 @@ export default function InteractiveMap({
       }
     };
   }, [center.lat, center.lng]);
+
+  useEffect(() => {
+    if (!mapInstanceRef.current || !pinPosition) return;
+    (async () => {
+      const L = await import("leaflet");
+      if (markerRef.current) {
+        markerRef.current.setLatLng([pinPosition.lat, pinPosition.lng]);
+      } else {
+        const icon = L.divIcon({
+          className: "custom-pin",
+          html: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#E94335" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+        });
+        markerRef.current = L.marker([pinPosition.lat, pinPosition.lng], { icon }).addTo(mapInstanceRef.current);
+      }
+    })();
+  }, [pinPosition?.lat, pinPosition?.lng]);
 
   return (
     <div ref={mapRef} className={`rounded-xl ${className}`} style={{ minHeight: 250 }} />

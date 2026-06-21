@@ -111,7 +111,7 @@ export async function POST(req: Request) {
         isAdmin: false,
         tier,
         signupNumber,
-        earlyAdopter: tier === "free",
+        earlyAdopter: tier === "free_1year",
       },
     });
   } catch (error) {

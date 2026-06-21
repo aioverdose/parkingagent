@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { HoverButton } from "@/components/ui/HoverButton";
 import { HoverCard } from "@/components/ui/HoverCard";
 import { Badge } from "@/components/ui/Badge";
+import InteractiveMap from "@/components/InteractiveMap";
 
 interface ParkingMatch {
   matchId: string;
@@ -21,6 +22,9 @@ interface ParkingMatch {
   partnerVehicleInfo: { type: string | null; size: string | null } | null;
   partnerRanking?: number;
   ownRanking?: number;
+  confirmed?: boolean;
+  rated?: boolean;
+  rating?: number;
 }
 
 interface BeaconRequest {
@@ -62,17 +66,27 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Tier 1: Preliminary Matching
+  // New schedule form
+  const [pinPosition, setPinPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [arrivalTime, setArrivalTime] = useState("");
+  const [departureTime, setDepartureTime] = useState("");
+  const [carType, setCarType] = useState("");
+  const [scheduleMessage, setScheduleMessage] = useState("");
+  const [scheduleError, setScheduleError] = useState("");
+  const [scheduleLoading, setScheduleLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  // Existing match / beacon state
+  const [parkingMatches, setParkingMatches] = useState<ParkingMatch[]>([]);
+  const [showMatches, setShowMatches] = useState(true);
   const [leavingTime, setLeavingTime] = useState("");
   const [arrivalLookingTime, setArrivalLookingTime] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [t1Message, setT1Message] = useState("");
   const [t1Error, setT1Error] = useState("");
   const [t1Loading, setT1Loading] = useState(false);
-  const [parkingMatches, setParkingMatches] = useState<ParkingMatch[]>([]);
-  const [showMatches, setShowMatches] = useState(true);
 
-  // Tier 3: Departure Beacon
+  // Beacon
   const [beaconDepartureTime, setBeaconDepartureTime] = useState("");
   const [beaconMessage, setBeaconMessage] = useState("");
   const [beaconError, setBeaconError] = useState("");
@@ -80,7 +94,11 @@ export default function ProfilePage() {
   const [beacons, setBeacons] = useState<BeaconRequest[]>([]);
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
 
+  // Post-match state
+  const [ratingValue, setRatingValue] = useState<Record<string, number>>({});
+
   const isPremium = user?.tier === "premium" || user?.isPremium === true;
+  const isFree1Year = user?.tier === "free_1year";
 
   useEffect(() => {
     if (!user) { router.push("/signup"); return; }
@@ -99,13 +117,52 @@ export default function ProfilePage() {
     if (typeof navigator !== "undefined" && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => setPosition({ lat: 33.77, lng: -118.19 }),
+        () => setPosition({ lat: 33.7701, lng: -118.1937 }),
         { enableHighAccuracy: true, timeout: 10000 },
       );
     } else {
-      setPosition({ lat: 33.77, lng: -118.19 });
+      setPosition({ lat: 33.7701, lng: -118.1937 });
     }
+    registerServiceWorker();
+    requestPushPermission();
   }, []);
+
+  async function registerServiceWorker() {
+    if ("serviceWorker" in navigator) {
+      try {
+        await navigator.serviceWorker.register("/sw.js");
+      } catch {}
+    }
+  }
+
+  async function requestPushPermission() {
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+            ? urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY)
+            : undefined,
+        });
+        const sub = subscription.toJSON();
+        await api.post("/api/push/subscribe", {
+          endpoint: sub.endpoint,
+          auth: sub.keys?.auth || "",
+          p256dh: sub.keys?.p256dh || "",
+        });
+      }
+    } catch {}
+  }
+
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const rawData = atob(base64);
+    return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+  }
 
   async function fetchParkingMatches() {
     try {
@@ -118,10 +175,10 @@ export default function ProfilePage() {
     try {
       const { beacons } = await api.get<{ beacons: BeaconRequest[] }>("/api/beacon/my-beacons");
       setBeacons(beacons);
-    } catch { console.error("Failed to fetch beacons"); }
+    } catch {}
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleProfileSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMessage(""); setError(""); setLoading(true);
     try {
@@ -148,6 +205,75 @@ export default function ProfilePage() {
     setLoading(false);
   }
 
+  async function handleScheduleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setScheduleMessage(""); setScheduleError("");
+    if (!pinPosition) { setScheduleError("Please drop a pin on the map for your desired parking location."); return; }
+    if (!arrivalTime) { setScheduleError("Please enter your arrival time."); return; }
+    if (!departureTime) { setScheduleError("Please enter your departure time."); return; }
+    if (!carType) { setScheduleError("Please select your car type."); return; }
+    setScheduleLoading(true);
+    try {
+      const anonymizedLocation = {
+        lat: Math.round(pinPosition.lat * 1000) / 1000,
+        lng: Math.round(pinPosition.lng * 1000) / 1000,
+      };
+      const { message } = await api.post<{ message: string }>("/api/parking-match-schedule", {
+        leavingTime: departureTime,
+        arrivalLookingTime: arrivalTime,
+        latitude: anonymizedLocation.lat,
+        longitude: anonymizedLocation.lng,
+        carType,
+      });
+      setScheduleMessage(message);
+      setSubmitted(true);
+      fetchParkingMatches();
+    } catch (err: any) {
+      setScheduleError(err.message || "Failed to submit schedule.");
+    }
+    setScheduleLoading(false);
+  }
+
+  async function handleConfirmMatch(matchId: string) {
+    try {
+      await api.post("/api/parking-match/confirm", { matchId });
+      fetchParkingMatches();
+    } catch {
+      setT1Error("Failed to confirm match.");
+    }
+  }
+
+  async function handleCancelMatch(matchId: string) {
+    try {
+      await api.post("/api/parking-match/cancel", { matchId });
+      await api.post("/api/ranking/update", { action: "cancel" });
+      fetchParkingMatches();
+    } catch {
+      setT1Error("Failed to cancel match.");
+    }
+  }
+
+  async function handleConfirmParking(matchId: string, success: boolean) {
+    try {
+      await api.post("/api/parking/confirm", { matchId, success });
+      fetchParkingMatches();
+    } catch {}
+  }
+
+  async function handleRateMatch(matchId: string, rating: number) {
+    try {
+      await api.post("/api/parking/rate", { matchId, rating });
+      setRatingValue((prev) => ({ ...prev, [matchId]: rating }));
+      fetchParkingMatches();
+    } catch {}
+  }
+
+  async function handleFavoriteMatch(matchId: string) {
+    try {
+      await api.post("/api/parking/favorite", { matchId });
+    } catch {}
+  }
+
   async function handleT1Submit(e: React.FormEvent) {
     e.preventDefault();
     setT1Message(""); setT1Error("");
@@ -171,29 +297,10 @@ export default function ProfilePage() {
     setT1Loading(false);
   }
 
-  async function handleConfirmMatch(matchId: string) {
-    try {
-      await api.post("/api/parking-match/confirm", { matchId });
-      fetchParkingMatches();
-    } catch {
-      setT1Error("Failed to confirm match.");
-    }
-  }
-
-  async function handleCancelMatch(matchId: string) {
-    try {
-      await api.post("/api/parking-match/cancel", { matchId });
-      await api.post("/api/ranking/update", { action: "cancel" });
-      fetchParkingMatches();
-    } catch {
-      setT1Error("Failed to cancel match.");
-    }
-  }
-
   async function handleBeaconSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBeaconMessage(""); setBeaconError("");
-    if (!isPremium) {
+    if (!isPremium && !isFree1Year) {
       setBeaconError("Departure Beacon is a Premium feature. Upgrade to use it.");
       return;
     }
@@ -218,11 +325,20 @@ export default function ProfilePage() {
         } catch {}
       }, 2000);
     } catch (err: any) {
-      console.error("Beacon error:", err);
       setBeaconError(err.message || "Failed to send beacon.");
     }
     setBeaconLoading(false);
   }
+
+  const matchStats = {
+    total: parkingMatches.length,
+    confirmed: parkingMatches.filter((m) => m.status === "confirmed").length,
+    cancelled: parkingMatches.filter((m) => m.status === "cancelled").length,
+    pending: parkingMatches.filter((m) => m.status === "pending").length,
+    rated: parkingMatches.filter((m) => m.rated).length,
+    avgRating: parkingMatches.filter((m) => m.rating).reduce((a, b) => a + (b.rating || 0), 0) /
+      Math.max(parkingMatches.filter((m) => m.rating).length, 1),
+  };
 
   if (!user) return null;
 
@@ -230,13 +346,17 @@ export default function ProfilePage() {
     <div className="flex flex-col min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between max-w-5xl mx-auto px-4 py-3">
-          <a href="/dashboard" className="text-xl font-bold tracking-tight">
-            <span className="text-[#4285F4]">Parking</span>{" "}
-            <span className="text-[#0F9D58]">Agent</span>
+          <a href="/" className="text-xl font-bold tracking-tight">
+            <span className="text-[#4285F4]">Spot</span>{" "}
+            <span className="text-[#0F9D58]">Mining</span>
           </a>
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#757575]">{user.name}</span>
             {isPremium && <Badge variant="success">Premium</Badge>}
+            {isFree1Year && <Badge variant="success">Free 1 Year</Badge>}
+            {user.signupNumber && user.signupNumber <= 100 && (
+              <Badge variant="info">Early Adopter</Badge>
+            )}
             <button onClick={() => router.push("/dashboard")}
               className="text-sm text-[#4285F4] hover:underline">Dashboard</button>
           </div>
@@ -245,13 +365,13 @@ export default function ProfilePage() {
 
       <main className="flex-1 px-4 py-12">
         <div className="w-full max-w-lg mx-auto space-y-10">
-          
+
           {/* Profile Settings */}
           <div>
-            <h1 className="text-2xl font-bold text-[#202124] text-center">Profile Settings</h1>
-            <p className="text-[#757575] text-center mt-1 text-sm">Update your information</p>
+            <h1 className="text-2xl font-bold text-[#202124] text-center">{"\uD83D\uDCCD"} Your Parking Profile</h1>
+            <p className="text-[#757575] text-center mt-1 text-sm">Update your information and set up your parking schedule</p>
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+            <form onSubmit={handleProfileSubmit} className="mt-8 space-y-4">
               {message && <p className="text-sm text-[#0F9D58] bg-[#E6F4EA] p-3 rounded-xl">{message}</p>}
               {error && <p className="text-sm text-[#E94335] bg-[#FCE8E6] p-3 rounded-xl">{error}</p>}
 
@@ -332,6 +452,176 @@ export default function ProfilePage() {
             </form>
           </div>
 
+          {/* Map + Schedule Section */}
+          <hr className="mb-2" />
+          <div>
+            <h2 className="text-lg font-semibold text-[#202124] mb-1">{"\uD83D\uDDFA\uFE0F"} Desired Parking Location</h2>
+            <p className="text-xs text-[#757575] mb-4">Move the map and drop a pin where you want to park</p>
+
+            {position && (
+              <InteractiveMap
+                center={position}
+                onPinDrop={(lat, lng) => setPinPosition({ lat, lng })}
+                className="w-full h-64 mb-4"
+              />
+            )}
+
+            {pinPosition && (
+              <p className="text-xs text-[#0F9D58] mb-4">
+                Pin placed: {pinPosition.lat.toFixed(4)}, {pinPosition.lng.toFixed(4)}
+              </p>
+            )}
+
+            <form onSubmit={handleScheduleSubmit} className="space-y-4">
+              {scheduleMessage && <p className="text-sm text-[#0F9D58] bg-[#E6F4EA] p-3 rounded-xl">{scheduleMessage}</p>}
+              {scheduleError && <p className="text-sm text-[#E94335] bg-[#FCE8E6] p-3 rounded-xl">{scheduleError}</p>}
+
+              {submitted ? (
+                <div className="bg-[#E6F4EA] border border-[#0F9D58]/30 rounded-xl p-4 text-center">
+                  <p className="font-bold text-[#0F9D58]">{"\u2705"} Your schedule is set!</p>
+                  <p className="text-sm text-[#757575] mt-2">
+                    You will receive a notification when a match is found!<br />
+                    We'll analyze your schedule and find someone with the opposite schedule.<br />
+                    Both you and they will get a notification to accept the match.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label htmlFor="arrivalTime" className="block text-sm font-medium text-[#202124] mb-1">{"\u23F0"} Arrival Time (when you need parking)</label>
+                    <input id="arrivalTime" type="time" value={arrivalTime} onChange={(e) => setArrivalTime(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
+                  </div>
+                  <div>
+                    <label htmlFor="departureTime" className="block text-sm font-medium text-[#202124] mb-1">{"\uD83D\uDE97"} Departure Time (when you leave)</label>
+                    <input id="departureTime" type="time" value={departureTime} onChange={(e) => setDepartureTime(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
+                  </div>
+                  <div>
+                    <label htmlFor="carType" className="block text-sm font-medium text-[#202124] mb-1">{"\uD83D\uDE99"} Car Type</label>
+                    <select id="carType" value={carType} onChange={(e) => setCarType(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none bg-white">
+                      <option value="">Select your car type</option>
+                      <option value="small">Small Car (Honda Civic, Toyota Corolla)</option>
+                      <option value="standard">Standard Car (Ford F-150, SUV)</option>
+                      <option value="large">Large Vehicle (Truck, Van, RV)</option>
+                    </select>
+                  </div>
+                  <HoverButton type="submit" disabled={scheduleLoading} className="w-full">
+                    {scheduleLoading ? "Submitting..." : "Submit and Receive Matches"}
+                  </HoverButton>
+                </>
+              )}
+            </form>
+          </div>
+
+          {/* Your Matches */}
+          {parkingMatches.length > 0 && (
+            <div>
+              <hr className="mb-4" />
+              <h2 className="text-lg font-semibold text-[#202124] mb-3">{"\uD83D\uDD14"} Your Matches</h2>
+              <div className="space-y-3">
+                {parkingMatches.map((m) => {
+                  const isLeaver = m.leavingMemberId === user?.id;
+                  const statusVariant = m.status === "confirmed" ? "success" : m.status === "cancelled" ? "error" : "warning";
+                  const needsConfirm = Date.now() / 60000 > m.arrivalLookingTime && m.status === "confirmed" && !m.confirmed;
+                  const needsRating = m.confirmed && !m.rated && !ratingValue[m.matchId];
+                  const hasRated = m.rated || ratingValue[m.matchId] > 0;
+
+                  return (
+                    <HoverCard key={m.matchId} className="text-xs">
+                      <div className="flex items-center justify-between mb-1">
+                        <Badge variant={statusVariant}>{m.status}</Badge>
+                        <span className="text-[#4285F4] font-medium">{m.anonymousPartner}</span>
+                      </div>
+                      <div className="space-y-0.5 text-[#757575]">
+                        <p><span className="text-[#202124] font-medium">{isLeaver ? "You leave" : "Partner leaves"}:</span> {formatTime(m.leavingTime)}</p>
+                        <p><span className="text-[#202124] font-medium">{isLeaver ? "Partner arrives" : "You arrive"}:</span> {formatTime(m.arrivalLookingTime)}</p>
+                        {m.partnerVehicleInfo && (m.partnerVehicleInfo.type || m.partnerVehicleInfo.size) && (
+                          <p><span className="text-[#202124] font-medium">Vehicle:</span> {m.partnerVehicleInfo.type || "any"} / {m.partnerVehicleInfo.size || "any"}</p>
+                        )}
+                        <p><span className="text-[#202124] font-medium">Matched:</span> {new Date(m.matchedAt).toLocaleDateString()}</p>
+
+                        {m.status === "pending" && (
+                          <div className="flex gap-2 mt-1.5">
+                            <button onClick={() => handleConfirmMatch(m.matchId)}
+                              className="text-[10px] bg-[#0F9D58] text-white px-2.5 py-1 rounded-lg font-medium hover:bg-[#34A853]">Accept</button>
+                            <button onClick={() => handleCancelMatch(m.matchId)}
+                              className="text-[10px] border border-gray-300 text-[#757575] px-2.5 py-1 rounded-lg font-medium hover:bg-gray-50">Decline</button>
+                          </div>
+                        )}
+
+                        {/* Post-match parking confirmation */}
+                        {m.status === "confirmed" && m.confirmed === false && (
+                          <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <p className="font-semibold text-[#202124] mb-2">Did you successfully park?</p>
+                            <div className="flex gap-2">
+                              <button onClick={() => handleConfirmParking(m.matchId, true)}
+                                className="text-xs bg-[#0F9D58] text-white px-3 py-1.5 rounded-lg hover:bg-[#34A853]">Yes {"\u2705"}</button>
+                              <button onClick={() => handleConfirmParking(m.matchId, false)}
+                                className="text-xs bg-[#E94335] text-white px-3 py-1.5 rounded-lg hover:bg-[#c62828]">No {"\u274C"}</button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Rating */}
+                        {m.confirmed && !m.rated && !ratingValue[m.matchId] && (
+                          <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                            <p className="font-semibold text-[#202124] mb-2">How was your match with {m.anonymousPartner}?</p>
+                            <div className="flex gap-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button key={star} onClick={() => handleRateMatch(m.matchId, star)}
+                                  className="text-lg hover:scale-110 transition-transform">
+                                  {star <= (ratingValue[m.matchId] || 0) ? "\u2B50" : "\u2606"}
+                                </button>
+                              ))}
+                            </div>
+                            <button onClick={() => handleFavoriteMatch(m.matchId)}
+                              className="mt-2 text-xs text-[#4285F4] hover:underline">
+                              {"\u2764\uFE0F"} Favorite this member
+                            </button>
+                          </div>
+                        )}
+
+                        {hasRated && (
+                          <p className="text-[#0F9D58] font-medium mt-1">Rated: {"\u2B50".repeat(m.rating || ratingValue[m.matchId] || 0)}</p>
+                        )}
+                      </div>
+                    </HoverCard>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Match History Summary */}
+          {parkingMatches.length > 0 && (
+            <div>
+              <hr className="mb-4" />
+              <div>
+                <h2 className="text-lg font-semibold text-[#202124] mb-3">{"\uD83D\uDCCA"} Your Match History</h2>
+                <div className="grid grid-cols-3 gap-2 text-center mb-4">
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-[#757575] text-[10px]">Previous Matches</p>
+                    <p className="font-bold text-[#202124] text-lg">{matchStats.total}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-[#757575] text-[10px]">Success Rate</p>
+                    <p className="font-bold text-[#0F9D58] text-lg">
+                      {matchStats.total > 0 ? Math.round((matchStats.confirmed / matchStats.total) * 100) : 0}%
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-[#757575] text-[10px]">Rating</p>
+                    <p className="font-bold text-[#202124] text-lg">
+                      {matchStats.avgRating > 0 ? matchStats.avgRating.toFixed(1) : "-"}{matchStats.avgRating > 0 ? "\u2B50" : ""}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Ranking Display */}
           <hr className="mb-2" />
           <div>
@@ -352,101 +642,46 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Tier 1: Preliminary Matching (Free) */}
+          {/* Preliminary Matching (existing) */}
           <hr className="mb-2" />
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-semibold text-[#202124]">Preliminary Matching (Free)</h2>
+              <h2 className="text-lg font-semibold text-[#202124]">Preliminary Matching</h2>
               <Badge variant="success">Free</Badge>
             </div>
             <p className="text-xs text-[#757575] mb-4">
               Enter your arrival and departure times to get matched based on time and proximity.
             </p>
-
             <form onSubmit={handleT1Submit} className="space-y-4">
               {t1Message && <p className="text-sm text-[#0F9D58] bg-[#E6F4EA] p-3 rounded-xl">{t1Message}</p>}
               {t1Error && <p className="text-sm text-[#E94335] bg-[#FCE8E6] p-3 rounded-xl">{t1Error}</p>}
-
               <div>
                 <label htmlFor="arrivalLookingTime" className="block text-sm font-medium text-[#202124] mb-1">Time you arrive and are looking for a spot</label>
                 <input id="arrivalLookingTime" type="time" value={arrivalLookingTime} onChange={(e) => setArrivalLookingTime(e.target.value)}
-                  placeholder="e.g., 08:00"
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
               </div>
               <div>
                 <label htmlFor="leavingTime" className="block text-sm font-medium text-[#202124] mb-1">Time you depart your parking spot</label>
                 <input id="leavingTime" type="time" value={leavingTime} onChange={(e) => setLeavingTime(e.target.value)}
-                  placeholder="e.g., 17:30"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
-              </div>
-              <div>
-                <label htmlFor="t1Neighborhood" className="block text-sm font-medium text-[#202124] mb-1">Neighborhood</label>
-                <input id="t1Neighborhood" type="text" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)}
-                  placeholder="e.g. Downtown, Midtown"
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
               </div>
               <HoverButton type="submit" disabled={t1Loading} className="w-full">
                 {t1Loading ? "Submitting..." : "Submit for Matching"}
               </HoverButton>
             </form>
-
-            {/* Parking Matches List */}
-            {parkingMatches.length > 0 && (
-              <div className="mt-6">
-                <button onClick={() => setShowMatches(!showMatches)}
-                  className="text-sm font-semibold text-[#202124] flex items-center gap-2 mb-3">
-                  <span>Your matches ({parkingMatches.length})</span>
-                  <svg className={`w-4 h-4 transition-transform ${showMatches ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
-                </button>
-                {showMatches && (
-                  <div className="space-y-2">
-                    {parkingMatches.map((m) => {
-                      const isLeaver = m.leavingMemberId === user?.id;
-                      const statusVariant = m.status === "confirmed" ? "success" : m.status === "cancelled" ? "error" : "warning";
-                      return (
-                        <HoverCard key={m.matchId} className="text-xs">
-                          <div className="flex items-center justify-between mb-1">
-                            <Badge variant={statusVariant}>{m.status}</Badge>
-                            <RankingStars ranking={isLeaver ? m.ownRanking || 5 : m.partnerRanking || 5} />
-                          </div>
-                          <div className="space-y-0.5 text-[#757575]">
-                            <p><span className="text-[#202124] font-medium">Matched member:</span> {m.anonymousPartner}</p>
-                            <p><span className="text-[#202124] font-medium">{isLeaver ? "You leave" : "Partner leaves"}:</span> {formatTime(m.leavingTime)}</p>
-                            <p><span className="text-[#202124] font-medium">{isLeaver ? "Partner arrives" : "You arrive"}:</span> {formatTime(m.arrivalLookingTime)}</p>
-                            {m.partnerVehicleInfo && (m.partnerVehicleInfo.type || m.partnerVehicleInfo.size) && (
-                              <p><span className="text-[#202124] font-medium">Vehicle:</span> {m.partnerVehicleInfo.type || "any"} / {m.partnerVehicleInfo.size || "any"}</p>
-                            )}
-                            <p><span className="text-[#4285F4]">{m.anonymousPartner}</span></p>
-                            {m.status === "pending" && (
-                              <div className="flex gap-2 mt-1.5">
-                                <button onClick={() => handleConfirmMatch(m.matchId)}
-                                  className="text-[10px] bg-[#0F9D58] text-white px-2.5 py-1 rounded-lg font-medium hover:bg-[#34A853]">Confirm</button>
-                                <button onClick={() => handleCancelMatch(m.matchId)}
-                                  className="text-[10px] border border-gray-300 text-[#757575] px-2.5 py-1 rounded-lg font-medium hover:bg-gray-50">Cancel</button>
-                              </div>
-                            )}
-                          </div>
-                        </HoverCard>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
-          {/* Tier 3: Departure Beacon (Premium) */}
+          {/* Departure Beacon (Premium) */}
           <hr className="mb-2" />
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-semibold text-[#202124]">Departure Beacon (Premium)</h2>
-              {isPremium ? <Badge variant="success">Premium</Badge> : <Badge variant="warning">Premium</Badge>}
+              <h2 className="text-lg font-semibold text-[#202124]">Departure Beacon</h2>
+              {isPremium || isFree1Year ? <Badge variant="success">Premium</Badge> : <Badge variant="warning">Premium</Badge>}
             </div>
             <p className="text-xs text-[#757575] mb-4">
               Send a beacon to the system when you are departing. We will look for incoming members in your area.
             </p>
-
-            {!isPremium && (
+            {!isPremium && !isFree1Year && (
               <div className="bg-[#FFF3E0] border border-[#FBBB05]/30 rounded-xl p-4 mb-4 text-center">
                 <p className="text-sm text-[#202124] font-semibold">Premium Feature</p>
                 <p className="text-xs text-[#757575] mt-1">Upgrade to Premium to use the Departure Beacon.</p>
@@ -456,23 +691,19 @@ export default function ProfilePage() {
                 </button>
               </div>
             )}
-
             <form onSubmit={handleBeaconSubmit} className="space-y-4">
               {beaconMessage && <p className="text-sm text-[#0F9D58] bg-[#E6F4EA] p-3 rounded-xl">{beaconMessage}</p>}
               {beaconError && <p className="text-sm text-[#E94335] bg-[#FCE8E6] p-3 rounded-xl">{beaconError}</p>}
-
               <div>
                 <label htmlFor="beaconDepartureTime" className="block text-sm font-medium text-[#202124] mb-1">Departure time</label>
                 <input id="beaconDepartureTime" type="time" value={beaconDepartureTime} onChange={(e) => setBeaconDepartureTime(e.target.value)}
-                  disabled={!isPremium}
+                  disabled={!isPremium && !isFree1Year}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none disabled:opacity-50" />
               </div>
-              <HoverButton type="submit" disabled={beaconLoading || !isPremium} className="w-full">
+              <HoverButton type="submit" disabled={beaconLoading || (!isPremium && !isFree1Year)} className="w-full">
                 {beaconLoading ? "Sending..." : "Send Beacon"}
               </HoverButton>
             </form>
-
-            {/* Beacon Requests List */}
             {beacons.length > 0 && (
               <div className="mt-6 space-y-2">
                 <h3 className="font-semibold text-sm text-[#202124]">Your beacon requests</h3>
@@ -500,13 +731,12 @@ export default function ProfilePage() {
           <hr className="mb-2" />
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-semibold text-[#202124]">🕵️ Spot Scout</h2>
+              <h2 className="text-lg font-semibold text-[#202124]">{"\uD83D\uDD75\uFE0F"} Spot Scout</h2>
               <Badge variant="success">Free</Badge>
             </div>
             <p className="text-xs text-[#757575] mb-3">
               Anchor open spots you see while traveling and earn points, levels, and badges.
             </p>
-
             <div className="flex items-center justify-between mb-3 text-xs">
               <div className="text-center flex-1 bg-gray-50 rounded-lg p-2 mx-1">
                 <p className="text-[#757575] text-[10px]">Level</p>
@@ -524,16 +754,9 @@ export default function ProfilePage() {
                 </p>
               </div>
             </div>
-
-            <div className="grid grid-cols-3 gap-2 text-center text-[10px] mb-4">
-              <div className="bg-gray-50 rounded-lg p-2"><span className="text-[#757575]">Anchored</span><p className="font-bold text-[#202124]">{user.anchorCount || 0}</p></div>
-              <div className="bg-gray-50 rounded-lg p-2"><span className="text-[#757575]">Successful</span><p className="font-bold text-[#0F9D58]">{user.successfulMatches || 0}</p></div>
-              <div className="bg-gray-50 rounded-lg p-2"><span className="text-[#757575]">Failed</span><p className="font-bold text-[#E94335]">{user.failedMatches || 0}</p></div>
-            </div>
-
             <button onClick={() => router.push("/scout")}
               className="w-full bg-gradient-to-r from-[#F9A825] to-[#FBBB05] text-white px-6 py-3 rounded-xl font-bold text-sm hover:shadow-lg transition-all">
-              🕵️ Go to Scout Mode
+              {"\uD83D\uDD75\uFE0F"} Go to Scout Mode
             </button>
           </div>
         </div>
