@@ -5,7 +5,7 @@ export default function Accessibility() {
     <div className="flex flex-col min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
-          <a href="/" className="text-lg font-bold tracking-tight"><span className="text-[#4285F4]">Parking</span> <span className="text-[#0F9D58]">Agent</span></a>
+          <a href="/" className="text-lg font-bold tracking-tight">Spotimization</a>
           <a href="/login" className="text-sm font-medium text-[#757575] hover:text-[#202124] transition-colors">Login</a>
         </div>
       </nav>
@@ -18,7 +18,7 @@ export default function Accessibility() {
           <Card>
             <h2 className="font-bold text-[#202124] text-sm mb-2">Our Commitment</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
-              Parking Agent is committed to ensuring digital accessibility for
+              Spotimization is committed to ensuring digital accessibility for
               all users, including individuals with disabilities. We strive to
               make our platform usable by everyone, regardless of ability or
               assistive technology.
@@ -69,7 +69,7 @@ export default function Accessibility() {
           <Card>
             <h2 className="font-bold text-[#202124] text-sm mb-2">ADA Compliance</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
-              Parking Agent is designed with the Americans with Disabilities
+              Spotimization is designed with the Americans with Disabilities
               Act (ADA) requirements in mind. We understand that accessibility
               is an ongoing effort and continuously work to improve the user
               experience for all individuals.
@@ -125,10 +125,10 @@ export default function Accessibility() {
           <Card>
             <h2 className="font-bold text-[#202124] text-sm mb-2">Feedback</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
-              We welcome feedback on the accessibility of Parking Agent. If you
+              We welcome feedback on the accessibility of Spotimization. If you
               encounter accessibility barriers or have suggestions for
               improvement, please contact us at
-              accessibility@parkingagent.com. We will make reasonable efforts
+              accessibility@spotimization.com. We will make reasonable efforts
               to address your concerns.
             </p>
           </Card>
@@ -137,13 +137,13 @@ export default function Accessibility() {
 
       <footer className="border-t border-gray-200 py-6">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-[10px] text-[#757575]">
-          <div className="font-bold tracking-tight"><span className="text-[#4285F4]">Parking</span> <span className="text-[#0F9D58]">Agent</span></div>
+          <div className="font-bold tracking-tight">Spotimization</div>
           <div className="flex gap-4">
             <a href="/premium" className="hover:text-[#202124]">Premium</a>
             <a href="/tos" className="hover:text-[#202124]">Terms</a>
             <a href="/legal/privacy" className="hover:text-[#202124]">Privacy</a>
           </div>
-          <p>&copy; 2026 Parking Agent. All rights reserved.</p>
+          <p>&copy; 2026 Spotimization. All rights reserved.</p>
         </div>
       </footer>
     </div>

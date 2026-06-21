@@ -44,7 +44,7 @@ export interface ContentVersion {
 
 const defaultContent: PageContent = {
   hero: {
-    headline: "Parking Agent",
+    headline: "Spotimization",
     subheadline: "City streets parking assistant",
     tagline: "Membership has its advantages",
     ctaText: "Get Started",
@@ -76,7 +76,7 @@ const defaultContent: PageContent = {
   },
   legal: {
     termsSummary:
-      "Parking Agent is a membership platform. We do not own, sell, lease, or control parking spots. We provide matching technology and community education.",
+      "Spotimization is a membership platform. We do not own, sell, lease, or control parking spots. We provide matching technology and community education.",
     privacySummary:
       "We collect your name, email, GPS location, membership status, and course completion data to provide matching services.",
     accessibilitySummary:

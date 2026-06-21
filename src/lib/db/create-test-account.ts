@@ -10,7 +10,7 @@ async function createTestAccount() {
   await db.insert(users).values({
     id: "test-user-001",
     name: "Test User",
-    email: "test@parkingagent.com",
+    email: "test@spotimization.com",
     passwordHash,
     role: "member",
     isMember: true,
@@ -25,7 +25,7 @@ async function createTestAccount() {
     createdAt: now,
   }).onConflictDoNothing();
 
-  console.log("Test account created: test@parkingagent.com / test123");
+  console.log("Test account created: test@spotimization.com / test123");
 }
 
 createTestAccount().catch((e) => {

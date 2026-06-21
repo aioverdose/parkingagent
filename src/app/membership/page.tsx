@@ -35,7 +35,7 @@ export default function Membership() {
     <div className="min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
-          <a href="/" className="text-lg font-bold tracking-tight"><span className="text-[#4285F4]">Parking</span> <span className="text-[#0F9D58]">Agent</span></a>
+          <a href="/" className="text-lg font-bold tracking-tight">Spotimization</a>
           <div className="flex items-center gap-4 text-sm font-medium">
             <a href="/login" className="text-[#757575] hover:text-[#202124] transition-colors">Login</a>
             <a href="/signup" className="bg-[#4285F4] text-white px-4 py-2 rounded-lg hover:bg-[#1A73E8] transition-colors">Start Membership</a>
@@ -45,7 +45,7 @@ export default function Membership() {
 
       <main className="max-w-5xl mx-auto px-4 pt-12 pb-20">
         <h1 className="text-3xl font-black text-center text-[#202124]">Membership</h1>
-        <p className="text-center text-[#757575] mt-2 max-w-2xl mx-auto text-sm">Join Parking Agent and unlock AI-powered parking matching in Long Beach, CA.</p>
+        <p className="text-center text-[#757575] mt-2 max-w-2xl mx-auto text-sm">Join Spotimization and unlock AI-powered parking matching in Long Beach, CA.</p>
 
         {/* Benefits */}
         <div className="mt-10 grid sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
@@ -94,19 +94,19 @@ export default function Membership() {
         {/* Disclosure */}
         <div className="mt-14 bg-[#E8F0FE] border border-[#4285F4]/20 rounded-xl p-5 max-w-3xl mx-auto">
           <h2 className="font-bold text-[#1A73E8] text-sm mb-1">Membership Disclosure</h2>
-          <p className="text-xs text-[#757575] leading-relaxed">Parking Agent is a membership platform. We do not own, sell, lease, or control any parking spots. Our technology provides AI agentic matching between members. All parking arrangements are between members themselves. Membership fees cover access to our matching technology, educational courses, and community platform.</p>
+          <p className="text-xs text-[#757575] leading-relaxed">Spotimization is a membership platform. We do not own, sell, lease, or control any parking spots. Our technology provides AI agentic matching between members. All parking arrangements are between members themselves. Membership fees cover access to our matching technology, educational courses, and community platform.</p>
         </div>
       </main>
 
       <footer className="border-t border-gray-200 py-8">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#757575]">
-          <div className="font-bold tracking-tight"><span className="text-[#4285F4]">Parking</span> <span className="text-[#0F9D58]">Agent</span></div>
+          <div className="font-bold tracking-tight">Spotimization</div>
           <div className="flex gap-4">
             <a href="/premium" className="hover:text-[#202124]">Premium</a>
             <a href="/tos" className="hover:text-[#202124]">Terms</a>
             <a href="/legal/privacy" className="hover:text-[#202124]">Privacy</a>
           </div>
-          <p>© 2026 Parking Agent. All rights reserved.</p>
+          <p>© 2026 Spotimization. All rights reserved.</p>
         </div>
       </footer>
     </div>

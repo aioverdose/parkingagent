@@ -72,7 +72,7 @@ export default function CommunityGuidelines() {
             <h2 className="font-bold text-[#202124] text-sm mb-2">6. Reporting Issues</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
               If you experience or witness a violation of these guidelines, please report it to us
-              immediately at support@parkingagent.com. Provide as much detail as possible, including
+              immediately at support@spotimization.com. Provide as much detail as possible, including
               the username involved, date, time, and description of the incident. All reports are
               reviewed promptly and handled confidentially.
             </p>

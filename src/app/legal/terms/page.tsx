@@ -5,7 +5,7 @@ export default function TermsOfService() {
     <div className="flex flex-col min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
-          <a href="/" className="text-lg font-bold tracking-tight"><span className="text-[#4285F4]">Parking</span> <span className="text-[#0F9D58]">Agent</span></a>
+          <a href="/" className="text-lg font-bold tracking-tight">Spotimization</a>
           <a href="/login" className="text-sm font-medium text-[#757575] hover:text-[#202124] transition-colors">Login</a>
         </div>
       </nav>
@@ -18,7 +18,7 @@ export default function TermsOfService() {
           <Card>
             <h2 className="font-bold text-[#202124] text-sm mb-2">1. Membership Platform</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
-              Parking Agent is a membership platform. We provide AI agentic
+              Spotimization is a membership platform. We provide AI agentic
               matching technology and community education to our members. We do
               not own, sell, lease, or control any parking spots. All parking
               arrangements are made between members themselves.
@@ -28,7 +28,7 @@ export default function TermsOfService() {
           <Card>
             <h2 className="font-bold text-[#202124] text-sm mb-2">2. No Ownership of Parking Spots</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
-              Parking Agent does not own, sell, lease, or control any parking
+              Spotimization does not own, sell, lease, or control any parking
               spots. Our technology facilitates communication and matching
               between members who choose to share information about available
               parking. Any parking arrangement made through our platform is
@@ -42,7 +42,7 @@ export default function TermsOfService() {
               Our AI agentic matching technology pairs members who are departing
               a parking spot with members who are looking for a spot. The
               matching algorithm considers proximity, ranking status, and
-              good-standing status. Parking Agent makes no guarantees about the
+              good-standing status. Spotimization makes no guarantees about the
               availability or suitability of any parking spot.
             </p>
           </Card>
@@ -50,7 +50,7 @@ export default function TermsOfService() {
           <Card>
             <h2 className="font-bold text-[#202124] text-sm mb-2">4. Community Education</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
-              Parking Agent provides educational courses about street parking
+              Spotimization provides educational courses about street parking
               laws in Long Beach, CA. These courses are for informational
               purposes only and do not constitute legal advice. Members are
               responsible for understanding and complying with all local
@@ -84,7 +84,7 @@ export default function TermsOfService() {
           <Card>
             <h2 className="font-bold text-[#202124] text-sm mb-2">6. Limitation of Liability</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
-              Parking Agent provides a technology platform and educational
+              Spotimization provides a technology platform and educational
               content. We are not responsible for any parking tickets, towing,
               fines, damages, or disputes arising from parking arrangements
               made through our platform. Members use the platform at their own
@@ -126,7 +126,7 @@ export default function TermsOfService() {
             <h2 className="font-bold text-[#202124] text-sm mb-2">10. Contact</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
               For questions about these terms, contact us at
-              support@parkingagent.com.
+              support@spotimization.com.
             </p>
           </Card>
         </div>
@@ -134,13 +134,13 @@ export default function TermsOfService() {
 
       <footer className="border-t border-gray-200 py-6">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-[10px] text-[#757575]">
-          <div className="font-bold tracking-tight"><span className="text-[#4285F4]">Parking</span> <span className="text-[#0F9D58]">Agent</span></div>
+          <div className="font-bold tracking-tight">Spotimization</div>
           <div className="flex gap-4">
             <a href="/premium" className="hover:text-[#202124]">Premium</a>
             <a href="/tos" className="hover:text-[#202124]">Terms</a>
             <a href="/legal/privacy" className="hover:text-[#202124]">Privacy</a>
           </div>
-          <p>&copy; 2026 Parking Agent. All rights reserved.</p>
+          <p>&copy; 2026 Spotimization. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -1,10 +1,10 @@
-# Parking Agent — Project Summary for NotebookLM
+# Spotimization — Project Summary for NotebookLM
 
 ## What It Is
 
-Parking Agent is a production-grade web application that solves street parking chaos using Uber-style AI matching. Instead of publishing available spots on a public map (which creates multi-car races), Parking Agent hides all spots until a member requests one. The AI then pairs the arriving member 1-to-1 with the closest departing member — one spot, one car, every time.
+Spotimization is a production-grade web application that solves street parking chaos using Uber-style AI matching. Instead of publishing available spots on a public map (which creates multi-car races), Spotimization hides all spots until a member requests one. The AI then pairs the arriving member 1-to-1 with the closest departing member — one spot, one car, every time.
 
-The app is deployed at **https://parking-agent.vercel.app** and the source is on GitHub at **https://github.com/aioverdose/parkingagent.git**.
+The app is deployed at **https://spotimization.vercel.app** and the source is on GitHub at **https://github.com/aioverdose/spotimization.git**.
 
 ---
 
@@ -229,8 +229,8 @@ Other shared components: `MapView` (Google Maps iframe), `PushNotifications`, `R
 ## Seed Data
 
 The seed script (`src/lib/db/seed.ts`) creates:
-- 1 admin account (admin@parkingagent.com / admin123)
-- 1 test account (test@parkingagent.com / test123)
+- 1 admin account (admin@spotimization.com / admin123)
+- 1 test account (test@spotimization.com / test123)
 - 8 members (alice@example.com through henry@example.com / password123)
 - 2 active spot offers with vehicle constraints
 - 6 matches in various statuses

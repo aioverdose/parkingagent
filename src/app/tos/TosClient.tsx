@@ -28,8 +28,7 @@ export default function TosClient() {
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
           <a href="/" className="text-lg font-bold tracking-tight">
-            <span className="text-[#4285F4]">Parking</span>{" "}
-            <span className="text-[#0F9D58]">Agent</span>
+            Spotimization
           </a>
         </div>
       </nav>
@@ -42,12 +41,12 @@ export default function TosClient() {
           <section>
             <h2 className="text-xl font-bold mb-3">1. Introduction</h2>
             <p>
-              Parking Agent is a member-to-member matching service for street parking in Long Beach, CA.
+              Spotimization is a member-to-member matching service for street parking in Long Beach, CA.
               We help members find parking more efficiently by anonymously matching their schedules
               with other members.
             </p>
             <p className="mt-2 font-semibold text-[#E94335]">
-              Parking Agent does not own, sell, or in any way make money from free public parking spots.
+              Spotimization does not own, sell, or in any way make money from free public parking spots.
             </p>
             <p className="mt-2">
               The app operates in accordance with Long Beach, CA city laws.
@@ -60,7 +59,7 @@ export default function TosClient() {
               We offer our members a way to maximize efficiency when parking on the streets of Long Beach.
             </p>
             <p className="mt-2">
-              Parking Agent is a member-to-member matching service for street parking. Members can:
+              Spotimization is a member-to-member matching service for street parking. Members can:
             </p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>Submit their schedule (when they leave their spot and when they return looking for a spot).</li>
@@ -72,12 +71,12 @@ export default function TosClient() {
           <section>
             <h2 className="text-xl font-bold mb-3">3. No Ownership or Control of Parking Spots</h2>
             <p className="font-semibold">
-              Parking Agent does not own, manage, or control any public parking spots.
+              Spotimization does not own, manage, or control any public parking spots.
             </p>
             <p className="mt-2">
               All parking spots referenced in the app are public street parking spots governed by
               Long Beach, CA parking regulations. The app does not control, reserve, or guarantee
-              any specific public parking spot. Parking Agent does not charge fees for public
+              any specific public parking spot. Spotimization does not charge fees for public
               parking spots themselves.
             </p>
             <p className="mt-2">
@@ -85,7 +84,7 @@ export default function TosClient() {
               signage, and regulations.
             </p>
             <p className="mt-2 font-semibold">
-              Parking Agent is not liable for:
+              Spotimization is not liable for:
             </p>
             <ul className="list-disc pl-5 mt-1 space-y-1">
               <li>Parking tickets, fines, or citations.</li>
@@ -113,7 +112,7 @@ export default function TosClient() {
               and vehicle type/size, not full names or addresses.
             </p>
             <p className="mt-2">
-              Parking Agent provides a matching service but does not guarantee that a match
+              Spotimization provides a matching service but does not guarantee that a match
               will be found. Availability of matches depends on member schedules, neighborhood
               demand, and other factors.
             </p>
@@ -122,7 +121,7 @@ export default function TosClient() {
           <section>
             <h2 className="text-xl font-bold mb-3">6. Privacy and Anonymity</h2>
             <p>
-              Parking Agent collects and uses personal data only as described in our
+              Spotimization collects and uses personal data only as described in our
               Privacy Policy (available at /legal/privacy). Matches are anonymous:
               members see only anonymized IDs and basic vehicle information.
             </p>
@@ -131,7 +130,7 @@ export default function TosClient() {
           <section>
             <h2 className="text-xl font-bold mb-3">7. No Liability</h2>
             <p>
-              Parking Agent is not responsible for parking tickets, towing, damages,
+              Spotimization is not responsible for parking tickets, towing, damages,
               or any incidents related to parking. Members use the app at their own
               risk and are responsible for their own compliance with local laws.
             </p>
@@ -140,7 +139,7 @@ export default function TosClient() {
           <section>
             <h2 className="text-xl font-bold mb-3">8. Changes to Terms</h2>
             <p>
-              Parking Agent may update these Terms of Service at any time. The latest
+              Spotimization may update these Terms of Service at any time. The latest
               version will be available at /tos. Continued use of the app after changes
               constitutes acceptance of the updated terms.
             </p>
@@ -149,7 +148,7 @@ export default function TosClient() {
           <section>
             <h2 className="text-xl font-bold mb-3">9. Contact</h2>
             <p>
-              For questions about these Terms, contact: support@parkingagent.com
+              For questions about these Terms, contact: support@spotimization.com
             </p>
           </section>
         </div>

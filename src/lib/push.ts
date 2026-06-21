@@ -2,7 +2,7 @@ import webPush from "web-push";
 
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webPush.setVapidDetails(
-    "mailto:support@parkingagent.com",
+    "mailto:support@spotimization.com",
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY,
   );

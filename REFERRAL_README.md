@@ -1,9 +1,9 @@
-# Parking Agent — Referral Program (Refer 3, Get 1 Month Free)
+# Spotimization — Referral Program (Refer 3, Get 1 Month Free)
 
 ## How It Works
 
 1. **Every member gets a unique referral code** (format: `PA-XXXXXX`) generated on signup.
-2. **Members share their referral link**: `https://parking-agent.vercel.app/?ref=PA-ABC123`
+2. **Members share their referral link**: `https://spotimization.vercel.app/?ref=PA-ABC123`
 3. **Visitor clicks the link** → a cookie stores the referral code (30-day expiry).
 4. **Visitor signs up** → the referral cookie is read, a `referrals` record is created (status: `pending`).
 5. **New member subscribes** → the Stripe checkout passes `referrerId` in subscription metadata.
@@ -47,7 +47,7 @@
 
 1. Go to **Stripe Dashboard → Developers → Webhooks**
 2. Click **Add endpoint**
-3. **Endpoint URL**: `https://parking-agent.vercel.app/api/stripe/webhook`
+3. **Endpoint URL**: `https://spotimization.vercel.app/api/stripe/webhook`
 4. **Events to listen for**:
    - `checkout.session.completed`
    - `invoice.payment_succeeded`
@@ -76,8 +76,8 @@
 ```
 STRIPE_SECRET_KEY=rk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-NEXT_PUBLIC_APP_URL=https://parking-agent.vercel.app
-NEXT_PUBLIC_BASE_URL=https://parking-agent.vercel.app
+NEXT_PUBLIC_APP_URL=https://spotimization.vercel.app
+NEXT_PUBLIC_BASE_URL=https://spotimization.vercel.app
 DATABASE_URL=postgresql://...
 ```
 

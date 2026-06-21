@@ -87,7 +87,7 @@ export default function TermsOfUse() {
           <Card>
             <h2 className="font-bold text-[#202124] text-sm mb-2">7. Contact</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
-              For questions about these terms, please contact us at support@parkingagent.com.
+              For questions about these terms, please contact us at support@spotimization.com.
             </p>
           </Card>
         </div>

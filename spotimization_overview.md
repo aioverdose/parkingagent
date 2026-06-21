@@ -1,8 +1,8 @@
-# Parking Agent — Product Overview
+# Spotimization — Product Overview
 
-## What Is Parking Agent?
+## What Is Spotimization?
 
-Parking Agent is a membership-based mobile web app that fixes the biggest problem with street parking: multi-car chaos. When a parking spot opens up, most apps show it on a public map for everyone to see, creating a race where multiple drivers speed to the same location. Parking Agent does the opposite — it hides every spot until the moment a member needs one, then uses AI to match them 1-to-1 with the closest departing member.
+Spotimization is a membership-based mobile web app that fixes the biggest problem with street parking: multi-car chaos. When a parking spot opens up, most apps show it on a public map for everyone to see, creating a race where multiple drivers speed to the same location. Spotimization does the opposite — it hides every spot until the moment a member needs one, then uses AI to match them 1-to-1 with the closest departing member.
 
 Think Uber for parking, but instead of matching riders with drivers, it matches arriving drivers with people who are about to leave their spot. One spot, one car, every time.
 
@@ -39,7 +39,7 @@ New members must complete three short educational modules before their membershi
 Two tiers: Monthly at $14.99/month and Annual at $119/year ($9.92/month — saves 33%). Annual members get priority matching and early access to new cities. Both include unlimited matches, course access, and the ranking system.
 
 ### Referral Program
-"Refer 3, Get 1 Month Free." Members get a unique referral link (PA-XXXXXX format) to share. When a referred friend signs up and pays, the referrer gets a free month added to their subscription. Progress tracks in the dashboard.
+"Refer 3, Get 1 Month Free." Members get a unique referral link (SP-XXXXXX format) to share. When a referred friend signs up and pays, the referrer gets a free month added to their subscription. Progress tracks in the dashboard.
 
 ### Push & Email Notifications
 Members get instant notifications when matched, with the spot location and ETA. Push notifications work on mobile browsers. Email notifications serve as backup.
@@ -49,16 +49,16 @@ Members get instant notifications when matched, with the spot location and ETA. 
 ## Comparison to Other Parking Apps
 
 ### vs. SpotHero, ParkWhiz, ParkMobile
-These apps work with off-street parking — garages, lots, and reserved spaces. You pre-book and pay. They don't help with street parking at all. Parking Agent is exclusively for on-street metered and permit parking.
+These apps work with off-street parking — garages, lots, and reserved spaces. You pre-book and pay. They don't help with street parking at all. Spotimization is exclusively for on-street metered and permit parking.
 
 ### vs. BestParking, SpotAngels
-These show public maps of available street parking, often crowdsourced or estimated. The problem: when a spot is shown to everyone, multiple drivers race to it. Parking Agent hides spots until a match is created, eliminating the race entirely.
+These show public maps of available street parking, often crowdsourced or estimated. The problem: when a spot is shown to everyone, multiple drivers race to it. Spotimization hides spots until a match is created, eliminating the race entirely.
 
 ### vs. Nextdoor, Facebook Groups (informal)
-Some neighborhoods use social media to share parking. It's manual, unreliable, and has no accountability. Parking Agent automates the process with real-time matching, GPS verification, and a ranking system that incentivizes good behavior.
+Some neighborhoods use social media to share parking. It's manual, unreliable, and has no accountability. Spotimization automates the process with real-time matching, GPS verification, and a ranking system that incentivizes good behavior.
 
 ### vs. DIY (circling for parking)
-The current alternative: driving around hoping to catch someone leaving. Studies show drivers spend an average of 17 minutes circling per trip. Parking Agent's proximity-based matching connects you directly to a departing member so you go straight to the spot.
+The current alternative: driving around hoping to catch someone leaving. Studies show drivers spend an average of 17 minutes circling per trip. Spotimization's proximity-based matching connects you directly to a departing member so you go straight to the spot.
 
 ---
 
@@ -74,7 +74,7 @@ The current alternative: driving around hoping to catch someone leaving. Studies
 
 5. **Vehicle-aware matching** — Motorcycles can fit in tight spots that trucks can't. The system filters by vehicle type and size constraints.
 
-6. **Exclusive focus on street parking** — Unlike competitors that chase the off-street reservation market, Parking Agent solves a specific, painful problem that millions of urban drivers face daily.
+6. **Exclusive focus on street parking** — Unlike competitors that chase the off-street reservation market, Spotimization solves a specific, painful problem that millions of urban drivers face daily.
 
 ---
 

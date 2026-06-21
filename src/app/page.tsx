@@ -50,8 +50,7 @@ export default function Home() {
             className="text-lg font-bold tracking-tight"
             whileHover={{ scale: 1.05 }}
           >
-            <span className="text-[#4285F4]">Spot</span>{" "}
-            <span className="text-[#0F9D58]">Mining</span>
+            spotimization
           </motion.a>
           <div className="hidden md:flex items-center gap-6 text-sm font-medium text-[#757575]">
             <a href="/how-it-works" className="hover:text-[#202124] transition-colors">How It Works</a>
@@ -96,10 +95,10 @@ export default function Home() {
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <h1 className="text-4xl md:text-5xl font-black text-[#202124] leading-tight mb-2">
-          Spot Mining
+          Street Parking Spot Optimization
         </h1>
         <p className="text-xl text-[#757575] max-w-xl mx-auto">
-          Street Parking Matching Service
+          Optimize your street parking experience
         </p>
       </motion.section>
 

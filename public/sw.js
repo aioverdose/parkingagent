@@ -1,5 +1,5 @@
 self.addEventListener("push", (event) => {
-  const data = event.data?.json() ?? { title: "Parking Agent", body: "You have a new notification" };
+  const data = event.data?.json() ?? { title: "Spotimization", body: "You have a new notification" };
 
   const options = {
     body: data.body,

@@ -1,8 +1,8 @@
-# Parking Agent — Free + Premium Business Model
+# Spotimization — Free + Premium Business Model
 
 ## Overview
 
-Parking Agent operates on a two-tier model: a **Free tier** for schedule-based parking matching and a **Premium tier** ($4.99/month) for real-time GPS-powered matching. The free tier is the main entry point to build a user base; the premium tier generates revenue while offering advanced features for members who need instant parking.
+Spotimization operates on a two-tier model: a **Free tier** for schedule-based parking matching and a **Premium tier** ($4.99/month) for real-time GPS-powered matching. The free tier is the main entry point to build a user base; the premium tier generates revenue while offering advanced features for members who need instant parking.
 
 ---
 
@@ -10,7 +10,7 @@ Parking Agent operates on a two-tier model: a **Free tier** for schedule-based p
 
 ### What It Is
 
-Free members submit their recurring parking schedule — the time they normally leave their spot and the time they return looking for a spot. Parking Agent matches them with other free members who have opposite schedules. When one person leaves, the other arrives.
+Free members submit their recurring parking schedule — the time they normally leave their spot and the time they return looking for a spot. Spotimization matches them with other free members who have opposite schedules. When one person leaves, the other arrives.
 
 ### How It Works
 
@@ -157,9 +157,9 @@ All passwords are `demopass`:
 
 | Account | Tier | Email | Schedule |
 |---------|------|-------|----------|
-| Alex Rivera | Premium | alex@demo.parking | Leaves 17:30, arrives 08:00 |
-| Jordan Chen | Free | jordan@demo.parking | Leaves 08:10, arrives 17:45 |
-| Sam Taylor | Free | sam@demo.parking | Leaves 09:00, arrives 18:00 |
+| Alex Rivera | Premium | alex@demo.spotimization | Leaves 17:30, arrives 08:00 |
+| Jordan Chen | Free | jordan@demo.spotimization | Leaves 08:10, arrives 17:45 |
+| Sam Taylor | Free | sam@demo.spotimization | Leaves 09:00, arrives 18:00 |
 
 Alex (Premium) can use both schedule-based and real-time matching. Jordan and Sam (Free) can only use schedule-based matching.
 
@@ -182,7 +182,7 @@ Alex (Premium) can use both schedule-based and real-time matching. Jordan and Sa
 
 ## Strategic Rationale
 
-**Why offer a free tier?** Parking Agent is a two-sided marketplace. It needs a critical mass of members for the matching to work. A free schedule-based tier removes the payment barrier and lets anyone join, creating the network effects necessary for the marketplace to function. Free members generate value by submitting schedules that become matching opportunities for other members.
+**Why offer a free tier?** Spotimization is a two-sided marketplace. It needs a critical mass of members for the matching to work. A free schedule-based tier removes the payment barrier and lets anyone join, creating the network effects necessary for the marketplace to function. Free members generate value by submitting schedules that become matching opportunities for other members.
 
 **Why $4.99/month for premium?** Real-time GPS matching is a premium, on-demand service. It requires more infrastructure (location services, routing computation, push notifications) and provides immediate convenience. Priced below traditional parking apps ($14.99/month for monthly plans) but above zero, it's an easy upsell for members who've experienced the free tier and want instant results.
 

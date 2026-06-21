@@ -59,7 +59,7 @@ export default function InstallApp() {
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg p-4 animate-slide-up">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
             <div className="flex-1">
-              <p className="text-sm font-bold text-[#202124]">Install Parking Agent</p>
+              <p className="text-sm font-bold text-[#202124]">Install Spotimization</p>
               <p className="text-xs text-[#757575] mt-0.5">
                 Tap the Share button{" "}
                 <svg className="inline w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>{" "}
@@ -74,7 +74,7 @@ export default function InstallApp() {
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg p-4 animate-slide-up">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
             <div className="flex-1">
-              <p className="text-sm font-bold text-[#202124]">Install Parking Agent</p>
+              <p className="text-sm font-bold text-[#202124]">Install Spotimization</p>
               <p className="text-xs text-[#757575] mt-0.5">Add to your home screen for the best experience</p>
             </div>
             <div className="flex items-center gap-2">

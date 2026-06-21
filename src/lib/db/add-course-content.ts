@@ -18,7 +18,7 @@ async function addCourseContentColumn() {
   `);
 
   await db.execute(`
-    UPDATE course_modules SET content = 'As a Parking Agent member, you agree to:
+    UPDATE course_modules SET content = 'As a Spotimization member, you agree to:
 • Only offer spots you are actively vacating (no advance reservations)
 • Arrive within the 10-minute window after being matched
 • Keep your ranking score accurate by completing matches

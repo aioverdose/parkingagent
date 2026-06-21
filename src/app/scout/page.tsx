@@ -79,7 +79,7 @@ export default function ScoutPage() {
       setAnchors(a);
       if (user) {
         const updatedUser = { ...user, ...profile };
-        localStorage.setItem("parking_agent_auth", JSON.stringify(updatedUser));
+        localStorage.setItem("spotimization_auth", JSON.stringify(updatedUser));
       }
     } catch { console.error("Failed to fetch scout profile"); }
   }
@@ -114,9 +114,7 @@ export default function ScoutPage() {
     <div className="min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
-          <a href="/dashboard" className="text-lg font-bold tracking-tight">
-            <span className="text-[#4285F4]">Parking</span> <span className="text-[#0F9D58]">Agent</span>
-          </a>
+            <a href="/dashboard" className="text-lg font-bold tracking-tight">spotimization</a>
           <div className="flex items-center gap-3 text-sm">
             <span className="text-[#757575] hidden sm:inline">{user?.name}</span>
             {isPremium && <Badge variant="success">Premium</Badge>}

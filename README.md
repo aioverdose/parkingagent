@@ -1,10 +1,10 @@
-# Parking Agent
+# Spotimization
 
-Parking Agent is a membership platform providing AI agentic matching technology for city street parking in Long Beach, CA. We connect departing members with arriving members to make parking easier and more efficient.
+Spotimization is a membership platform providing AI agentic matching technology for city street parking in Long Beach, CA. We connect departing members with arriving members to make parking easier and more efficient.
 
 ## Important Legal Notice
 
-Parking Agent **does not own, sell, lease, or control any parking spots**. We are a membership platform that provides:
+Spotimization **does not own, sell, lease, or control any parking spots**. We are a membership platform that provides:
 
 - AI agentic matching technology between members
 - Educational courses on Long Beach street parking laws
@@ -66,7 +66,7 @@ src/
 ## Pages
 
 ### Public Pages
-- **/** - Landing page with hero text "Parking Agent", "City streets parking assistant", "Membership has its advantages"
+- **/** - Landing page with hero text "Spotimization", "City streets parking assistant", "Membership has its advantages"
 - **/how-it-works** - Animated presentation showing AI matching flow + Long Beach parking laws
 - **/membership** - Membership benefits and pricing ($9.99-$19.99/month, $79-$149/year)
 - **/signup** - Signup form with course completion workflow
@@ -75,7 +75,7 @@ src/
 ### Member Pages
 - **/dashboard** - Member dashboard with "I'm Leaving" and "I Need a Spot" buttons, AI matching simulation
 
-### Admin Pages (requires admin login: admin@parkingagent.com / admin123)
+### Admin Pages (requires admin login: admin@spotimization.com / admin123)
 - **/admin** - Dashboard with system metrics, financial metrics, member overview, quick actions
 - **/admin/members** - Member management table with search, filter, status management
 - **/admin/matches** - Match history with status filtering
@@ -100,7 +100,7 @@ src/
 
 | Email | Password |
 |-------|----------|
-| admin@parkingagent.com | admin123 |
+| admin@spotimization.com | admin123 |
 
 ## Tech Stack
 
@@ -113,7 +113,7 @@ src/
 
 This platform is designed for **Long Beach, California** and includes:
 
-- **Membership disclosure**: Clear statements that Parking Agent does not own/sell parking spots
+- **Membership disclosure**: Clear statements that Spotimization does not own/sell parking spots
 - **Street parking laws**: Course content covering time limits, permit zones, no-parking zones, street sweeping
 - **Terms of Service**: Comprehensive terms compliant with California law
 - **Privacy Policy**: CCPA/CPRA compliant privacy practices

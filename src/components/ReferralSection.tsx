@@ -51,13 +51,13 @@ export function ReferralSection() {
   }, [shareUrl]);
 
   const handleShareSMS = useCallback(() => {
-    const msg = encodeURIComponent(`Get 1 month free parking with Parking Agent! Use my referral link: ${shareUrl}`);
+    const msg = encodeURIComponent(`Get 1 month free parking with Spotimization! Use my referral link: ${shareUrl}`);
     window.open(`sms:?&body=${msg}`, "_blank");
   }, [shareUrl]);
 
   const handleShareEmail = useCallback(() => {
-    const subject = encodeURIComponent("Join Parking Agent - Get 1 Month Free");
-    const body = encodeURIComponent(`I've been using Parking Agent for hassle-free street parking in Long Beach. Use my referral link to sign up and get started: ${shareUrl}`);
+    const subject = encodeURIComponent("Join Spotimization - Get 1 Month Free");
+    const body = encodeURIComponent(`I've been using Spotimization for hassle-free street parking in Long Beach. Use my referral link to sign up and get started: ${shareUrl}`);
     window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
   }, [shareUrl]);
 

@@ -7,9 +7,9 @@ import { v4 as uuid } from "uuid";
 import bcrypt from "bcryptjs";
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "parking-agent-dev-secret-change-in-production",
+  process.env.JWT_SECRET || "spotimization-dev-secret-change-in-production",
 );
-const COOKIE_NAME = "parking_agent_session";
+const COOKIE_NAME = "spotimization_session";
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export interface JwtPayload {

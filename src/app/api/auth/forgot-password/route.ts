@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
     await sendEmail(
       user.email,
-      "Reset your Parking Agent password",
+      "Reset your Spotimization password",
       `Click here to reset your password: ${resetUrl}\n\nThis link expires in 1 hour.`,
     );
 

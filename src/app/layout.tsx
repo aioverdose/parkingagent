@@ -14,13 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Parking Agent",
+  title: "Spotimization - Street Parking Spot Optimization",
   description:
-    "Parking Agent is a membership platform providing AI agentic matching technology for city street parking in Long Beach, CA.",
+    "Spotimization optimizes street parking spot matching using AI agentic technology for Long Beach, CA.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    title: "Parking Agent",
+    title: "Spotimization",
     statusBarStyle: "default",
   },
   icons: {

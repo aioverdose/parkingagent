@@ -27,7 +27,7 @@ async function seed() {
     .values({
       id: "admin-001",
       name: "Admin",
-      email: "admin@parkingagent.com",
+      email: "admin@spotimization.com",
       passwordHash,
       role: "admin",
       isMember: true,
@@ -48,7 +48,7 @@ async function seed() {
     .values({
       id: "test-001",
       name: "Test Account",
-      email: "test@parkingagent.com",
+      email: "test@spotimization.com",
       passwordHash: testPasswordHash,
       role: "member",
       isMember: true,
@@ -121,7 +121,7 @@ async function seed() {
 
   // CMS content
   const cmsEntries = [
-    { page: "landing", key: "headline", value: "Parking Agent" },
+    { page: "landing", key: "headline", value: "Spotimization" },
     { page: "landing", key: "subheadline", value: "City streets parking assistant" },
     { page: "landing", key: "tagline", value: "Membership has its advantages" },
     { page: "landing", key: "ctaText", value: "Get Started" },
@@ -137,7 +137,7 @@ async function seed() {
   }
 
   // CMS version
-  await db.insert(cmsVersions).values({ id: "v1", page: "landing", status: "published", content: { headline: "Parking Agent", subheadline: "City streets parking assistant", tagline: "Membership has its advantages", ctaText: "Get Started" }, lastUpdated: "2026-06-15" }).onConflictDoNothing();
+  await db.insert(cmsVersions).values({ id: "v1", page: "landing", status: "published", content: { headline: "Spotimization", subheadline: "City streets parking assistant", tagline: "Membership has its advantages", ctaText: "Get Started" }, lastUpdated: "2026-06-15" }).onConflictDoNothing();
 
   // Revenue entries
   const revenue = [

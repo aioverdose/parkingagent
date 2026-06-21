@@ -53,7 +53,7 @@ export default function Signup() {
     <div className="min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
-          <a href="/" className="text-lg font-bold tracking-tight"><span className="text-[#4285F4]">Spot</span> <span className="text-[#0F9D58]">Mining</span></a>
+          <a href="/" className="text-lg font-bold tracking-tight">spotimization</a>
           <a href="/login" className="text-sm font-medium text-[#757575] hover:text-[#202124] transition-colors">Login</a>
         </div>
       </nav>
@@ -63,7 +63,7 @@ export default function Signup() {
           {step === "form" && (
             <div>
               <h1 className="text-3xl font-black text-[#202124] text-center">Sign Up</h1>
-              <p className="text-center text-[#757575] mt-2 text-sm">Join Spot Mining and start matching</p>
+              <p className="text-center text-[#757575] mt-2 text-sm">Join spotimization and start matching</p>
 
               {signupCount && !signupCount.isFull && (
                 <div className="mt-6 bg-gradient-to-r from-[#E8F0FE] to-[#E6F4EA] border border-[#4285F4]/20 rounded-xl p-4 text-center">

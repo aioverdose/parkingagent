@@ -25,7 +25,7 @@ export async function POST() {
 
     // Admin
     await db.insert(users).values({
-      id: "admin-001", name: "Admin", email: "admin@parkingagent.com",
+      id: "admin-001", name: "Admin", email: "admin@spotimization.com",
       passwordHash: adminHash, role: "admin", isMember: true, isAdmin: true,
       rankingScore: 100, status: "good-standing", membershipType: "annual",
       completedCourses: true, tier: "premium", ranking: 5,
@@ -35,7 +35,7 @@ export async function POST() {
 
     // Test account
     await db.insert(users).values({
-      id: "test-001", name: "Test Account", email: "test@parkingagent.com",
+      id: "test-001", name: "Test Account", email: "test@spotimization.com",
       passwordHash: testHash, role: "member", isMember: true, isAdmin: false,
       rankingScore: 85, status: "good-standing", membershipType: "monthly",
       completedCourses: true, tier: "free", ranking: 5,
@@ -106,7 +106,7 @@ export async function POST() {
 
     // CMS content
     const cmsEntries = [
-      { page: "landing", key: "headline", value: "Parking Agent" },
+      { page: "landing", key: "headline", value: "Spotimization" },
     ];
     for (const c of cmsEntries) {
       await db.insert(cmsContent).values({ id: uuid(), ...c, updatedAt: today }).onConflictDoNothing();

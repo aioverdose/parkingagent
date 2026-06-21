@@ -1,6 +1,6 @@
 import { api, type AuthUser } from "./api";
 
-const AUTH_KEY = "parking_agent_auth";
+const AUTH_KEY = "spotimization_auth";
 
 function storeUser(user: AuthUser): void {
   if (typeof window !== "undefined") {

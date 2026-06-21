@@ -100,14 +100,14 @@ function exportCSV(data: FinancialData) {
   const csv = rows.map((r) => r.join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a"); a.href = url; a.download = `parking-agent-financials-${new Date().toISOString().split("T")[0]}.csv`;
+  const a = document.createElement("a"); a.href = url; a.download = `spotimization-financials-${new Date().toISOString().split("T")[0]}.csv`;
   a.click(); URL.revokeObjectURL(url);
 }
 
 function exportPDF(data: FinancialData) {
   const win = window.open("", "_blank");
   if (!win) return;
-  win.document.write(`<html><head><title>Parking Agent Financials</title><style>
+  win.document.write(`<html><head><title>Spotimization Financials</title><style>
     body { font-family: system-ui, sans-serif; padding: 40px; color: #202124; }
     h1 { font-size: 24px; margin-bottom: 4px; }
     .subtitle { color: #757575; font-size: 14px; margin-bottom: 24px; }
@@ -120,7 +120,7 @@ function exportPDF(data: FinancialData) {
     th { color: #757575; font-weight: 600; }
     .footer { margin-top: 32px; font-size: 12px; color: #bdbdbd; }
   </style></head><body>
-    <h1>Parking Agent Financials</h1>
+    <h1>Spotimization Financials</h1>
     <p class="subtitle">Generated ${new Date().toLocaleDateString()}</p>
     <div class="grid">
       <div class="card"><div class="card-label">Monthly Revenue</div><div class="card-value" style="color:#0F9D58">$${data.totalMonthlyRevenue.toLocaleString()}</div></div>
@@ -137,7 +137,7 @@ function exportPDF(data: FinancialData) {
       <tr><td>New Signups (This Week)</td><td>${data.newSignupsThisWeek}</td></tr>
       <tr><td>Churned (This Month)</td><td>${data.churnedMembersThisMonth}</td></tr>
     </table>
-    <p class="footer">Parking Agent — Confidential</p>
+    <p class="footer">Spotimization — Confidential</p>
     <script>window.print()</script>
   </body></html>`);
   win.document.close();

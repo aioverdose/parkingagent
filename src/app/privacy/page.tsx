@@ -91,7 +91,7 @@ export default function PrivacyPolicy() {
           <Card>
             <h2 className="font-bold text-[#202124] text-sm mb-2">7. Contact</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
-              For privacy-related inquiries, contact us at support@parkingagent.com.
+              For privacy-related inquiries, contact us at support@spotimization.com.
             </p>
           </Card>
         </div>

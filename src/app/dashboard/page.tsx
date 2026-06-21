@@ -224,7 +224,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
-          <a href="/" className="text-lg font-bold tracking-tight"><span className="text-[#4285F4]">Parking</span> <span className="text-[#0F9D58]">Agent</span></a>
+          <a href="/" className="text-lg font-bold tracking-tight">spotimization</a>
           <div className="flex items-center gap-3 text-sm">
             <span className="text-[#757575] hidden sm:inline">{user.name}</span>
             {isPremium && <Badge variant="success">Premium</Badge>}
@@ -235,7 +235,7 @@ export default function Dashboard() {
               <button onClick={async () => { setBillingLoading(true); try { const { url } = await api.post<{ url: string }>("/api/stripe/portal"); window.location.href = url; } catch { alert("Billing portal not available."); } setBillingLoading(false); }} disabled={billingLoading}
                 className="text-xs bg-gray-100 text-[#757575] px-3 py-1.5 rounded-lg hover:bg-gray-200">{billingLoading ? "..." : "Billing"}</button>
             )}
-            <button onClick={() => { localStorage.removeItem("parking_agent_auth"); router.push("/"); }} className="text-[#E94335] hover:underline ml-1">Sign out</button>
+            <button onClick={() => { localStorage.removeItem("spotimization_auth"); router.push("/"); }} className="text-[#E94335] hover:underline ml-1">Sign out</button>
           </div>
         </div>
       </nav>

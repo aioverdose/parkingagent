@@ -6,7 +6,7 @@ import { login } from "@/lib/auth";
 
 export default function AdminLogin() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@parkingagent.com");
+  const [email, setEmail] = useState("admin@spotimization.com");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);

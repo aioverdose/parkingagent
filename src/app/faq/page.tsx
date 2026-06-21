@@ -4,12 +4,12 @@ import { useState } from "react";
 
 const faqs = [
   {
-    q: "What is Parking Agent?",
-    a: "Parking Agent is a membership platform that uses AI agentic matching technology to help members find street parking in Long Beach, CA. We connect departing members with arriving members to make parking easier.",
+    q: "What is Spotimization?",
+    a: "Spotimization is a membership platform that uses AI agentic matching technology to help members find street parking in Long Beach, CA. We connect departing members with arriving members to make parking easier.",
   },
   {
-    q: "Does Parking Agent own parking spots?",
-    a: "No. Parking Agent does not own, sell, lease, or control any parking spots. We provide matching technology and community education. All parking arrangements are between members.",
+    q: "Does Spotimization own parking spots?",
+    a: "No. Spotimization does not own, sell, lease, or control any parking spots. We provide matching technology and community education. All parking arrangements are between members.",
   },
   {
     q: "How does the AI matching work?",
@@ -28,8 +28,8 @@ const faqs = [
     a: "Yes. All members must complete a short course on Long Beach street parking laws, including time limits, permit zones, no-parking zones, and community participation rules.",
   },
   {
-    q: "What areas does Parking Agent serve?",
-    a: "Parking Agent is currently focused on Long Beach, California. We plan to expand to other cities in the future.",
+    q: "What areas does Spotimization serve?",
+    a: "Spotimization is currently focused on Long Beach, California. We plan to expand to other cities in the future.",
   },
   {
     q: "How do I become a member?",
@@ -37,11 +37,11 @@ const faqs = [
   },
   {
     q: "What happens if I get a parking ticket?",
-    a: "Parking Agent is not responsible for parking tickets or fines. Members are responsible for complying with all local parking laws and regulations. Our educational courses help you understand the rules.",
+    a: "Spotimization is not responsible for parking tickets or fines. Members are responsible for complying with all local parking laws and regulations. Our educational courses help you understand the rules.",
   },
   {
     q: "How do I cancel my membership?",
-    a: "You can cancel your membership at any time through your account settings. Refunds are handled on a case-by-case basis. Contact support@parkingagent.com for assistance.",
+    a: "You can cancel your membership at any time through your account settings. Refunds are handled on a case-by-case basis. Contact support@spotimization.com for assistance.",
   },
 ];
 
@@ -53,8 +53,7 @@ export default function FAQ() {
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between max-w-5xl mx-auto px-4 py-3">
           <a href="/" className="text-xl font-bold tracking-tight">
-            <span className="text-[#4285F4]">Parking</span>{" "}
-            <span className="text-[#0F9D58]">Agent</span>
+            Spotimization
           </a>
           <div className="flex items-center gap-4">
             <a href="/login" className="text-sm font-medium text-[#757575] hover:text-[#4285F4] transition-colors">Login</a>
@@ -73,7 +72,7 @@ export default function FAQ() {
           FAQ
         </h1>
         <p className="text-center text-[#757575] mt-2">
-          Frequently asked questions about Parking Agent.
+          Frequently asked questions about Spotimization.
         </p>
 
         <div className="mt-10 space-y-3">
@@ -115,7 +114,7 @@ export default function FAQ() {
 
       <footer className="border-t border-gray-200 py-6 text-center text-xs text-[#BDBDBD]">
         <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>&copy; 2026 Parking Agent. All rights reserved.</span>
+          <span>&copy; 2026 Spotimization. All rights reserved.</span>
           <div className="flex gap-4">
             <a href="/premium" className="hover:text-[#4285F4]">Premium</a>
             <a href="/tos" className="hover:text-[#4285F4]">Terms</a>

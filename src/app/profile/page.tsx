@@ -194,7 +194,7 @@ export default function ProfilePage() {
         newPassword: newPassword || undefined,
       });
       if (updated) {
-        localStorage.setItem("parking_agent_auth", JSON.stringify(updated));
+        localStorage.setItem("spotimization_auth", JSON.stringify(updated));
         setUser(updated);
         setMessage("Profile updated successfully");
         setCurrentPassword(""); setNewPassword("");
@@ -346,10 +346,7 @@ export default function ProfilePage() {
     <div className="flex flex-col min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between max-w-5xl mx-auto px-4 py-3">
-          <a href="/" className="text-xl font-bold tracking-tight">
-            <span className="text-[#4285F4]">Spot</span>{" "}
-            <span className="text-[#0F9D58]">Mining</span>
-          </a>
+          <a href="/" className="text-xl font-bold tracking-tight">spotimization</a>
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#757575]">{user.name}</span>
             {isPremium && <Badge variant="success">Premium</Badge>}

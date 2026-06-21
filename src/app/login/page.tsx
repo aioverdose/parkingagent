@@ -31,16 +31,16 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-6">
-          <a href="/" className="text-2xl font-bold tracking-tight"><span className="text-[#4285F4]">Parking</span> <span className="text-[#0F9D58]">Agent</span></a>
+          <a href="/" className="text-2xl font-bold tracking-tight">spotimization</a>
           <p className="text-[#757575] mt-1 text-xs">Sign in to your account</p>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm mb-3">
           <p className="text-[10px] font-semibold text-[#757575] uppercase tracking-wider mb-2">Quick Login</p>
           <div className="flex flex-wrap gap-1.5">
-            <button onClick={() => quickLogin("admin@parkingagent.com", "admin123", true)}
+            <button onClick={() => quickLogin("admin@spotimization.com", "admin123", true)}
               className="text-[10px] bg-[#4285F4]/10 text-[#4285F4] px-2.5 py-1.5 rounded-lg hover:bg-[#4285F4]/20 transition-colors">Admin</button>
-            <button onClick={() => quickLogin("test@parkingagent.com", "test123")}
+            <button onClick={() => quickLogin("test@spotimization.com", "test123")}
               className="text-[10px] bg-[#0F9D58]/10 text-[#0F9D58] px-2.5 py-1.5 rounded-lg hover:bg-[#0F9D58]/20 transition-colors">Test</button>
             <button onClick={() => quickLogin("alice@example.com", "password123")}
               className="text-[10px] bg-[#FBBB05]/10 text-[#FBBB05] px-2.5 py-1.5 rounded-lg hover:bg-[#FBBB05]/20 transition-colors">Alice</button>
