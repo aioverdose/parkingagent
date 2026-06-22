@@ -7,7 +7,6 @@ const helpPages = [
   { id: "help-center", label: "Help Center", path: "/help-center" },
   { id: "how-it-works", label: "How It Works", path: "/how-it-works" },
   { id: "safety-tips", label: "Safety Tips", path: "/safety-tips" },
-  { id: "contact-support", label: "Contact Support", path: "/contact-support" },
   { id: "troubleshooting", label: "Troubleshooting", path: "/troubleshooting" },
 ];
 

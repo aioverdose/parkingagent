@@ -93,12 +93,12 @@ export default function HelpCenter() {
         )}
 
         <div className="mt-12 text-center bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-8 max-w-3xl mx-auto">
-          <p className="text-sm text-[#757575] mb-4">Still need help?</p>
+          <p className="text-sm text-[#757575] mb-4">Still need help? Check the troubleshooting guide.</p>
           <button
-            onClick={() => router.push("/contact-support")}
+            onClick={() => router.push("/troubleshooting")}
             className="bg-[#2563EB] text-white px-8 py-3.5 rounded-lg font-semibold text-base hover:bg-[#1D4ED8] shadow-[0_4px_12px_rgba(37,99,235,0.3)] transition-all duration-300"
           >
-            Contact Support
+            Troubleshooting
           </button>
         </div>
       </main>

@@ -90,22 +90,14 @@ export default function DocsPage() {
         <div className="mt-12 bg-gray-50 rounded-2xl p-8 text-center border border-gray-200">
           <h2 className="font-bold text-[#202124] mb-2">Still have questions?</h2>
           <p className="text-sm text-[#757575] mb-4">
-            Check the FAQ or contact our support team.
+            Check the FAQ for quick answers.
           </p>
-          <div className="flex items-center justify-center gap-3">
-            <button
-              onClick={() => router.push("/help-center")}
-              className="bg-[#4285F4] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#1A73E8] transition-colors"
-            >
-              Help Center
-            </button>
-            <button
-              onClick={() => router.push("/contact-support")}
-              className="border border-gray-300 text-[#475569] px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors"
-            >
-              Contact Support
-            </button>
-          </div>
+          <button
+            onClick={() => router.push("/help-center")}
+            className="bg-[#4285F4] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#1A73E8] transition-colors"
+          >
+            Help Center
+          </button>
         </div>
       </main>
     </div>

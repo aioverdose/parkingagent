@@ -20,7 +20,7 @@ const actionHandlers: Record<string, () => void> = {
   "clear-cache": () => alert("Cache clearing instructions: Go to Settings > App > Spotimization > Clear Cache."),
   "try-again": () => window.location.reload(),
   "edit-request": () => window.location.href = "/dashboard",
-  "report-issue": () => window.location.href = "/contact-support",
+  "report-issue": () => alert("Please describe the issue in detail so we can help resolve it."),
   "check-settings": () => {
     if (navigator.mediaSession) {
       alert("Please check your device notification settings for Spotimization.");
@@ -127,13 +127,7 @@ export default function Troubleshooting() {
         )}
 
         <div className="mt-10 text-center border-t border-gray-200 pt-8">
-          <p className="text-sm text-[#757575] mb-4">Still having issues?</p>
-          <button
-            onClick={() => router.push("/contact-support")}
-            className="text-[#4285F4] font-bold text-sm hover:underline"
-          >
-            Contact Support &rarr;
-          </button>
+          <p className="text-sm text-[#757575]">If the issue persists, try restarting the app or clearing your cache.</p>
         </div>
       </main>
     </div>

@@ -144,7 +144,7 @@ export default function Signup() {
                 We sent a verification link to <strong>{email}</strong>. Click the link to activate your account.
               </p>
               <p className="text-xs text-[#757575] mt-4">
-                Didn't get the email? Check your spam folder or contact support.
+                Didn't get the email? Check your spam folder and make sure you entered the right address.
               </p>
             </div>
           )}

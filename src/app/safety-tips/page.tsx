@@ -116,15 +116,9 @@ export default function SafetyTips() {
           </div>
         </div>
 
-        {/* Emergency */}
-        <div className="mt-8 text-center border-t border-gray-200 pt-8">
-          <p className="text-sm text-[#757575] mb-4">For urgent safety issues, contact support immediately</p>
-          <button
-            onClick={() => router.push("/contact-support")}
-            className="bg-[#E94335] text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-[#D93025] transition-colors"
-          >
-            Contact Support
-          </button>
+        {/* Urgent reminders */}
+        <div className="mt-8 border-t border-gray-200 pt-8">
+          <p className="text-sm text-[#757575] text-center">Always prioritize your personal safety during exchanges.</p>
         </div>
       </main>
     </div>
