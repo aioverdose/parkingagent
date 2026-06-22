@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 
 const helpPages = [
+  { id: "docs", label: "Docs", path: "/docs" },
   { id: "help-center", label: "Help Center", path: "/help-center" },
   { id: "how-it-works", label: "How It Works", path: "/how-it-works" },
   { id: "safety-tips", label: "Safety Tips", path: "/safety-tips" },

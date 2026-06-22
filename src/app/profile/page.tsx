@@ -424,8 +424,8 @@ export default function ProfilePage() {
             )}
             <button onClick={() => router.push("/dashboard")}
               className="text-sm text-[#4285F4] hover:underline">Dashboard</button>
-            <button onClick={() => router.push("/help-center")}
-              className="text-sm text-[#4285F4] hover:underline">Help</button>
+            <button onClick={() => router.push("/docs")}
+              className="text-sm text-[#4285F4] hover:underline">Docs</button>
           </div>
         </div>
       </nav>

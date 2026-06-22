@@ -54,6 +54,7 @@ export default function Home() {
             spotimization
           </motion.a>
           <div className="hidden md:flex items-center gap-6 text-sm font-medium text-[#757575]">
+            <a href="/docs" className="hover:text-[#202124] transition-colors">Docs</a>
             <a href="/how-it-works" className="hover:text-[#202124] transition-colors">How It Works</a>
             <a href="/terms" className="hover:text-[#202124] transition-colors">Terms</a>
             <a href="/guidelines" className="hover:text-[#202124] transition-colors">Guidelines</a>
@@ -73,6 +74,7 @@ export default function Home() {
         </div>
         {menuOpen && (
           <div className="md:hidden border-t border-gray-100 px-4 py-4 space-y-3 text-sm">
+            <a href="/docs" className="block text-[#757575] hover:text-[#202124]">Docs</a>
             <a href="/how-it-works" className="block text-[#757575] hover:text-[#202124]">How It Works</a>
             <a href="/terms" className="block text-[#757575] hover:text-[#202124]">Terms</a>
             <a href="/guidelines" className="block text-[#757575] hover:text-[#202124]">Guidelines</a>

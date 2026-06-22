@@ -229,6 +229,7 @@ export default function Dashboard() {
             <span className="text-[#64748B] hidden sm:inline">{user.name}</span>
             {isPremium && <Badge variant="success">Premium</Badge>}
             {(user as any).earlyAdopter && <Badge variant="info">1 Year Free</Badge>}
+            <a href="/docs" className="text-[#64748B] font-medium hover:underline">Docs</a>
             <a href="/profile" className="text-[#2563EB] font-medium hover:underline">Profile</a>
             <a href="/premium" className={`font-medium hover:underline ${isPremium ? "text-[#64748B]" : "text-[#F59E0B] font-semibold"}`}>Premium</a>
             {user.membershipType && user.membershipType !== "none" && (
