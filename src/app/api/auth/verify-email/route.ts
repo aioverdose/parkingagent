@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { users, emailVerifications } from "@/lib/db/schema";
+import { emailVerifications } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { ok, err, handleError } from "@/lib/apiResponse";
 
@@ -29,11 +29,6 @@ export async function GET(req: Request) {
     if (new Date(verification.expiresAt) < new Date()) {
       return err("Verification link has expired", 410);
     }
-
-    await db
-      .update(users)
-      .set({ emailVerified: true })
-      .where(eq(users.id, verification.userId!));
 
     await db
       .update(emailVerifications)

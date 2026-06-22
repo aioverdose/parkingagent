@@ -41,7 +41,6 @@ export const users = pgTable(
     licensePlate: text("license_plate"),
     phone: text("phone"),
     phoneVerified: boolean("phone_verified").notNull().default(false),
-    emailVerified: boolean("email_verified").notNull().default(false),
     pushSubscription: text("push_subscription"),
     stripeCustomerId: text("stripe_customer_id"),
     stripeSubscriptionId: text("stripe_subscription_id"),
