@@ -102,16 +102,6 @@ export default function Home() {
         </p>
       </motion.section>
 
-      {/* Explanation */}
-      <section className="max-w-3xl mx-auto px-4 pb-8 text-center">
-        <div className="bg-[#F8F9FA] border border-gray-200 rounded-2xl p-6">
-          <p className="text-base text-[#202124] leading-relaxed">
-            We are a matching service for people who park on city streets.<br />
-            <strong>We do NOT own, buy, or sell parking spots of any kind.</strong>
-          </p>
-        </div>
-      </section>
-
       {/* How It Works */}
       <section className="max-w-3xl mx-auto px-4 pb-8">
         <h2 className="text-2xl font-bold text-[#202124] text-center mb-6">How It Works</h2>
