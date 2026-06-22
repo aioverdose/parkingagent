@@ -10,14 +10,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const isLoginPage = pathname === "/admin/login";
+
   useEffect(() => {
+    if (isLoginPage) { setLoading(false); return; }
     fetchCurrentUser().then((u) => {
       if (!u || !u.isAdmin) { router.push("/admin/login"); }
       else { setUser(u); }
       setLoading(false);
     });
-  }, [router]);
+  }, [router, isLoginPage]);
 
+  if (isLoginPage) return <>{children}</>;
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="w-8 h-8 border-4 border-[#E8F0FE] border-t-[#4285F4] rounded-full animate-spin" /></div>;
   if (!user) return null;
 
