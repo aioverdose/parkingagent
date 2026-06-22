@@ -70,6 +70,7 @@ export async function POST(req: Request) {
 
     await generateReferralCode(userId);
 
+    let emailSent = false;
     try {
       const verificationToken = uuid();
       const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
@@ -91,6 +92,7 @@ export async function POST(req: Request) {
         "Verify your email — Spotimization",
         `Hi ${name},\n\nWelcome to Spotimization! Please verify your email address by clicking the link below:\n\n${verifyUrl}\n\nThis link expires in 24 hours.\n\n— Spotimization`,
       );
+      emailSent = true;
     } catch {
       // email verification is non-critical — don't block signup
     }
@@ -139,6 +141,7 @@ export async function POST(req: Request) {
         signupNumber,
         earlyAdopter: tier === "free_1year",
       },
+      emailSent,
     });
   } catch (error) {
     return handleError(error, "Register error");

@@ -35,10 +35,14 @@ export default function Signup() {
 
     setLoading(true);
     try {
-      const res = await api.post<{ user: { signupNumber: number; tier: string } }>("/api/auth/register", {
+      const res = await api.post<{ user: { signupNumber: number; tier: string }; emailSent: boolean }>("/api/auth/register", {
         name, email, password, completedModuleIds: [],
       });
-      setStep("verify");
+      if (res.emailSent) {
+        setStep("verify");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       setError(err.message || "Signup failed. The email may already be registered.");
     }
