@@ -1,0 +1,184 @@
+{
+  "categories": [
+    {
+      "id": "getting-started",
+      "title": "Getting Started",
+      "icon": "🚀",
+      "items": [
+        {
+          "question": "How do I sign up?",
+          "answer": "Creating an account is free and easy. Click 'Sign Up' on the homepage, enter your name, email, and a secure password. Verify your phone number to activate your account, agree to the Terms of Service, and you're ready to go!"
+        },
+        {
+          "question": "How do I make my first spot request?",
+          "answer": "After signing up, go to your Dashboard and click 'I Need a Spot'. Drop a pin on the map where you want to park, set your arrival time and vehicle type. The system will search for available matches in real-time."
+        },
+        {
+          "question": "Is there a free trial?",
+          "answer": "The first 100 users receive a free 1-year premium membership. After that, we offer a standard plan at $4.99/month with a 30-day money-back guarantee."
+        },
+        {
+          "question": "Do I need to verify my phone?",
+          "answer": "Yes, phone verification is required to ensure all members are real and to prevent spam. You'll receive a one-time SMS code during signup."
+        }
+      ]
+    },
+    {
+      "id": "spot-requests",
+      "title": "Spot Requests",
+      "icon": "📌",
+      "items": [
+        {
+          "question": "How do I drop a pin on a parking spot?",
+          "answer": "In the Dashboard, select 'I Need a Spot' or 'I'm Leaving a Spot'. The map will center on your current location. Tap or click the exact street location where you want to park. A red pin will appear to confirm your selection."
+        },
+        {
+          "question": "Can I set my arrival and departure times?",
+          "answer": "Yes, you can set both arrival looking time and departure time. Our matching algorithm uses these times to find compatible members. You can adjust them anytime before a match is confirmed."
+        },
+        {
+          "question": "What vehicle types are supported?",
+          "answer": "We support small cars, standard sedans, and large vehicles (SUVs, trucks). Select your vehicle type in your profile settings to ensure spot compatibility."
+        },
+        {
+          "question": "How accurate does the pin need to be?",
+          "answer": "Drop the pin as close to the actual parking spot as possible. The map uses high-resolution street data. Zoom in for better accuracy. A 5-10 meter precision is sufficient for successful matching."
+        }
+      ]
+    },
+    {
+      "id": "matching",
+      "title": "Matching",
+      "icon": "🤝",
+      "items": [
+        {
+          "question": "How does the matching algorithm work?",
+          "answer": "Our algorithm matches departing users (leaving a spot) with arriving users (looking for a spot) based on location proximity, time overlap (within a 15-minute tolerance window), vehicle compatibility, and member ratings."
+        },
+        {
+          "question": "How long does matching take?",
+          "answer": "Matching is nearly instant during peak hours when many members are active. During slower periods, it may take a few minutes. You'll see a 'Searching...' indicator while the system looks for compatible matches."
+        },
+        {
+          "question": "Can I decline a match?",
+          "answer": "Yes, you can cancel a match if the timing or location doesn't work for you. However, frequent cancellations may affect your ranking score, so only request spots you genuinely need."
+        },
+        {
+          "question": "What happens when both members confirm?",
+          "answer": "Once both members confirm the match, the exchange enters the 'Confirmed' state. You'll be redirected to the live tracking page where you can see the other member's approach in real-time."
+        }
+      ]
+    },
+    {
+      "id": "exchanges",
+      "title": "Exchanges",
+      "icon": "🔄",
+      "items": [
+        {
+          "question": "How does the Uber-style tracking work?",
+          "answer": "Once a match is confirmed, the arriving user shares their live GPS location. The departing user sees their approach on a map with an estimated time of arrival (ETA). This works like ride-sharing tracking."
+        },
+        {
+          "question": "What is the geofence safety feature?",
+          "answer": "Our geofence creates a 75-meter virtual boundary around the parking spot. The departing user cannot start their car until the arriving user is confirmed inside this geofence area. This prevents spot camping and ensures a fair exchange."
+        },
+        {
+          "question": "What is the exchange flow?",
+          "answer": "The flow has 4 states: (1) Matched – both users confirmed, tracking active; (2) Arrived – arriving user is within the geofence; (3) Departing – departing user confirms departure; (4) Complete – exchange finished and the arriving user can park."
+        },
+        {
+          "question": "What if the other member doesn't show up?",
+          "answer": "If a member doesn't arrive within a reasonable time, you can cancel the match. The system tracks no-shows, and repeat offenders may have their accounts suspended. We recommend communicating through the app."
+        }
+      ]
+    },
+    {
+      "id": "payment",
+      "title": "Payment & Subscription",
+      "icon": "💳",
+      "items": [
+        {
+          "question": "How much does Spotimization cost?",
+          "answer": "The standard plan is $4.99/month. We also offer an annual plan at a discounted rate. The first 100 users receive a free 1-year membership as part of our early adopter program."
+        },
+        {
+          "question": "What payment methods do you accept?",
+          "answer": "We accept all major credit cards (Visa, Mastercard, American Express, Discover) and debit cards. Payments are processed securely through Stripe, our payment processor."
+        },
+        {
+          "question": "Can I cancel my subscription anytime?",
+          "answer": "Yes. You can cancel your subscription at any time from your Account Settings. Your premium features will remain active until the end of your billing period."
+        },
+        {
+          "question": "Is there a refund policy?",
+          "answer": "We offer a 30-day money-back guarantee. If you're not satisfied, contact support within 30 days of your first payment for a full refund."
+        }
+      ]
+    },
+    {
+      "id": "account",
+      "title": "Account & Profile",
+      "icon": "👤",
+      "items": [
+        {
+          "question": "How do I update my profile?",
+          "answer": "Go to Profile from the Dashboard menu. You can update your name, email, neighborhood, and notification preferences. Changes are saved instantly."
+        },
+        {
+          "question": "How do notification settings work?",
+          "answer": "You can enable or disable push notifications, email notifications, and alarm settings from your Profile page. We recommend keeping notifications on during active matches to receive real-time updates."
+        },
+        {
+          "question": "Can I manage my vehicle info?",
+          "answer": "Vehicle information can be added in your Profile settings. You can set your vehicle type (car, motorcycle, bike, truck) and preferred spot size for better matching compatibility."
+        }
+      ]
+    },
+    {
+      "id": "safety",
+      "title": "Safety & Trust",
+      "icon": "🛡️",
+      "items": [
+        {
+          "question": "How are users verified?",
+          "answer": "All users must verify their phone number and agree to our Terms of Service. We also track member ratings and match history to build a trusted community."
+        },
+        {
+          "question": "How does the rating system work?",
+          "answer": "After each exchange, both members rate each other on a 5-star scale. Your overall rating is the average of all ratings received. Higher-rated members are prioritized in the matching algorithm."
+        },
+        {
+          "question": "How do I report a problem with another user?",
+          "answer": "You can report issues through the Contact Support page or directly from a match card. Select 'Report Issue' and provide details. Our team reviews every report within 24 hours."
+        },
+        {
+          "question": "Is my personal information safe?",
+          "answer": "Yes. We never share your personal information with other members without your consent. All communications are anonymized through the app. Your payment data is processed securely through Stripe."
+        }
+      ]
+    },
+    {
+      "id": "technical",
+      "title": "Technical Issues",
+      "icon": "🔧",
+      "items": [
+        {
+          "question": "Why is my GPS not working?",
+          "answer": "Check that Location Services are enabled for Spotimization in your device settings. Enable 'High Accuracy' mode for best results. If issues persist, try restarting the app or your device."
+        },
+        {
+          "question": "Why is the map not loading?",
+          "answer": "Verify your internet connection is working. Try clearing the app cache from your device settings. If the problem continues, update to the latest version or reinstall the app."
+        },
+        {
+          "question": "I found a bug. How do I report it?",
+          "answer": "Contact Support via the app with a description of the issue, steps to reproduce it, and a screenshot if possible. Our development team reviews bug reports regularly."
+        },
+        {
+          "question": "Why am I not receiving notifications?",
+          "answer": "Ensure notifications are enabled for Spotimization in your device settings. Check that your phone isn't in Do Not Disturb mode. Enable Background App Refresh for reliable notification delivery."
+        }
+      ]
+    }
+  ]
+}

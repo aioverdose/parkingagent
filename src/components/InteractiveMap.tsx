@@ -45,7 +45,7 @@ export default function InteractiveMap({
       await import("leaflet/dist/leaflet.css");
 
       if (!mapRef.current) return;
-      const map = L.map(mapRef.current).setView([center.lat, center.lng], 15);
+      const map = L.map(mapRef.current, { zoomControl: false }).setView([center.lat, center.lng], 15);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>",
@@ -60,21 +60,21 @@ export default function InteractiveMap({
         } else {
           const icon = L.divIcon({
             className: "custom-pin",
-            html: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#E94335" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`,
+            html: `<div style="position:relative;width:32px;height:32px;"><div style="position:absolute;width:32px;height:32px;background:#2563EB;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(37,99,235,0.4);"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:10px;height:10px;background:white;border-radius:50%;"></div></div></div>`,
             iconSize: [32, 32],
-            iconAnchor: [16, 32],
+            iconAnchor: [16, 28],
           });
           markerRef.current = L.marker([lat, lng], { icon }).addTo(map);
         }
       });
 
-      // Spot position marker (green pin for the parking spot)
+      // Spot position marker (electric blue pin for parking spot)
       if (spotPosition) {
         const spotIcon = L.divIcon({
           className: "custom-spot-pin",
-          html: `<svg width="36" height="36" viewBox="0 0 24 24" fill="#0F9D58" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`,
+          html: `<div style="position:relative;width:36px;height:36px;"><div style="position:absolute;width:36px;height:36px;background:#2563EB;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 16px rgba(37,99,235,0.45);"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;background:white;border-radius:50%;"></div></div></div>`,
           iconSize: [36, 36],
-          iconAnchor: [18, 36],
+          iconAnchor: [18, 32],
         });
         spotMarkerRef.current = L.marker([spotPosition.lat, spotPosition.lng], { icon: spotIcon }).addTo(map);
       }
@@ -83,11 +83,11 @@ export default function InteractiveMap({
       if (geofence) {
         geofenceRef.current = L.circle([geofence.center.lat, geofence.center.lng], {
           radius: geofence.radiusMeters,
-          color: geofence.color || "#4285F4",
-          fillColor: geofence.color || "#4285F4",
-          fillOpacity: 0.1,
+          color: geofence.color || "#7C3AED",
+          fillColor: geofence.color || "#7C3AED",
+          fillOpacity: 0.3,
           weight: 2,
-          dashArray: "8 8",
+          dashArray: "6 6",
         }).addTo(map);
       }
 
@@ -105,7 +105,7 @@ export default function InteractiveMap({
     };
   }, [center.lat, center.lng, spotPosition?.lat, spotPosition?.lng, geofence?.center.lat, geofence?.center.lng, geofence?.radiusMeters]);
 
-  // Pin position marker (user's selected spot - red)
+  // Pin position marker
   useEffect(() => {
     if (!mapInstanceRef.current) return;
     (async () => {
@@ -115,16 +115,16 @@ export default function InteractiveMap({
       } else if (pinPosition) {
         const icon = L.divIcon({
           className: "custom-pin",
-          html: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#E94335" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`,
+          html: `<div style="position:relative;width:32px;height:32px;"><div style="position:absolute;width:32px;height:32px;background:#2563EB;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(37,99,235,0.4);"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:10px;height:10px;background:white;border-radius:50%;"></div></div></div>`,
           iconSize: [32, 32],
-          iconAnchor: [16, 32],
+          iconAnchor: [16, 28],
         });
         markerRef.current = L.marker([pinPosition.lat, pinPosition.lng], { icon }).addTo(mapInstanceRef.current);
       }
     })();
   }, [pinPosition?.lat, pinPosition?.lng]);
 
-  // Live position marker (approaching user - blue)
+  // Live position marker (purple with pulse)
   useEffect(() => {
     if (!mapInstanceRef.current || !livePosition) return;
     (async () => {
@@ -134,9 +134,10 @@ export default function InteractiveMap({
       } else {
         const liveIcon = L.divIcon({
           className: "custom-live-pin",
-          html: `<div style="width:20px;height:20px;background:#4285F4;border:3px solid white;border-radius:50%;box-shadow:0 0 8px rgba(66,133,244,0.6);animation:pulse 2s infinite;"></div>`,
-          iconSize: [20, 20],
-          iconAnchor: [10, 10],
+          html: `<div style="width:24px;height:24px;background:#7C3AED;border:3px solid white;border-radius:50%;box-shadow:0 0 0 8px rgba(124,58,237,0.2),0 2px 8px rgba(124,58,237,0.4);animation:livePulse 2s infinite;"></div>
+          <style>@keyframes livePulse{0%,100%{box-shadow:0 0 0 8px rgba(124,58,237,0.2),0 2px 8px rgba(124,58,237,0.4);}50%{box-shadow:0 0 0 16px rgba(124,58,237,0.1),0 2px 8px rgba(124,58,237,0.4);}}</style>`,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
         });
         liveMarkerRef.current = L.marker([livePosition.lat, livePosition.lng], { icon: liveIcon }).addTo(mapInstanceRef.current);
       }
@@ -145,6 +146,6 @@ export default function InteractiveMap({
   }, [livePosition?.lat, livePosition?.lng]);
 
   return (
-    <div ref={mapRef} className={`rounded-xl ${className}`} style={{ minHeight: 250 }} />
+    <div ref={mapRef} className={`rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] ${className}`} style={{ minHeight: 250 }} />
   );
 }

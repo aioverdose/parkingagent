@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { signup } from "@/lib/auth";
 import { api } from "@/lib/api";
-import { HoverButton } from "@/components/ui/HoverButton";
 
 export default function Signup() {
   const router = useRouter();
@@ -20,7 +19,6 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [signupCount, setSignupCount] = useState<{ count: number; remaining: number; isFull: boolean } | null>(null);
-  const [signupResult, setSignupResult] = useState<{ signupNumber: number; tier: string } | null>(null);
 
   useEffect(() => {
     api.get<{ count: number; remaining: number; isFull: boolean }>("/api/signup-count").then(setSignupCount).catch(() => {});
@@ -40,8 +38,6 @@ export default function Signup() {
       const res = await api.post<{ user: { signupNumber: number; tier: string } }>("/api/auth/register", {
         name, email, password, completedModuleIds: [],
       });
-      const { user } = res;
-      setSignupResult({ signupNumber: user.signupNumber, tier: user.tier });
       setStep("verify");
     } catch (err: any) {
       setError(err.message || "Signup failed. The email may already be registered.");
@@ -73,7 +69,7 @@ export default function Signup() {
                     <div className="bg-gradient-to-r from-[#4285F4] to-[#0F9D58] h-full rounded-full transition-all duration-500" style={{ width: `${(signupCount.count / 100) * 100}%` }} />
                   </div>
                   <p className="text-xs text-[#757575] mt-2">
-                    First 100 users get <strong>1 year FREE</strong> \u2014 Early Adopter badge, unlimited matching.
+                    First 100 users get <strong>1 year FREE</strong> \u2014 1 Year Free badge, unlimited matching.
                   </p>
                 </div>
               )}
@@ -140,33 +136,16 @@ export default function Signup() {
             </div>
           )}
 
-          {step === "verify" && signupResult && (
+          {step === "verify" && (
             <div className="text-center">
-              <div className="text-5xl mb-4">{"\u2705"}</div>
-              <h1 className="text-3xl font-black text-[#202124]">You're Signed Up!</h1>
-              <div className="mt-6 bg-gradient-to-r from-[#E8F0FE] to-[#E6F4EA] border border-[#4285F4]/20 rounded-2xl p-6">
-                <div className="text-4xl font-black text-[#4285F4] mb-2">#{signupResult.signupNumber}</div>
-                {signupResult.tier === "free_1year" ? (
-                  <>
-                    <p className="text-lg font-bold text-[#0F9D58]">{"\u2705"} You got 1 Year FREE Access!</p>
-                    <p className="text-sm text-[#757575] mt-2">
-                      You're one of the first 100 members. Enjoy free matching for a full year, then $4.99/month.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-lg font-bold text-[#4285F4]">Premium Member</p>
-                    <p className="text-sm text-[#757575] mt-2">
-                      You signed up after the first 100. Your plan is <strong>$4.99/month</strong>.
-                    </p>
-                  </>
-                )}
-              </div>
-              <div className="mt-6">
-                <HoverButton variant="primary" onClick={() => router.push("/profile")}>
-                  Set Up Your Profile \u2192
-                </HoverButton>
-              </div>
+              <div className="text-5xl mb-4">{"\u2709\uFE0F"}</div>
+              <h1 className="text-3xl font-black text-[#202124]">Check Your Email</h1>
+              <p className="text-[#757575] mt-2">
+                We sent a verification link to <strong>{email}</strong>. Click the link to activate your account.
+              </p>
+              <p className="text-xs text-[#757575] mt-4">
+                Didn't get the email? Check your spam folder or contact support.
+              </p>
             </div>
           )}
 

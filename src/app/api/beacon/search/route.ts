@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { parkingBeacons, parkingMatchSchedules, users } from "@/lib/db/schema";
-import { eq, and, gt, lte, gte } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth-server";
 import { haversineDistanceMiles } from "@/lib/geo";
 import { ok, err, handleError } from "@/lib/apiResponse";
@@ -11,10 +11,6 @@ export async function POST(req: NextRequest) {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return err("Not authenticated", 401);
-    }
-
-    if (currentUser.tier !== "premium" && !currentUser.isPremium) {
-      return err("Premium subscription required", 403);
     }
 
     const body = await req.json().catch(() => ({}));

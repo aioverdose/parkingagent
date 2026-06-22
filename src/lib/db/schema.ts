@@ -41,6 +41,7 @@ export const users = pgTable(
     licensePlate: text("license_plate"),
     phone: text("phone"),
     phoneVerified: boolean("phone_verified").notNull().default(false),
+    emailVerified: boolean("email_verified").notNull().default(false),
     pushSubscription: text("push_subscription"),
     stripeCustomerId: text("stripe_customer_id"),
     stripeSubscriptionId: text("stripe_subscription_id"),
@@ -397,7 +398,90 @@ export const phoneVerifications = pgTable(
   }),
 );
 
+// ── Email Verification ──────────────────────────────────────────
+
+export const emailVerifications = pgTable(
+  "email_verifications",
+  {
+    id: text("id").primaryKey(),
+    email: text("email").notNull(),
+    token: text("token").notNull().unique(),
+    userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+    verified: boolean("verified").notNull().default(false),
+    expiresAt: text("expires_at").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => ({
+    tokenIdx: uniqueIndex("ev_token_idx").on(table.token),
+    emailIdx: index("ev_email_idx").on(table.email),
+  }),
+);
+
 // ── Optional Parking Match ──────────────────────────────────────
+
+export const schedules = pgTable(
+  "schedules",
+  {
+    id: text("id").primaryKey(),
+    memberId: text("member_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    neighborhoodId: text("neighborhood_id"),
+    neighborhoodName: text("neighborhood_name"),
+    scheduleType: text("schedule_type", {
+      enum: ["work", "event", "shift", "other"],
+    }).notNull().default("other"),
+    daysOfWeek: integer("days_of_week").array().notNull(),
+    arrivalWindowStart: integer("arrival_window_start").notNull(),
+    arrivalWindowEnd: integer("arrival_window_end").notNull(),
+    departureWindowStart: integer("departure_window_start").notNull(),
+    departureWindowEnd: integer("departure_window_end").notNull(),
+    frequency: text("frequency", {
+      enum: ["daily", "weekly", "biweekly"],
+    }).notNull().default("weekly"),
+    startDate: text("start_date"),
+    endDate: text("end_date"),
+    role: text("role", {
+      enum: ["arriver", "departor", "both"],
+    }).notNull().default("both"),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at"),
+  },
+  (table) => ({
+    memberIdx: index("schedules_member_idx").on(table.memberId),
+    neighborhoodIdx: index("schedules_neighborhood_idx").on(table.neighborhoodId),
+  }),
+);
+
+export const preScheduledMatches = pgTable(
+  "pre_scheduled_matches",
+  {
+    id: text("id").primaryKey(),
+    incomingMemberId: text("incoming_member_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    departingMemberId: text("departing_member_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    neighborhoodId: text("neighborhood_id"),
+    neighborhoodName: text("neighborhood_name"),
+    schedulePatternId: text("schedule_pattern_id")
+      .notNull()
+      .references(() => schedules.id, { onDelete: "cascade" }),
+    status: text("status", {
+      enum: ["pending", "confirmed", "cancelled", "expired"],
+    }).notNull().default("pending"),
+    nextOccurrence: text("next_occurrence").notNull(),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at"),
+  },
+  (table) => ({
+    incomingIdx: index("psm_incoming_idx").on(table.incomingMemberId),
+    departingIdx: index("psm_departing_idx").on(table.departingMemberId),
+    neighborhoodIdx: index("psm_neighborhood_idx").on(table.neighborhoodId),
+    statusIdx: index("psm_status_idx").on(table.status),
+  }),
+);
 
 export const parkingMatchSchedules = pgTable(
   "parking_match_schedules",
@@ -485,7 +569,7 @@ export const parkingMatchesRelations = relations(parkingMatches, ({ one }) => ({
   }),
 }));
 
-// ── Departure Beacons ───────────────────────────────────────────
+// ── Arrival Beacons ─────────────────────────────────────────────
 
 export const parkingBeacons = pgTable(
   "parking_beacons",

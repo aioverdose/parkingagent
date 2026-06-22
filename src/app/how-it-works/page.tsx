@@ -1,96 +1,148 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/Card";
+import { useRouter } from "next/navigation";
+import HelpNav from "@/components/HelpNav";
 
 const steps = [
-  { label: "Member Departing", desc: "Leaving a parking spot", icon: "🚗", side: "left" },
-  { label: "Spot Offered", desc: "AI registers the availability", icon: "📡", side: "right" },
-  { label: "AI Finds Match", desc: "Searches closest ranking member", icon: "🤖", side: "left" },
-  { label: "Match Confirmed", desc: "Arriving member notified", icon: "✅", side: "right" },
-  { label: "Member Arrives", desc: "Takes the parking spot", icon: "📍", side: "left" },
-];
-
-const details = [
-  { title: "AI Matching Engine", items: ["Departing member posts their soon-to-be-available spot", "AI searches for ranking members in closest proximity", "Pairs the closest good-standing member to the spot", "No multi-car approach — one member, one spot"] },
-  { title: "Long Beach Street Parking Laws", items: ["Time limits: 2 hours in commercial zones", "Permit zones: residential permit parking areas", "No-parking zones: red curbs, fire hydrants, driveways", "Street sweeping schedules must be observed"] },
-  { title: "Ranking System", items: ["Earn points for successful matches and course completion", "Higher ranking = priority in the AI matching queue", "Good-standing required to participate in matching", "Violations may result in suspension or reduced ranking"] },
+  {
+    num: 1,
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    ),
+    title: "Sign Up & Verify",
+    text: "Create account, verify phone, agree to TOS",
+  },
+  {
+    num: 2,
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+    title: "Drop a Pin on Your Spot",
+    text: "Select exact street parking spot on neighborhood map",
+  },
+  {
+    num: 3,
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    title: "Set Your Times",
+    text: "Enter arrival time, departure time, and vehicle type",
+  },
+  {
+    num: 4,
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+    title: "Get Matched",
+    text: "We match you with someone arriving or departing at the same time",
+  },
+  {
+    num: 5,
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10m10 0h-3m3 0h3m-8-4h3" />
+      </svg>
+    ),
+    title: "Track in Real-Time",
+    text: "Uber-style live tracking shows arriving user's location",
+  },
+  {
+    num: 6,
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    title: "Seamless Exchange",
+    text: "Arriving user positioned \u2192 departing user starts car \u2192 exchange complete",
+  },
 ];
 
 export default function HowItWorks() {
-  const [visibleStep, setVisibleStep] = useState(0);
-  useEffect(() => {
-    if (visibleStep < steps.length - 1) { const t = setTimeout(() => setVisibleStep(v => v + 1), 1200); return () => clearTimeout(t); }
-  }, [visibleStep]);
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
-          <a href="/" className="text-lg font-bold tracking-tight">Spotimization</a>
-          <div className="flex items-center gap-4 text-sm font-medium">
-            <a href="/login" className="text-[#757575] hover:text-[#202124] transition-colors">Login</a>
-            <a href="/signup" className="bg-[#4285F4] text-white px-4 py-2 rounded-lg hover:bg-[#1A73E8] transition-colors">Get Started</a>
-          </div>
+      <HelpNav current="how-it-works" />
+
+      <main className="max-w-3xl mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-3xl font-bold text-[#202124]">How It Works</h1>
+          <p className="text-[#757575] mt-2">Six simple steps to a seamless parking exchange</p>
         </div>
-      </nav>
 
-      <main className="max-w-5xl mx-auto px-4 pt-12 pb-20">
-        <h1 className="text-3xl font-black text-center text-[#202124]">How It Works</h1>
-        <p className="text-center text-[#757575] mt-2 max-w-2xl mx-auto text-sm">Our AI agentic technology matches departing members with arriving members in real-time — no public listing, no multi-car races.</p>
+        {/* Progress indicator */}
+        <div className="flex items-center justify-center gap-1 mb-12">
+          {steps.map((s) => (
+            <div key={s.num} className="flex items-center">
+              <div className="w-8 h-8 rounded-full bg-[#4285F4] text-white flex items-center justify-center text-xs font-bold">
+                {s.num}
+              </div>
+              {s.num < 6 && <div className="w-8 h-0.5 bg-[#4285F4]/30" />}
+            </div>
+          ))}
+        </div>
 
-        {/* Timeline */}
-        <div className="mt-16 relative">
-          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#E8F0FE] -translate-x-1/2 hidden sm:block" />
-          <div className="space-y-8 sm:space-y-0">
-            {steps.map((s, i) => (
-              <div key={s.label} className={`flex items-center gap-4 sm:gap-8 ${i % 2 === 0 ? "sm:flex-row" : "sm:flex-row-reverse"} ${i <= visibleStep ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 ease-out`}>
-                <div className={`flex-1 ${i % 2 === 0 ? "sm:text-right" : "sm:text-left"}`}>
-                  <Card className={`${i <= visibleStep ? "animate-fade-in-up" : ""}`} style={{ animationDelay: `${i * 200}ms` }}>
-                    <span className="text-2xl block mb-1">{s.icon}</span>
-                    <h3 className="font-bold text-[#202124]">{s.label}</h3>
-                    <p className="text-xs text-[#757575] mt-0.5">{s.desc}</p>
-                  </Card>
+        <div className="relative">
+          {/* Vertical line */}
+          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-[#4285F4]/20 hidden md:block" />
+
+          <div className="space-y-10">
+            {steps.map((step, idx) => (
+              <div key={step.num} className="relative flex items-start gap-6">
+                {/* Step number badge */}
+                <div className={`flex-shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center z-10 ${
+                  idx % 2 === 0 ? "bg-[#E8F0FE] text-[#4285F4]" : "bg-[#E6F4EA] text-[#0F9D58]"
+                }`}>
+                  {step.icon}
                 </div>
-                <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-[#4285F4] text-white font-bold text-sm shrink-0 relative z-10">{i + 1}</div>
-                <div className="flex-1 hidden sm:block" />
+
+                {/* Content */}
+                <div className="flex-1 pt-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-bold text-[#4285F4]">Step {step.num}</span>
+                    <span className="text-xs text-[#757575]">of 6</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-[#202124]">{step.title}</h3>
+                  <p className="text-sm text-[#757575] mt-1 leading-relaxed">{step.text}</p>
+                </div>
+
+                {/* Mobile step indicator */}
+                <div className="md:hidden flex-shrink-0 w-8 h-8 rounded-full bg-[#4285F4] text-white flex items-center justify-center text-xs font-bold">
+                  {step.num}
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Detail cards */}
-        <div className="mt-16 grid md:grid-cols-3 gap-4">
-          {details.map((d) => (
-            <Card key={d.title}>
-              <h2 className="font-bold text-[#202124] text-sm mb-3">{d.title}</h2>
-              <ul className="space-y-1.5">
-                {d.items.map((item) => (
-                  <li key={item} className="text-xs text-[#757575] flex items-start gap-2">
-                    <span className="text-[#0F9D58] mt-0.5">•</span> {item}
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          ))}
-        </div>
-
-        <div className="text-center mt-12">
-          <a href="/signup" className="inline-block bg-[#0F9D58] text-white px-8 py-3.5 rounded-xl font-bold shadow-lg hover:bg-[#34A853] transition-colors">Become a Member</a>
+        {/* Illustration placeholder */}
+        <div className="mt-12 bg-gradient-to-br from-[#E8F0FE] to-[#E6F4EA] rounded-2xl p-8 text-center border border-[#4285F4]/20">
+          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <svg className="w-10 h-10 text-[#4285F4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+          </div>
+          <h3 className="font-bold text-[#202124] mb-2">Ready to find your spot?</h3>
+          <p className="text-sm text-[#757575] mb-4">Join hundreds of members optimizing street parking</p>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="bg-[#4285F4] text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-[#1A73E8] transition-colors"
+          >
+            Get Started
+          </button>
         </div>
       </main>
-
-      <footer className="border-t border-gray-200 py-8">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#757575]">
-          <div className="font-bold tracking-tight">Spotimization</div>
-          <div className="flex gap-4">
-            <a href="/premium" className="hover:text-[#202124]">Premium</a>
-            <a href="/tos" className="hover:text-[#202124]">Terms</a>
-            <a href="/legal/privacy" className="hover:text-[#202124]">Privacy</a>
-          </div>
-          <p>© 2026 Spotimization. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 }

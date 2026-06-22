@@ -15,15 +15,14 @@ export function HoverCard({
   return (
     <motion.div
       className={cn(
-        "rounded-xl bg-white p-6 shadow-3d-light border border-gray-100",
-        glow && "hover:shadow-glow",
+        "rounded-xl bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)]",
+        glow && "hover:shadow-[0_0_30px_rgba(37,99,235,0.22)]",
         className,
       )}
       whileHover={{
-        y: -6,
-        scale: 1.02,
-        boxShadow: "0 20px 40px rgba(0,0,0,0.2), 0 6px 12px rgba(0,0,0,0.15)",
-        transition: { duration: 0.2, ease: "easeOut" },
+        y: -2,
+        boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+        transition: { duration: 0.3, ease: "easeOut" },
       }}
     >
       {children}

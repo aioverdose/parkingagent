@@ -19,13 +19,17 @@ export function HoverButton({
   type?: "button" | "submit" | "reset";
 }) {
   const base =
-    "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-colors";
+    "inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-lg font-semibold text-base transition-all duration-300";
 
-  const variants = {
-    primary: "bg-[#4285F4] text-white hover:bg-[#1A73E8]",
-    secondary: "border-2 border-gray-300 text-[#757575] hover:border-[#4285F4] hover:text-[#4285F4]",
-    success: "bg-[#0F9D58] text-white hover:bg-[#34A853]",
-    danger: "bg-[#E94335] text-white hover:bg-[#D93025]",
+  const variants: Record<string, string> = {
+    primary:
+      "bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-[0_4px_12px_rgba(37,99,235,0.3)]",
+    secondary:
+      "bg-white text-[#2563EB] border-2 border-[#2563EB] hover:bg-[#DBEAFE]",
+    success:
+      "bg-[#10B981] text-white hover:bg-[#059669] shadow-[0_4px_12px_rgba(16,185,129,0.3)]",
+    danger:
+      "bg-[#EF4444] text-white hover:bg-[#DC2626] shadow-[0_4px_12px_rgba(239,68,68,0.3)]",
   };
 
   return (
@@ -37,12 +41,7 @@ export function HoverButton({
       whileHover={
         disabled
           ? undefined
-          : {
-              scale: 1.04,
-              y: -2,
-              boxShadow: "0 8px 20px rgba(66,133,244,0.35)",
-              transition: { duration: 0.2, ease: "easeOut" },
-            }
+          : { y: -2, transition: { duration: 0.3, ease: "easeOut" } }
       }
       whileTap={disabled ? undefined : { scale: 0.97 }}
     >

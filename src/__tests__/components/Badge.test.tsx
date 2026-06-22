@@ -22,15 +22,15 @@ describe("Badge", () => {
   it("applies variant class for success", () => {
     render(<Badge variant="success">Success</Badge>);
     const badge = screen.getByText("Success");
-    expect(badge.className).toContain("bg-[#E6F4EA]");
-    expect(badge.className).toContain("text-[#0F9D58]");
+    expect(badge.className).toContain("bg-[#D1FAE5]");
+    expect(badge.className).toContain("text-[#059669]");
   });
 
   it("applies variant class for error", () => {
     render(<Badge variant="error">Error</Badge>);
     const badge = screen.getByText("Error");
-    expect(badge.className).toContain("bg-[#FCE8E6]");
-    expect(badge.className).toContain("text-[#E94335]");
+    expect(badge.className).toContain("bg-[#FEE2E2]");
+    expect(badge.className).toContain("text-[#DC2626]");
   });
 
   it("applies custom className", () => {

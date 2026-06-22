@@ -34,6 +34,8 @@ export default function AdminDashboard() {
   const [seedMsg, setSeedMsg] = useState("");
   const [resetting, setResetting] = useState(false);
   const [resetMsg, setResetMsg] = useState("");
+  const [runningMatching, setRunningMatching] = useState(false);
+  const [matchingMsg, setMatchingMsg] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -157,10 +159,13 @@ export default function AdminDashboard() {
             className="bg-[#4285F4] text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-[#1A73E8] disabled:opacity-50">{seeding ? "..." : "Seed Database"}</button>
           <button onClick={async () => { setResetting(true); setResetMsg(""); try { const { message } = await api.post<{ message: string }>("/api/admin/reset-metrics"); setResetMsg(message); } catch { setResetMsg("Reset failed"); } setResetting(false); setTimeout(() => setResetMsg(""), 5000); }} disabled={resetting}
             className="bg-[#FBBB05] text-[#202124] px-4 py-2 rounded-lg text-xs font-semibold hover:bg-[#F9A825] disabled:opacity-50">{resetting ? "..." : "Reset Metrics"}</button>
+          <button onClick={async () => { setRunningMatching(true); setMatchingMsg(""); try { const { message } = await api.post<{ message: string }>("/api/matching/run-for-neighborhood", {}); setMatchingMsg(message); } catch { setMatchingMsg("Matching failed"); } setRunningMatching(false); setTimeout(() => setMatchingMsg(""), 5000); }} disabled={runningMatching}
+            className="bg-[#0F9D58] text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-[#34A853] disabled:opacity-50">{runningMatching ? "..." : "Run Matching Now"}</button>
         </div>
         {expireMsg && <p className="text-xs text-[#757575] mt-2">{expireMsg}</p>}
         {seedMsg && <p className="text-xs text-[#0F9D58] mt-2">{seedMsg}</p>}
         {resetMsg && <p className="text-xs text-[#0F9D58] mt-2">{resetMsg}</p>}
+        {matchingMsg && <p className="text-xs text-[#0F9D58] mt-2">{matchingMsg}</p>}
       </Card>
     </div>
   );

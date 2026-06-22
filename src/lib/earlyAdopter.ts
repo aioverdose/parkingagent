@@ -11,7 +11,7 @@ export function getTierForSignup(signupNumber: number): "free_1year" | "premium"
 export function getBadges(signupNumber: number): string[] {
   const badges: string[] = [];
   if (isEarlyAdopter(signupNumber)) {
-    badges.push("Early Adopter (1 Year Free)");
+    badges.push("1 Year Free");
   } else {
     badges.push("Premium Member");
   }

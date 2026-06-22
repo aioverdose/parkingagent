@@ -1,0 +1,89 @@
+{
+  "issues": [
+    {
+      "id": "gps-not-working",
+      "title": "GPS Not Working",
+      "icon": "📍",
+      "problem": "App can't track your location",
+      "solutions": [
+        "Go to Settings > Privacy > Location Services > Spotimization > Enable",
+        "Enable 'High Accuracy' mode in Location Settings",
+        "Close and reopen the app",
+        "Power off and restart your device"
+      ],
+      "buttonText": "Test GPS",
+      "buttonAction": "test-gps"
+    },
+    {
+      "id": "map-not-loading",
+      "title": "Map Not Loading",
+      "icon": "🗺️",
+      "problem": "Map shows blank or doesn't display",
+      "solutions": [
+        "Verify Wi-Fi or cellular data is working",
+        "Settings > App > Clear Cache",
+        "Check for latest app version",
+        "Delete and reinstall the app"
+      ],
+      "buttonText": "Clear Cache",
+      "buttonAction": "clear-cache"
+    },
+    {
+      "id": "cant-drop-pin",
+      "title": "Can't Drop Pin",
+      "icon": "📌",
+      "problem": "Unable to select parking spot on map",
+      "solutions": [
+        "Zoom closer to area for better pin accuracy",
+        "Tap exact spot on the street, not the edge",
+        "Close and reopen the map view",
+        "Ensure Location Services are enabled"
+      ],
+      "buttonText": "Try Again",
+      "buttonAction": "try-again"
+    },
+    {
+      "id": "match-not-found",
+      "title": "Match Not Found",
+      "icon": "🔍",
+      "problem": "Waiting for match but no one matched",
+      "solutions": [
+        "Try broader arrival and departure time windows",
+        "Ensure your spot is in a populated area",
+        "Matches take time, especially during early or late hours",
+        "Try a nearby location if available"
+      ],
+      "buttonText": "Edit Request",
+      "buttonAction": "edit-request"
+    },
+    {
+      "id": "app-crashes",
+      "title": "App Crashes",
+      "icon": "⚠️",
+      "problem": "App closes unexpectedly",
+      "solutions": [
+        "Install the latest version (check Settings > About)",
+        "Settings > App > Clear Cache",
+        "Ensure your phone has available storage space",
+        "Delete and reinstall the app",
+        "Update your phone to the latest OS version"
+      ],
+      "buttonText": "Report Issue",
+      "buttonAction": "report-issue"
+    },
+    {
+      "id": "notifications-not-working",
+      "title": "Notifications Not Working",
+      "icon": "🔔",
+      "problem": "Don't receive match or tracking notifications",
+      "solutions": [
+        "Settings > Notifications > Spotimization > Enable All",
+        "Ensure your device isn't muted or in Do Not Disturb mode",
+        "Enable Background App Refresh in Settings",
+        "Power off and restart your device"
+      ],
+      "buttonText": "Check Settings",
+      "buttonAction": "check-settings"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { parkingBeacons, users } from "@/lib/db/schema";
+import { parkingBeacons } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
@@ -16,10 +16,6 @@ export async function POST(req: NextRequest) {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return err("Not authenticated", 401);
-    }
-
-    if (currentUser.tier !== "premium" && !currentUser.isPremium) {
-      return err("Premium subscription required", 403);
     }
 
     const { departureTime, latitude, longitude } = validate(beaconActivateSchema, await req.json());

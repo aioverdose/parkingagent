@@ -182,36 +182,37 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-[#E94335] text-lg font-bold">{error}</p>
-          <button onClick={() => router.push("/profile")} className="mt-4 text-[#4285F4] underline">Back to Profile</button>
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center px-4">
+        <div className="text-center bg-white rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] p-8">
+          <p className="text-[#EF4444] text-lg font-bold">{error}</p>
+          <button onClick={() => router.push("/profile")} className="mt-4 text-[#2563EB] underline">Back to Profile</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="flex items-center justify-between max-w-5xl mx-auto px-4 py-3">
-          <a href="/profile" className="text-lg font-bold tracking-tight">
-            <span className="text-[#4285F4]">spotimization</span>
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl shadow-sm border-b border-[#E2E8F0]">
+        <div className="flex items-center justify-between max-w-5xl mx-auto px-4 sm:px-8 h-20">
+          <a href="/profile" className="text-2xl font-bold tracking-tight">
+            <span className="text-[#2563EB]">spotimization</span>
           </a>
           <div className="flex items-center gap-3">
             <Badge variant={isArriving ? "info" : "success"}>
               {isArriving ? "Arriving" : "Departing"}
             </Badge>
-            <button onClick={() => router.push("/profile")} className="text-sm text-[#4285F4] hover:underline">Profile</button>
+            <button onClick={() => router.push("/profile")} className="text-sm text-[#2563EB] hover:underline">Profile</button>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-[#202124]">Live Tracking</h1>
+      <main className="max-w-3xl mx-auto px-4 sm:px-8 py-10">
+        <div className="modern-hero px-6 py-10 sm:px-10 text-center mb-8">
+          <div className="relative z-10">
+          <h1 className="text-4xl sm:text-5xl font-bold text-white">Live Tracking</h1>
           {match && (
-            <p className="text-sm text-[#757575] mt-1">
+            <p className="text-lg text-white/90 mt-3">
               {isArriving
                 ? matchState === "complete"
                   ? "Exchange complete!"
@@ -222,19 +223,20 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
           <div className="mt-2">
             <StateBadge matchState={matchState} />
           </div>
+          </div>
         </div>
 
         {/* GPS Status (arriving user only) */}
         {isArriving && matchState !== "complete" && (
           <div className="mb-4 text-center">
             <span className={`inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full ${
-              gpsStatus === "active" ? "bg-[#E6F4EA] text-[#0F9D58]" :
-              gpsStatus === "starting" ? "bg-[#E8F0FE] text-[#4285F4]" :
-              "bg-[#FCE8E6] text-[#E94335]"
+              gpsStatus === "active" ? "bg-[#D1FAE5] text-[#059669]" :
+              gpsStatus === "starting" ? "bg-[#DBEAFE] text-[#2563EB]" :
+              "bg-[#FEE2E2] text-[#DC2626]"
             }`}>
               <span className={`w-2 h-2 rounded-full ${
-                gpsStatus === "active" ? "bg-[#0F9D58] animate-pulse" :
-                gpsStatus === "starting" ? "bg-[#4285F4]" : "bg-[#E94335]"
+                gpsStatus === "active" ? "bg-[#059669] animate-pulse" :
+                gpsStatus === "starting" ? "bg-[#2563EB]" : "bg-[#DC2626]"
               }`} />
               {gpsStatus === "active" ? "Sharing live location" :
                gpsStatus === "starting" ? "Starting GPS..." : "GPS error"}
@@ -243,7 +245,7 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
         )}
 
         {/* Map */}
-        <div className="rounded-xl overflow-hidden border border-gray-200 mb-6">
+        <div className="rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] mb-6">
           <InteractiveMap
             center={{ lat: 33.7701, lng: -118.1937 }}
             onPinDrop={() => {}}
@@ -263,23 +265,23 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
         {matchState === "matched" && !isArriving && (
           <>
             {etaMinutes !== null ? (
-              <div className={`rounded-2xl p-6 text-center mb-6 border-2 transition-all ${
-                alarmTriggered ? "border-[#E94335] bg-[#FCE8E6] animate-pulse" : "border-[#4285F4] bg-[#E8F0FE]"
+          <div className={`rounded-xl p-6 text-center mb-6 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.08)] ${
+                alarmTriggered ? "border-[#EF4444] bg-[#FEE2E2] animate-pulse" : "border-[#2563EB] bg-[#DBEAFE]"
               }`}>
-                <p className="text-xs text-[#757575] uppercase tracking-wider mb-1">
+                <p className="text-xs text-[#64748B] uppercase tracking-wider mb-1">
                   {alarmTriggered ? "ALARM - ARRIVING NOW!" : "Estimated arrival"}
                 </p>
-                <p className={`text-4xl font-black ${alarmTriggered ? "text-[#E94335]" : "text-[#4285F4]"}`}>
+                <p className={`text-4xl font-black ${alarmTriggered ? "text-[#EF4444]" : "text-[#2563EB]"}`}>
                   {etaMinutes} min
                 </p>
-                <p className="text-xs text-[#757575] mt-2">
+                <p className="text-xs text-[#64748B] mt-2">
                   Last updated: {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : "waiting..."}
                 </p>
               </div>
             ) : (
-              <div className="rounded-2xl bg-gray-50 border border-gray-200 p-6 text-center mb-6">
-                <div className="w-6 h-6 border-2 border-[#4285F4] border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-xs text-[#757575] mt-3">Waiting for the arriving member to share location...</p>
+              <div className="rounded-xl bg-white p-6 text-center mb-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+                <div className="w-6 h-6 border-2 border-[#DBEAFE] border-t-[#2563EB] rounded-full animate-spin mx-auto" />
+                <p className="text-xs text-[#64748B] mt-3">Waiting for the arriving member to share location...</p>
               </div>
             )}
 
@@ -295,27 +297,27 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
         )}
 
         {matchState === "matched" && isArriving && (
-          <div className="rounded-2xl bg-[#E6F4EA] border border-[#0F9D58]/30 p-6 text-center mb-6">
-            <div className="w-4 h-4 bg-[#0F9D58] rounded-full animate-pulse mx-auto mb-2" />
-            <p className="font-bold text-[#0F9D58]">Your location is being shared</p>
-            <p className="text-xs text-[#757575] mt-1">The departing member can see your approach in real-time</p>
-            <p className="text-xs text-[#757575] mt-2">You'll automatically be detected when you reach the geofence area around the spot.</p>
+          <div className="rounded-xl bg-[#DBEAFE] p-6 text-center mb-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+            <div className="w-4 h-4 bg-[#2563EB] rounded-full animate-pulse mx-auto mb-2" />
+            <p className="font-bold text-[#2563EB]">Your location is being shared</p>
+            <p className="text-xs text-[#64748B] mt-1">The departing member can see your approach in real-time</p>
+            <p className="text-xs text-[#64748B] mt-2">You'll automatically be detected when you reach the geofence area around the spot.</p>
           </div>
         )}
 
         {matchState === "arrived" && !isArriving && (
-          <div className="rounded-2xl bg-[#E8F0FE] border-2 border-[#4285F4] p-6 text-center mb-6">
-            <div className="w-10 h-10 bg-[#4285F4] rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="rounded-xl bg-[#D1FAE5] p-6 text-center mb-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+            <div className="w-10 h-10 bg-[#10B981] rounded-full flex items-center justify-center mx-auto mb-3">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="font-bold text-[#4285F4] text-lg">Arriving user is positioned!</p>
-            <p className="text-sm text-[#757575] mt-1">They are within the spot geofence. You can now safely start your departure.</p>
+            <p className="font-bold text-[#10B981] text-lg">Arriving user is positioned!</p>
+            <p className="text-sm text-[#64748B] mt-1">They are within the spot geofence. You can now safely start your departure.</p>
             <button
               onClick={handleStartDeparture}
               disabled={startingDeparture}
-              className="mt-4 w-full bg-[#0F9D58] hover:bg-[#0B8043] disabled:bg-gray-300 text-white font-bold py-3 px-6 rounded-xl transition-all"
+              className="mt-4 w-full bg-[#10B981] hover:bg-[#059669] disabled:bg-[#CBD5E1] text-white font-semibold py-3.5 px-6 rounded-lg transition-all shadow-[0_4px_12px_rgba(16,185,129,0.3)]"
             >
               {startingDeparture ? "Starting..." : "START DEPARTURE"}
             </button>
@@ -323,30 +325,30 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
         )}
 
         {matchState === "arrived" && isArriving && (
-          <div className="rounded-2xl bg-[#E6F4EA] border-2 border-[#0F9D58] p-6 text-center mb-6">
-            <div className="w-10 h-10 bg-[#0F9D58] rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="rounded-xl bg-[#D1FAE5] p-6 text-center mb-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+            <div className="w-10 h-10 bg-[#10B981] rounded-full flex items-center justify-center mx-auto mb-3">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="font-bold text-[#0F9D58] text-lg">You've arrived at the spot!</p>
-            <p className="text-sm text-[#757575] mt-1">Waiting for the departing user to start their car and leave the spot.</p>
+            <p className="font-bold text-[#10B981] text-lg">You've arrived at the spot!</p>
+            <p className="text-sm text-[#64748B] mt-1">Waiting for the departing user to start their car and leave the spot.</p>
           </div>
         )}
 
         {matchState === "departing" && !isArriving && (
-          <div className="rounded-2xl bg-[#FEF7E0] border-2 border-[#F9AB00] p-6 text-center mb-6">
-            <div className="w-10 h-10 bg-[#F9AB00] rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="rounded-xl bg-[#FEF3C7] p-6 text-center mb-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+            <div className="w-10 h-10 bg-[#F59E0B] rounded-full flex items-center justify-center mx-auto mb-3">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <p className="font-bold text-[#F9AB00] text-lg">You're departing!</p>
-            <p className="text-sm text-[#757575] mt-1">Please leave the spot so the arriving user can park.</p>
+            <p className="font-bold text-[#F59E0B] text-lg">You're departing!</p>
+            <p className="text-sm text-[#64748B] mt-1">Please leave the spot so the arriving user can park.</p>
             <button
               onClick={handleCompleteExchange}
               disabled={completing}
-              className="mt-4 w-full bg-[#4285F4] hover:bg-[#3367D6] disabled:bg-gray-300 text-white font-bold py-3 px-6 rounded-xl transition-all"
+              className="mt-4 w-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:bg-[#CBD5E1] text-white font-semibold py-3.5 px-6 rounded-lg transition-all shadow-[0_4px_12px_rgba(37,99,235,0.3)]"
             >
               {completing ? "Completing..." : "I've left the spot"}
             </button>
@@ -354,18 +356,18 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
         )}
 
         {matchState === "departing" && isArriving && (
-          <div className="rounded-2xl bg-[#FEF7E0] border-2 border-[#F9AB00] p-6 text-center mb-6">
-            <div className="w-10 h-10 bg-[#F9AB00] rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="rounded-xl bg-[#FEF3C7] p-6 text-center mb-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+            <div className="w-10 h-10 bg-[#F59E0B] rounded-full flex items-center justify-center mx-auto mb-3">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <p className="font-bold text-[#F9AB00] text-lg">Departing user is leaving!</p>
-            <p className="text-sm text-[#757575] mt-1">They are vacating the spot. You can park once they've left.</p>
+            <p className="font-bold text-[#F59E0B] text-lg">Departing user is leaving!</p>
+            <p className="text-sm text-[#64748B] mt-1">They are vacating the spot. You can park once they've left.</p>
             <button
               onClick={handleCompleteExchange}
               disabled={completing}
-              className="mt-4 w-full bg-[#4285F4] hover:bg-[#3367D6] disabled:bg-gray-300 text-white font-bold py-3 px-6 rounded-xl transition-all"
+              className="mt-4 w-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:bg-[#CBD5E1] text-white font-semibold py-3.5 px-6 rounded-lg transition-all shadow-[0_4px_12px_rgba(37,99,235,0.3)]"
             >
               {completing ? "Completing..." : "I've parked"}
             </button>
@@ -373,14 +375,14 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
         )}
 
         {matchState === "complete" && (
-          <div className="rounded-2xl bg-[#E6F4EA] border-2 border-[#0F9D58] p-6 text-center mb-6">
-            <div className="w-12 h-12 bg-[#0F9D58] rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="rounded-xl bg-[#D1FAE5] p-6 text-center mb-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+            <div className="w-12 h-12 bg-[#10B981] rounded-full flex items-center justify-center mx-auto mb-3">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="font-bold text-[#0F9D58] text-xl">Exchange Complete!</p>
-            <p className="text-sm text-[#757575] mt-1">
+            <p className="font-bold text-[#10B981] text-xl">Exchange Complete!</p>
+            <p className="text-sm text-[#64748B] mt-1">
               {isArriving ? "The spot is yours. Enjoy parking!" : "The arriving user now has the spot."}
             </p>
             <HoverButton onClick={() => router.push("/profile")} className="mt-4 w-full">
@@ -391,15 +393,15 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
 
         {/* Match Details Summary */}
         {match && (
-          <div className="border border-gray-200 rounded-2xl p-4 text-xs text-[#757575]">
-            <p><strong className="text-[#202124]">Match:</strong> {match.anonymousPartner}</p>
+          <div className="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-5 text-xs text-[#64748B]">
+            <p><strong className="text-[#1E293B]">Match:</strong> {match.anonymousPartner}</p>
             {match.arrivalLookingTime && (
-              <p><strong className="text-[#202124]">Arrival:</strong> {formatTime(match.arrivalLookingTime)}</p>
+              <p><strong className="text-[#1E293B]">Arrival:</strong> {formatTime(match.arrivalLookingTime)}</p>
             )}
             {match.leavingTime && (
-              <p><strong className="text-[#202124]">Departure:</strong> {formatTime(match.leavingTime)}</p>
+              <p><strong className="text-[#1E293B]">Departure:</strong> {formatTime(match.leavingTime)}</p>
             )}
-            <p><strong className="text-[#202124]">Status:</strong> {matchState}</p>
+            <p><strong className="text-[#1E293B]">Status:</strong> {matchState}</p>
           </div>
         )}
       </main>
@@ -409,11 +411,11 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
 
 function StateBadge({ matchState }: { matchState: MatchState }) {
   const styles: Record<string, string> = {
-    matched: "bg-[#E8F0FE] text-[#4285F4]",
-    arrived: "bg-[#E6F4EA] text-[#0F9D58]",
-    departing: "bg-[#FEF7E0] text-[#F9AB00]",
-    complete: "bg-[#E6F4EA] text-[#0F9D58]",
-    cancelled: "bg-[#FCE8E6] text-[#E94335]",
+    matched: "bg-[#DBEAFE] text-[#2563EB]",
+    arrived: "bg-[#D1FAE5] text-[#059669]",
+    departing: "bg-[#FEF3C7] text-[#D97706]",
+    complete: "bg-[#D1FAE5] text-[#059669]",
+    cancelled: "bg-[#FEE2E2] text-[#DC2626]",
   };
   const labels: Record<string, string> = {
     matched: "Tracking",
@@ -423,7 +425,7 @@ function StateBadge({ matchState }: { matchState: MatchState }) {
     cancelled: "Cancelled",
   };
   return (
-    <span className={`inline-block text-xs px-2.5 py-1 rounded-full font-medium ${styles[matchState] || "bg-gray-100 text-gray-500"}`}>
+    <span className={`inline-block text-xs px-2.5 py-1 rounded-full font-medium ${styles[matchState] || "bg-[#F1F5F9] text-[#64748B]"}`}>
       {labels[matchState] || matchState}
     </span>
   );
@@ -439,9 +441,9 @@ function AlarmSection({
   alarmTriggered: boolean;
 }) {
   return (
-    <div className="border border-gray-200 rounded-2xl p-6 mb-6">
-      <h2 className="font-bold text-[#202124] text-sm mb-1">Set Arrival Alarm</h2>
-      <p className="text-xs text-[#757575] mb-4">
+    <div className="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6 mb-6">
+      <h2 className="font-bold text-[#1E293B] text-sm mb-1">Set Arrival Alarm</h2>
+      <p className="text-xs text-[#64748B] mb-4">
         Get notified when the arriving member is within a certain distance, so you have time to get to your vehicle.
       </p>
       <div className="flex items-center gap-3">
@@ -451,11 +453,11 @@ function AlarmSection({
           max={15}
           value={alarmMinutes}
           onChange={(e) => setAlarmMinutes(Number(e.target.value))}
-          className="flex-1 accent-[#4285F4]"
+          className="flex-1 accent-[#2563EB]"
         />
-        <span className="text-sm font-bold text-[#202124] w-12 text-right">{alarmMinutes} min</span>
+        <span className="text-sm font-bold text-[#1E293B] w-12 text-right">{alarmMinutes} min</span>
       </div>
-      <p className="text-xs text-[#757575] mt-2">
+      <p className="text-xs text-[#64748B] mt-2">
         We'll notify you when the arriving member is ~{alarmMinutes} minutes away, giving you time to head to your car.
       </p>
       <div className="flex gap-2 mt-4">
@@ -464,12 +466,12 @@ function AlarmSection({
         </HoverButton>
       </div>
       {alarmMessage && (
-        <p className="text-xs text-[#0F9D58] mt-2 text-center">{alarmMessage}</p>
+        <p className="text-xs text-[#10B981] mt-2 text-center">{alarmMessage}</p>
       )}
       {alarmTriggered && (
-        <div className="mt-4 bg-[#E94335]/10 border border-[#E94335]/30 rounded-xl p-4 text-center">
-          <p className="text-lg font-black text-[#E94335]">{"\uD83D\uDD14"} ARRIVING NOW!</p>
-          <p className="text-sm text-[#757575] mt-1">Time to head to your vehicle!</p>
+        <div className="mt-4 bg-[#EF4444]/10 border border-[#EF4444]/30 rounded-xl p-4 text-center">
+          <p className="text-lg font-black text-[#EF4444]">{"\uD83D\uDD14"} ARRIVING NOW!</p>
+          <p className="text-sm text-[#64748B] mt-1">Time to head to your vehicle!</p>
         </div>
       )}
     </div>

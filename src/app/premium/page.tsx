@@ -12,7 +12,7 @@ const benefits = [
   { title: "Drop a Pin on the Map", desc: "Mark exactly where you're arriving on an interactive map." },
   { title: "Preliminary requests to matching users", desc: "System sends non-intrusive alerts to members who match your time and proximity." },
   { title: "Expanding radius alerts", desc: "Alerts expand in radius as you get closer if no match is found (5, 10, 15, 20 blocks)." },
-  { title: "Departure Beacon", desc: "Send a beacon when departing. System finds incoming members in your area." },
+  { title: "Arrival Beacon", desc: "Send a beacon when arriving at an unscheduled time." },
   { title: "Higher ranking priority", desc: "Premium members get priority over free users in matching." },
   { title: "Unlimited matches", desc: "No restrictions on how many matches you can make." },
 ];
@@ -66,7 +66,7 @@ export default function PremiumPage() {
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F9D58" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></svg>
             </div>
             <h1 className="text-3xl font-black text-[#202124] mt-6">You&apos;re now a Premium member!</h1>
-            <p className="text-[#757575] mt-2">You now have access to real-time parking, departure beacon, and priority matching.</p>
+            <p className="text-[#757575] mt-2">You now have access to real-time parking, arrival beacon, and priority matching.</p>
             <div className="mt-8 space-y-3">
               <HoverButton onClick={() => router.push("/dashboard")} className="w-full max-w-xs mx-auto">
                 Go to Dashboard
@@ -82,7 +82,7 @@ export default function PremiumPage() {
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#F9A825" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
             </div>
             <h1 className="text-3xl font-black text-[#202124] mt-6">You&apos;re already Premium</h1>
-            <p className="text-[#757575] mt-2">Enjoy real-time parking, departure beacon, and priority service.</p>
+            <p className="text-[#757575] mt-2">Enjoy real-time parking, arrival beacon, and priority service.</p>
             <div className="mt-8">
               <HoverButton onClick={() => router.push("/dashboard")} className="w-full max-w-xs mx-auto">
                 Go to Dashboard
@@ -97,7 +97,7 @@ export default function PremiumPage() {
               </div>
               <h1 className="text-3xl font-black text-[#202124] mt-6">Upgrade to Premium</h1>
               <p className="text-[#757575] mt-2 max-w-md mx-auto">
-                Get real-time parking service with GPS-based ETA, interactive map pin drop, departure beacon, and priority matching.
+                Get real-time parking service with GPS-based ETA, interactive map pin drop, arrival beacon, and priority matching.
               </p>
             </div>
 

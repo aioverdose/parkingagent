@@ -36,6 +36,17 @@ interface BeaconRequest {
   createdAt: string;
 }
 
+interface PreScheduledConnection {
+  id: string;
+  neighborhoodName: string;
+  schedulePattern: string;
+  yourRole: "arriver" | "departor";
+  status: string;
+  nextOccurrence: string;
+  anonymousPartner: string;
+  partnerVehicleInfo: { type: string | null; size: string | null } | null;
+}
+
 function formatTime(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
@@ -72,12 +83,26 @@ export default function ProfilePage() {
 
   // Existing match / beacon state
   const [parkingMatches, setParkingMatches] = useState<ParkingMatch[]>([]);
+  const [preScheduledConnections, setPreScheduledConnections] = useState<PreScheduledConnection[]>([]);
   const [showMatches, setShowMatches] = useState(true);
   const [leavingTime, setLeavingTime] = useState("");
   const [arrivalLookingTime, setArrivalLookingTime] = useState("");
   const [t1Message, setT1Message] = useState("");
   const [t1Error, setT1Error] = useState("");
   const [t1Loading, setT1Loading] = useState(false);
+  const [psRole, setPsRole] = useState<"arriver" | "departor" | "both">("both");
+  const [psType, setPsType] = useState<"work" | "event" | "shift" | "other">("work");
+  const [psDays, setPsDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [psArrivalStart, setPsArrivalStart] = useState("07:00");
+  const [psArrivalEnd, setPsArrivalEnd] = useState("08:00");
+  const [psDepartureStart, setPsDepartureStart] = useState("17:00");
+  const [psDepartureEnd, setPsDepartureEnd] = useState("18:00");
+  const [psFrequency, setPsFrequency] = useState<"daily" | "weekly" | "biweekly">("weekly");
+  const [psStartDate, setPsStartDate] = useState("");
+  const [psEndDate, setPsEndDate] = useState("");
+  const [psMessage, setPsMessage] = useState("");
+  const [psError, setPsError] = useState("");
+  const [psLoading, setPsLoading] = useState(false);
 
   // Beacon
   const [beaconDepartureTime, setBeaconDepartureTime] = useState("");
@@ -102,6 +127,7 @@ export default function ProfilePage() {
       }
     });
     fetchParkingMatches();
+    fetchPreScheduledConnections();
     if (typeof navigator !== "undefined" && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
@@ -157,6 +183,13 @@ export default function ProfilePage() {
       const { matches } = await api.get<{ matches: ParkingMatch[] }>("/api/parking-match/my-matches");
       setParkingMatches(matches);
     } catch { console.error("Failed to fetch parking matches"); }
+  }
+
+  async function fetchPreScheduledConnections() {
+    try {
+      const { connections } = await api.get<{ connections: PreScheduledConnection[] }>("/api/matching/my-connections");
+      setPreScheduledConnections(connections);
+    } catch {}
   }
 
   async function fetchBeacons() {
@@ -277,15 +310,70 @@ export default function ProfilePage() {
     setT1Loading(false);
   }
 
+  function timeToMinutes(value: string) {
+    const [h, m] = value.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  function toggleScheduleDay(day: number) {
+    setPsDays((current) => current.includes(day)
+      ? current.filter((d) => d !== day)
+      : [...current, day].sort((a, b) => a - b));
+  }
+
+  async function handlePreScheduledSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setPsMessage(""); setPsError("");
+    if (!neighborhood.trim()) {
+      setPsError("Add a neighborhood before submitting a pre-scheduled connection.");
+      return;
+    }
+    if (psDays.length === 0) {
+      setPsError("Choose at least one day of the week.");
+      return;
+    }
+
+    setPsLoading(true);
+    try {
+      const { message } = await api.post<{ message: string }>("/api/schedules", {
+        neighborhoodId: neighborhood.trim().toLowerCase().replace(/\s+/g, "-"),
+        neighborhoodName: neighborhood.trim(),
+        scheduleType: psType,
+        daysOfWeek: psDays,
+        arrivalWindowStart: timeToMinutes(psArrivalStart),
+        arrivalWindowEnd: timeToMinutes(psArrivalEnd),
+        departureWindowStart: timeToMinutes(psDepartureStart),
+        departureWindowEnd: timeToMinutes(psDepartureEnd),
+        frequency: psFrequency,
+        startDate: psStartDate || null,
+        endDate: psEndDate || null,
+        role: psRole,
+      });
+      setPsMessage(message);
+      await api.post("/api/matching/run-for-neighborhood", {
+        neighborhoodId: neighborhood.trim().toLowerCase().replace(/\s+/g, "-"),
+      });
+      fetchPreScheduledConnections();
+    } catch (err: any) {
+      setPsError(err.message || "Failed to submit pre-scheduled connection.");
+    }
+    setPsLoading(false);
+  }
+
+  async function handlePreScheduledAction(matchId: string, action: "confirm" | "cancel") {
+    try {
+      await api.post(`/api/matching/${action}/${matchId}`);
+      fetchPreScheduledConnections();
+    } catch {
+      setPsError(`Failed to ${action} connection.`);
+    }
+  }
+
   async function handleBeaconSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBeaconMessage(""); setBeaconError("");
-    if (!isPremium && !isFree1Year) {
-      setBeaconError("Departure Beacon is a Premium feature. Upgrade to use it.");
-      return;
-    }
     if (!beaconDepartureTime || !position) {
-      setBeaconError("Departure time and location are required.");
+      setBeaconError("Arrival time and location are required.");
       return;
     }
     setBeaconLoading(true);
@@ -323,30 +411,38 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="flex items-center justify-between max-w-5xl mx-auto px-4 py-3">
-          <a href="/" className="text-xl font-bold tracking-tight">spotimization</a>
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-sm">
+        <div className="flex items-center justify-between max-w-5xl mx-auto px-4 sm:px-8 h-20">
+          <a href="/" className="text-2xl font-bold tracking-tight text-[#2563EB]">spotimization</a>
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#757575]">{user.name}</span>
             {isPremium && <Badge variant="success">Premium</Badge>}
-            {isFree1Year && <Badge variant="success">Free 1 Year</Badge>}
+              {isFree1Year && <Badge variant="success">1 Year Free</Badge>}
             {user.signupNumber && user.signupNumber <= 100 && (
               <Badge variant="info">Early Adopter</Badge>
             )}
             <button onClick={() => router.push("/dashboard")}
               className="text-sm text-[#4285F4] hover:underline">Dashboard</button>
+            <button onClick={() => router.push("/help-center")}
+              className="text-sm text-[#4285F4] hover:underline">Help</button>
           </div>
         </div>
       </nav>
 
-      <main className="flex-1 px-4 py-12">
-        <div className="w-full max-w-lg mx-auto space-y-10">
+      <main className="flex-1 px-4 sm:px-8 py-10">
+        <div className="w-full max-w-2xl mx-auto space-y-10">
+          <section className="modern-hero px-6 py-10 sm:px-10 text-center">
+            <div className="relative z-10">
+              <h1 className="text-4xl sm:text-5xl font-bold text-white">Parking Profile</h1>
+              <p className="text-white/90 mt-3 text-lg">Manage vehicle details, schedules, rankings, and recurring anonymous connections.</p>
+            </div>
+          </section>
 
           {/* Profile Settings */}
-          <div>
-            <h1 className="text-2xl font-bold text-[#202124] text-center">{"\uD83D\uDCCD"} Your Parking Profile</h1>
-            <p className="text-[#757575] text-center mt-1 text-sm">Update your information and set up your parking schedule</p>
+          <div className="modern-card">
+            <h1 className="text-2xl font-bold text-[#111827] text-center">Your Parking Profile</h1>
+            <p className="text-[#4B5563] text-center mt-2 text-base">Update your information and set up your parking schedule</p>
 
             <form onSubmit={handleProfileSubmit} className="mt-8 space-y-4">
               {message && <p className="text-sm text-[#0F9D58] bg-[#E6F4EA] p-3 rounded-xl">{message}</p>}
@@ -377,7 +473,7 @@ export default function ProfilePage() {
 
           {/* Map + Schedule Section */}
           <hr className="mb-2" />
-          <div>
+          <div className="modern-card">
             <h2 className="text-lg font-semibold text-[#202124] mb-1">{"\uD83D\uDDFA\uFE0F"} Desired Parking Location</h2>
             <p className="text-xs text-[#757575] mb-4">Move the map and drop a pin where you want to park</p>
 
@@ -436,6 +532,50 @@ export default function ProfilePage() {
                 </>
               )}
             </form>
+          </div>
+
+          {/* Arrival Beacon */}
+          <hr className="mb-2" />
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-lg font-semibold text-[#202124]">Arrival Beacon</h2>
+            </div>
+            <p className="text-xs text-[#757575] mb-4">
+              If you are arriving at an unscheduled time we will send a beacon to find any matches.
+            </p>
+            <form onSubmit={handleBeaconSubmit} className="space-y-4">
+              {beaconMessage && <p className="text-sm text-[#0F9D58] bg-[#E6F4EA] p-3 rounded-xl">{beaconMessage}</p>}
+              {beaconError && <p className="text-sm text-[#E94335] bg-[#FCE8E6] p-3 rounded-xl">{beaconError}</p>}
+              <div>
+                <label htmlFor="beaconDepartureTime" className="block text-sm font-medium text-[#202124] mb-1">Arrival time</label>
+                <input id="beaconDepartureTime" type="time" value={beaconDepartureTime} onChange={(e) => setBeaconDepartureTime(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
+              </div>
+              <HoverButton type="submit" disabled={beaconLoading} className="w-full">
+                {beaconLoading ? "Sending..." : "Send Beacon"}
+              </HoverButton>
+            </form>
+            {beacons.length > 0 && (
+              <div className="mt-6 space-y-2">
+                <h3 className="font-semibold text-sm text-[#202124]">Your beacon requests</h3>
+                {beacons.slice().reverse().map((b) => {
+                  const statusVariant = b.status === "matched" ? "success" : b.status === "expired" ? "error" : "warning";
+                  return (
+                    <HoverCard key={b.id} className="text-xs">
+                      <div className="flex items-center justify-between mb-1">
+                        <Badge variant={statusVariant}>{b.status}</Badge>
+                        <span className="text-[10px] text-[#757575]">Radius: {b.radius} blocks</span>
+                      </div>
+                      <div className="space-y-0.5 text-[#757575]">
+                        <p><span className="text-[#202124] font-medium">Arrival time:</span> {b.departureTime}</p>
+                        <p><span className="text-[#202124] font-medium">Created:</span> {new Date(b.createdAt).toLocaleDateString()}</p>
+                        {b.matchedMemberId && <p><span className="text-[#0F9D58] font-medium">Matched with:</span> Member #{b.matchedMemberId.slice(0, 4).toUpperCase()}</p>}
+                      </div>
+                    </HoverCard>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Your Matches */}
@@ -557,7 +697,7 @@ export default function ProfilePage() {
 
           {/* Ranking Display */}
           <hr className="mb-2" />
-          <div>
+          <div className="modern-card">
             <div className="flex items-center justify-between mb-2">
               <div>
                 <h2 className="text-lg font-semibold text-[#202124]">Your Ranking</h2>
@@ -577,7 +717,7 @@ export default function ProfilePage() {
 
           {/* Preliminary Matching (existing) */}
           <hr className="mb-2" />
-          <div>
+          <div className="modern-card">
             <div className="flex items-center gap-2 mb-1">
               <h2 className="text-lg font-semibold text-[#202124]">Preliminary Matching</h2>
               <Badge variant="success">Free</Badge>
@@ -604,61 +744,134 @@ export default function ProfilePage() {
             </form>
           </div>
 
-          {/* Departure Beacon (Premium) */}
+          {/* Pre-Scheduled Parking Connections */}
           <hr className="mb-2" />
-          <div>
+          <div className="modern-card">
             <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-semibold text-[#202124]">Departure Beacon</h2>
-              {isPremium || isFree1Year ? <Badge variant="success">Premium</Badge> : <Badge variant="warning">Premium</Badge>}
+              <h2 className="text-lg font-semibold text-[#202124]">Pre-Scheduled Parking Connections</h2>
+              <Badge variant="success">Anonymous</Badge>
             </div>
             <p className="text-xs text-[#757575] mb-4">
-              Send a beacon to the system when you are departing. We will look for incoming members in your area.
+              Submit your schedule anonymously to find recurring parking matches.
             </p>
-            {!isPremium && !isFree1Year && (
-              <div className="bg-[#FFF3E0] border border-[#FBBB05]/30 rounded-xl p-4 mb-4 text-center">
-                <p className="text-sm text-[#202124] font-semibold">Premium Feature</p>
-                <p className="text-xs text-[#757575] mt-1">Upgrade to Premium to use the Departure Beacon.</p>
-                <button onClick={() => router.push("/premium")}
-                  className="mt-3 bg-[#F9A825] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#F59E0B] transition-colors">
-                  Upgrade to Premium ($4.99/month)
-                </button>
-              </div>
-            )}
-            <form onSubmit={handleBeaconSubmit} className="space-y-4">
-              {beaconMessage && <p className="text-sm text-[#0F9D58] bg-[#E6F4EA] p-3 rounded-xl">{beaconMessage}</p>}
-              {beaconError && <p className="text-sm text-[#E94335] bg-[#FCE8E6] p-3 rounded-xl">{beaconError}</p>}
+            <form onSubmit={handlePreScheduledSubmit} className="space-y-4">
+              {psMessage && <p className="text-sm text-[#0F9D58] bg-[#E6F4EA] p-3 rounded-xl">{psMessage}</p>}
+              {psError && <p className="text-sm text-[#E94335] bg-[#FCE8E6] p-3 rounded-xl">{psError}</p>}
               <div>
-                <label htmlFor="beaconDepartureTime" className="block text-sm font-medium text-[#202124] mb-1">Departure time</label>
-                <input id="beaconDepartureTime" type="time" value={beaconDepartureTime} onChange={(e) => setBeaconDepartureTime(e.target.value)}
-                  disabled={!isPremium && !isFree1Year}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none disabled:opacity-50" />
+                <label className="block text-sm font-medium text-[#202124] mb-1">Role</label>
+                <select value={psRole} onChange={(e) => setPsRole(e.target.value as typeof psRole)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none bg-white">
+                  <option value="arriver">I need a spot</option>
+                  <option value="departor">I can offer my spot</option>
+                  <option value="both">Both</option>
+                </select>
               </div>
-              <HoverButton type="submit" disabled={beaconLoading || (!isPremium && !isFree1Year)} className="w-full">
-                {beaconLoading ? "Sending..." : "Send Beacon"}
+              <div>
+                <label className="block text-sm font-medium text-[#202124] mb-1">Schedule type</label>
+                <select value={psType} onChange={(e) => setPsType(e.target.value as typeof psType)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none bg-white">
+                  <option value="work">Work commute</option>
+                  <option value="event">Regular event</option>
+                  <option value="shift">Shift work</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#202124] mb-2">Days of week</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((label, index) => (
+                    <label key={label} className="flex items-center gap-1.5 text-xs text-[#202124]">
+                      <input type="checkbox" checked={psDays.includes(index)} onChange={() => toggleScheduleDay(index)} />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-[#202124] mb-1">Arrival start</label>
+                  <input type="time" value={psArrivalStart} onChange={(e) => setPsArrivalStart(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#202124] mb-1">Arrival end</label>
+                  <input type="time" value={psArrivalEnd} onChange={(e) => setPsArrivalEnd(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#202124] mb-1">Departure start</label>
+                  <input type="time" value={psDepartureStart} onChange={(e) => setPsDepartureStart(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#202124] mb-1">Departure end</label>
+                  <input type="time" value={psDepartureEnd} onChange={(e) => setPsDepartureEnd(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#202124] mb-1">Frequency</label>
+                <select value={psFrequency} onChange={(e) => setPsFrequency(e.target.value as typeof psFrequency)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none bg-white">
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="biweekly">Biweekly</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-[#202124] mb-1">Start date</label>
+                  <input type="date" value={psStartDate} onChange={(e) => setPsStartDate(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#202124] mb-1">End date</label>
+                  <input type="date" value={psEndDate} onChange={(e) => setPsEndDate(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
+                </div>
+              </div>
+              <HoverButton type="submit" disabled={psLoading} className="w-full">
+                {psLoading ? "Submitting..." : "Add Anonymous Schedule"}
               </HoverButton>
             </form>
-            {beacons.length > 0 && (
-              <div className="mt-6 space-y-2">
-                <h3 className="font-semibold text-sm text-[#202124]">Your beacon requests</h3>
-                {beacons.slice().reverse().map((b) => {
-                  const statusVariant = b.status === "matched" ? "success" : b.status === "expired" ? "error" : "warning";
-                  return (
-                    <HoverCard key={b.id} className="text-xs">
+
+            <div className="mt-6">
+              <h3 className="font-semibold text-sm text-[#202124] mb-3">Your pre-scheduled connections</h3>
+              {preScheduledConnections.length === 0 ? (
+                <p className="text-xs text-[#757575]">No anonymous recurring connections yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {preScheduledConnections.map((connection) => (
+                    <HoverCard key={connection.id} className="text-xs">
                       <div className="flex items-center justify-between mb-1">
-                        <Badge variant={statusVariant}>{b.status}</Badge>
-                        <span className="text-[10px] text-[#757575]">Radius: {b.radius} blocks</span>
+                        <Badge variant={connection.status === "confirmed" ? "success" : connection.status === "cancelled" ? "error" : "warning"}>{connection.status}</Badge>
+                        <span className="text-[#4285F4] font-medium">{connection.anonymousPartner}</span>
                       </div>
                       <div className="space-y-0.5 text-[#757575]">
-                        <p><span className="text-[#202124] font-medium">Departure time:</span> {b.departureTime}</p>
-                        <p><span className="text-[#202124] font-medium">Created:</span> {new Date(b.createdAt).toLocaleDateString()}</p>
-                        {b.matchedMemberId && <p><span className="text-[#0F9D58] font-medium">Matched with:</span> Member #{b.matchedMemberId.slice(0, 4).toUpperCase()}</p>}
+                        <p><span className="text-[#202124] font-medium">Neighborhood:</span> {connection.neighborhoodName}</p>
+                        <p><span className="text-[#202124] font-medium">Pattern:</span> {connection.schedulePattern}</p>
+                        <p><span className="text-[#202124] font-medium">Your role:</span> {connection.yourRole}</p>
+                        <p><span className="text-[#202124] font-medium">Next:</span> {new Date(connection.nextOccurrence).toLocaleDateString()}</p>
+                        {connection.partnerVehicleInfo && (
+                          <p><span className="text-[#202124] font-medium">Partner vehicle:</span> {connection.partnerVehicleInfo.type || "any"} / {connection.partnerVehicleInfo.size || "any"}</p>
+                        )}
                       </div>
+                      {connection.status === "pending" && (
+                        <div className="flex gap-2 mt-3">
+                          <button onClick={() => handlePreScheduledAction(connection.id, "confirm")}
+                            className="text-[10px] bg-[#0F9D58] text-white px-2.5 py-1 rounded-lg font-medium hover:bg-[#34A853]">Confirm</button>
+                          <button onClick={() => handlePreScheduledAction(connection.id, "cancel")}
+                            className="text-[10px] border border-gray-300 text-[#757575] px-2.5 py-1 rounded-lg font-medium hover:bg-gray-50">Cancel</button>
+                        </div>
+                      )}
                     </HoverCard>
-                  );
-                })}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
+
 
 
           <div className="text-center mt-6">

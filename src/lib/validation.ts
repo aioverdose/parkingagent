@@ -158,6 +158,25 @@ export const parkingMatchScheduleSchema = z.object({
 
 // ── Parking match actions ───────────────────────────────────────
 
+export const preScheduledScheduleSchema = z.object({
+  neighborhoodId: z.string().min(1, "neighborhoodId is required"),
+  neighborhoodName: z.string().min(1, "neighborhoodName is required"),
+  scheduleType: z.enum(["work", "event", "shift", "other"]).default("other"),
+  daysOfWeek: z.array(z.number().int().min(0).max(6)).min(1, "Choose at least one day"),
+  arrivalWindowStart: z.number().int().min(0).max(1439),
+  arrivalWindowEnd: z.number().int().min(0).max(1439),
+  departureWindowStart: z.number().int().min(0).max(1439),
+  departureWindowEnd: z.number().int().min(0).max(1439),
+  frequency: z.enum(["daily", "weekly", "biweekly"]).default("weekly"),
+  startDate: z.string().optional().nullable(),
+  endDate: z.string().optional().nullable(),
+  role: z.enum(["arriver", "departor", "both"]).default("both"),
+});
+
+export const runMatchingForNeighborhoodSchema = z.object({
+  neighborhoodId: z.string().optional(),
+});
+
 export const parkingMatchActionSchema = z.object({
   matchId: z.string().min(1, "matchId is required"),
 });

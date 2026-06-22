@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
-import { users, courseModules, userCourseCompletions } from "@/lib/db/schema";
+import { users, emailVerifications, courseModules, userCourseCompletions } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { hashPassword, createSession, setSessionCookie } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
@@ -9,6 +9,7 @@ import { rateLimit, rateLimitedResponse } from "@/lib/rateLimit";
 import { ok, err, handleError } from "@/lib/apiResponse";
 import { lookupReferrerByCode, createReferral, generateReferralCode, REFERRAL_COOKIE } from "@/lib/referral";
 import { getTierForSignup, getBadges } from "@/lib/earlyAdopter";
+import { sendEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -68,6 +69,27 @@ export async function POST(req: Request) {
     });
 
     await generateReferralCode(userId);
+
+    const verificationToken = uuid();
+    const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    await db.insert(emailVerifications).values({
+      id: uuid(),
+      email,
+      token: verificationToken,
+      userId,
+      verified: false,
+      expiresAt: verificationExpiresAt,
+      createdAt: now,
+    });
+
+    const verifyUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${verificationToken}`;
+
+    await sendEmail(
+      email,
+      "Verify your email — Spotimization",
+      `Hi ${name},\n\nWelcome to Spotimization! Please verify your email address by clicking the link below:\n\n${verifyUrl}\n\nThis link expires in 24 hours.\n\n— Spotimization`,
+    );
 
     try {
       const cookieStore = await cookies();
