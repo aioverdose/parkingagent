@@ -40,7 +40,7 @@ export const registerSchema = z.object({
   name: z.string().min(1).max(100),
   email,
   password,
-  phone: z.string().max(20).optional().default(""),
+  phone: z.string().min(10, "Phone number is required. A mobile device is needed for this app."),
   completedModuleIds: z.array(z.string()).optional(),
 });
 

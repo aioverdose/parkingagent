@@ -9,15 +9,24 @@ export default function Signup() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [step, setStep] = useState<"form" | "verify">("form");
+  const [step, setStep] = useState<"form" | "verify-phone" | "done">("form");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [agreeTos, setAgreeTos] = useState(false);
   const [agreeLocation, setAgreeLocation] = useState(false);
   const [agreeAge, setAgreeAge] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [verificationCode, setVerificationCode] = useState("");
+  const [devCode, setDevCode] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+
   const [signupCount, setSignupCount] = useState<{ count: number; remaining: number; isFull: boolean } | null>(null);
 
   useEffect(() => {
@@ -27,7 +36,7 @@ export default function Signup() {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!name.trim() || !email.trim() || !password.trim()) { setError("All fields are required."); return; }
+    if (!name.trim() || !email.trim() || !password.trim() || !phone.trim()) { setError("All fields are required."); return; }
     if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
     if (!agreeTos) { setError("You must agree to the Terms of Use and Guidelines."); return; }
     if (!agreeLocation) { setError("You must agree to location access."); return; }
@@ -35,18 +44,58 @@ export default function Signup() {
 
     setLoading(true);
     try {
-      const res = await api.post<{ user: { signupNumber: number; tier: string }; emailSent: boolean }>("/api/auth/register", {
-        name, email, password, completedModuleIds: [],
+      const res = await api.post<{ user: { id: string; phone: string } }>("/api/auth/register", {
+        name, email, password, phone, completedModuleIds: [],
       });
-      if (res.emailSent) {
-        setStep("verify");
-      } else {
-        router.push("/dashboard");
+      setUserId(res.user.id);
+      setPhoneNumber(res.user.phone);
+      const codeRes = await api.post<{ code?: string; dev?: boolean }>("/api/auth/request-phone-verification", {
+        phone: res.user.phone,
+        userId: res.user.id,
+      });
+      if (codeRes.code) {
+        setDevCode(codeRes.code);
       }
+      setStep("verify-phone");
     } catch (err: any) {
       setError(err.message || "Signup failed. The email may already be registered.");
     }
     setLoading(false);
+  };
+
+  const handleVerifyPhone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPhoneError("");
+    if (!verificationCode.trim()) { setPhoneError("Enter the verification code."); return; }
+    setPhoneLoading(true);
+    try {
+      await api.post("/api/auth/verify-phone", {
+        phone: phoneNumber,
+        code: verificationCode.trim(),
+      });
+      setStep("done");
+      setTimeout(() => router.push("/dashboard"), 1500);
+    } catch (err: any) {
+      setPhoneError(err.message || "Invalid code. Try again.");
+    }
+    setPhoneLoading(false);
+  };
+
+  const handleResendCode = async () => {
+    setPhoneLoading(true);
+    try {
+      const codeRes = await api.post<{ code?: string; dev?: boolean }>("/api/auth/request-phone-verification", {
+        phone: phoneNumber,
+        userId,
+      });
+      if (codeRes.code) {
+        setDevCode(codeRes.code);
+      }
+      setPhoneError("");
+    } catch {
+      setPhoneError("Failed to resend code.");
+    }
+    setPhoneLoading(false);
   };
 
   return (
@@ -73,7 +122,7 @@ export default function Signup() {
                     <div className="bg-gradient-to-r from-[#4285F4] to-[#0F9D58] h-full rounded-full transition-all duration-500" style={{ width: `${(signupCount.count / 100) * 100}%` }} />
                   </div>
                   <p className="text-xs text-[#757575] mt-2">
-                    First 100 users get <strong>1 year FREE</strong> \u2014 1 Year Free badge, unlimited matching.
+                    First 100 users get <strong>1 year FREE</strong> &mdash; 1 Year Free badge, unlimited matching.
                   </p>
                 </div>
               )}
@@ -101,13 +150,18 @@ export default function Signup() {
                     placeholder="you@example.com" />
                 </div>
                 <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-[#202124] mb-1">Phone</label>
+                  <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] focus:border-[#4285F4] outline-none transition"
+                    placeholder="+1 (555) 123-4567" />
+                </div>
+                <div>
                   <label htmlFor="password" className="block text-sm font-medium text-[#202124] mb-1">Password</label>
                   <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] focus:border-[#4285F4] outline-none transition"
                     placeholder="At least 6 characters" />
                 </div>
 
-                {/* Checkboxes */}
                 <div className="space-y-3 pt-2">
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input type="checkbox" checked={agreeTos} onChange={(e) => setAgreeTos(e.target.checked)}
@@ -140,16 +194,49 @@ export default function Signup() {
             </div>
           )}
 
-          {step === "verify" && (
+          {step === "verify-phone" && (
             <div className="text-center">
-              <div className="text-5xl mb-4">{"\u2709\uFE0F"}</div>
-              <h1 className="text-3xl font-black text-[#202124]">Check Your Email</h1>
+              <div className="text-5xl mb-4">{"\uD83D\uDCF1"}</div>
+              <h1 className="text-3xl font-black text-[#202124]">Verify Your Phone</h1>
               <p className="text-[#757575] mt-2">
-                We sent a verification link to <strong>{email}</strong>. Click the link to activate your account.
+                Enter the 6-digit code sent to <strong>{phoneNumber}</strong>.
               </p>
-              <p className="text-xs text-[#757575] mt-4">
-                Didn't get the email? Check your spam folder and make sure you entered the right address.
-              </p>
+
+              <form onSubmit={handleVerifyPhone} className="mt-8 space-y-4">
+                {phoneError && <div className="bg-[#FCE8E6] border border-[#E94335]/30 text-[#E94335] text-sm p-3 rounded-xl">{phoneError}</div>}
+
+                {devCode && (
+                  <div className="bg-[#FFF3E0] border border-[#F9A825]/30 rounded-xl p-4">
+                    <p className="text-xs text-[#F57F17] font-medium">Dev mode &mdash; your code is:</p>
+                    <p className="text-2xl font-black text-[#E65100] tracking-widest">{devCode}</p>
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor="code" className="block text-sm font-medium text-[#202124] mb-1">Verification Code</label>
+                  <input id="code" type="text" inputMode="numeric" maxLength={6} value={verificationCode} onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ""))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] focus:border-[#4285F4] outline-none transition text-center text-2xl tracking-widest"
+                    placeholder="000000" />
+                </div>
+
+                <button type="submit" disabled={phoneLoading || verificationCode.length !== 6}
+                  className="w-full bg-[#4285F4] text-white px-6 py-3.5 rounded-xl font-bold text-base hover:bg-[#1A73E8] transition-colors disabled:opacity-50">
+                  {phoneLoading ? "Verifying..." : "Verify Phone"}
+                </button>
+              </form>
+
+              <button onClick={handleResendCode} disabled={phoneLoading}
+                className="mt-4 text-sm text-[#4285F4] hover:underline">
+                Resend code
+              </button>
+            </div>
+          )}
+
+          {step === "done" && (
+            <div className="text-center">
+              <div className="text-5xl mb-4">{"\u2705"}</div>
+              <h1 className="text-3xl font-black text-[#202124]">Phone Verified</h1>
+              <p className="text-[#757575] mt-2">Redirecting to dashboard...</p>
             </div>
           )}
 

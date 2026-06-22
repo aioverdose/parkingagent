@@ -5,6 +5,27 @@ import { eq, and } from "drizzle-orm";
 import { validate, requestPhoneVerificationSchema } from "@/lib/validation";
 import { rateLimit, rateLimitedResponse } from "@/lib/rateLimit";
 import { ok, handleError } from "@/lib/apiResponse";
+import twilio from "twilio";
+
+function sendSms(phone: string, code: string): Promise<boolean> {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+
+  if (!accountSid || !authToken || !fromNumber) {
+    return Promise.resolve(false);
+  }
+
+  const client = twilio(accountSid, authToken);
+  return client.messages
+    .create({
+      body: `Your Spotimization verification code is: ${code}`,
+      to: phone,
+      from: fromNumber,
+    })
+    .then(() => true)
+    .catch(() => false);
+}
 
 export async function POST(req: Request) {
   try {
@@ -39,11 +60,21 @@ export async function POST(req: Request) {
       createdAt,
     });
 
-    const isDev = process.env.NODE_ENV === "development";
+    const sent = await sendSms(cleanPhone, code);
+
+    if (!sent) {
+      const isDev = process.env.NODE_ENV === "development";
+      return ok({
+        success: true,
+        message: "Verification code generated",
+        code,
+        dev: true,
+      });
+    }
+
     return ok({
       success: true,
       message: `Verification code sent to ${phone}`,
-      ...(isDev && { devCode: code }),
     });
   } catch (error) {
     return handleError(error, "Request phone verification error");

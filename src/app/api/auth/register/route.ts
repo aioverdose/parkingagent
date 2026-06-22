@@ -18,6 +18,10 @@ export async function POST(req: Request) {
 
     const { name, email, password, phone, completedModuleIds } = validate(registerSchema, await req.json());
 
+    if (!phone) {
+      return err("Phone number is required. A mobile device is needed for this app.", 400);
+    }
+
     const [existing] = await db
       .select()
       .from(users)
@@ -59,8 +63,8 @@ export async function POST(req: Request) {
       status: allRequiredComplete ? "good-standing" : "pending",
       membershipType: "none",
       completedCourses: !!allRequiredComplete,
-      phone: phone || null,
-      phoneVerified: !!phone,
+      phone: phone.replace(/\D/g, ""),
+      phoneVerified: false,
       joinedDate: today,
       createdAt: now,
       tier,
@@ -134,6 +138,7 @@ export async function POST(req: Request) {
         id: userId,
         name,
         email,
+        phone: phone.replace(/\D/g, ""),
         role: "member",
         isMember: !!allRequiredComplete,
         isAdmin: false,
@@ -141,7 +146,6 @@ export async function POST(req: Request) {
         signupNumber,
         earlyAdopter: tier === "free_1year",
       },
-      emailSent,
     });
   } catch (error) {
     return handleError(error, "Register error");
