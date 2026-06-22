@@ -37,7 +37,7 @@ export default function Home() {
     "Sign up and agree to Terms of Service",
     "Get verified (email + location access)",
     "Enter your schedule:\n  Arrival time (when you need parking)\n  Desired location (drop pin on map)\n  Car type (so we match spots that fit)",
-    "Submit \u2192 We find matches with opposite schedules",
+    "Submit \u2192 We match you with other members to find you parking",
     "Get matched \u2192 Both users accept \u2192 You're ready!",
   ];
 
