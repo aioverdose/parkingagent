@@ -70,26 +70,30 @@ export async function POST(req: Request) {
 
     await generateReferralCode(userId);
 
-    const verificationToken = uuid();
-    const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    try {
+      const verificationToken = uuid();
+      const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-    await db.insert(emailVerifications).values({
-      id: uuid(),
-      email,
-      token: verificationToken,
-      userId,
-      verified: false,
-      expiresAt: verificationExpiresAt,
-      createdAt: now,
-    });
+      await db.insert(emailVerifications).values({
+        id: uuid(),
+        email,
+        token: verificationToken,
+        userId,
+        verified: false,
+        expiresAt: verificationExpiresAt,
+        createdAt: now,
+      });
 
-    const verifyUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${verificationToken}`;
+      const verifyUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${verificationToken}`;
 
-    await sendEmail(
-      email,
-      "Verify your email — Spotimization",
-      `Hi ${name},\n\nWelcome to Spotimization! Please verify your email address by clicking the link below:\n\n${verifyUrl}\n\nThis link expires in 24 hours.\n\n— Spotimization`,
-    );
+      await sendEmail(
+        email,
+        "Verify your email — Spotimization",
+        `Hi ${name},\n\nWelcome to Spotimization! Please verify your email address by clicking the link below:\n\n${verifyUrl}\n\nThis link expires in 24 hours.\n\n— Spotimization`,
+      );
+    } catch {
+      // email verification is non-critical — don't block signup
+    }
 
     try {
       const cookieStore = await cookies();
