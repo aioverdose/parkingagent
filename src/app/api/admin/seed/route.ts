@@ -4,6 +4,7 @@ import {
   cmsVersions, revenueEntries, systemMetrics, referralCodes,
   userCourseCompletions,
 } from "@/lib/db/schema";
+import { eq, sql } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 import bcrypt from "bcryptjs";
 import { ok, err, handleError } from "@/lib/apiResponse";
@@ -23,15 +24,14 @@ export async function POST() {
       return code;
     }
 
-    // Admin
-    await db.insert(users).values({
-      id: "admin-001", name: "Admin", email: "admin@spotimization.com",
-      passwordHash: adminHash, role: "admin", isMember: true, isAdmin: true,
-      rankingScore: 100, status: "good-standing", membershipType: "annual",
-      completedCourses: true, tier: "premium", ranking: 5,
-      matchCount: 0, cancelCount: 0, noShowCount: 0, neighborhood: "Long Beach",
-      joinedDate: "2026-01-01", createdAt: now,
-    }).onConflictDoNothing();
+    // Admin — single atomic upsert via raw SQL, handles both first-run and re-seed
+    await db.execute(
+      sql`
+        INSERT INTO users (id, name, email, password_hash, role, is_member, is_admin, ranking_score, status, membership_type, completed_courses, tier, ranking, match_count, cancel_count, no_show_count, neighborhood, joined_date, created_at)
+        VALUES (${"admin-001"}, ${"Admin"}, ${"admin@spotimization.com"}, ${adminHash}, ${"admin"}, ${true}, ${true}, ${100}, ${"good-standing"}, ${"annual"}, ${true}, ${"premium"}, ${5}, ${0}, ${0}, ${0}, ${"Long Beach"}, ${"2026-01-01"}, ${now})
+        ON CONFLICT (id) DO UPDATE SET email = ${"admin@spotimization.com"}, password_hash = ${adminHash}, is_admin = ${true}, role = ${"admin"}
+      `
+    );
 
     // Test account
     await db.insert(users).values({
