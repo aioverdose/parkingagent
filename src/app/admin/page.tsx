@@ -5,6 +5,9 @@ import { api } from "@/lib/api";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { MetricCard } from "@/components/ui/MetricCard";
+import dynamic from "next/dynamic";
+
+const AdminMap = dynamic(() => import("@/components/AdminMap"), { ssr: false });
 
 interface SystemMetrics {
   totalMembers: number; activeMembers: number; totalSpotOffers: number;
@@ -192,6 +195,9 @@ export default function AdminDashboard() {
         {matchingMsg && <p className="text-xs text-[#0F9D58] mt-2">{matchingMsg}</p>}
         {parkingMatchMsg && <p className="text-xs text-[#7B1FA2] mt-2">{parkingMatchMsg}</p>}
       </Card>
+
+      {/* Geo Map */}
+      <AdminMap />
     </div>
   );
 }

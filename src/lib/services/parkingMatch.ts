@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { users, spotOffers, parkingMatchSchedules, parkingMatches } from "@/lib/db/schema";
 import { eq, and, sql, gte, lte, ne, inArray, desc } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
+import { haversineDistanceKm } from "@/lib/geo";
 
 export const DEFAULT_TOLERANCE_MINUTES = 15;
 export const DEFAULT_PROXIMITY_KM = 0.5;
@@ -34,19 +35,6 @@ export function vehicleCompatible(
   if (spotVehicleType && memberVehicleType && spotVehicleType !== memberVehicleType) return false;
   if (spotVehicleSize && memberVehicleSize && spotVehicleSize !== memberVehicleSize) return false;
   return true;
-}
-
-function haversineKm(
-  lat1: number, lng1: number,
-  lat2: number, lng2: number,
-): number {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function hashMemberId(id: string): string {
@@ -98,7 +86,7 @@ export async function runMatchingForAll(
       // Proximity check: if both have lat/lng, compute distance
       if (leaver.latitude != null && leaver.longitude != null &&
           seeker.latitude != null && seeker.longitude != null) {
-        const dist = haversineKm(
+        const dist = haversineDistanceKm(
           leaver.latitude, leaver.longitude,
           seeker.latitude, seeker.longitude,
         );

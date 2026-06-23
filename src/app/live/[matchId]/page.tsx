@@ -8,19 +8,10 @@ import { HoverButton } from "@/components/ui/HoverButton";
 import { Badge } from "@/components/ui/Badge";
 import InteractiveMap from "@/components/InteractiveMap";
 import type { GeofenceCircle } from "@/components/InteractiveMap";
+import { haversineDistanceMiles } from "@/lib/geo";
 
 const POLL_INTERVAL = 3000;
 const GEOFENCE_RADIUS_M = 75;
-
-function haversineMiles(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 3959;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
 type MatchState = "matched" | "waiting_arrival" | "arrived" | "ready_to_depart" | "departing" | "complete" | "cancelled";
 
@@ -123,7 +114,7 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
         const spotLat = data.match.spotLatitude ?? match?.spotLatitude;
         const spotLng = data.match.spotLongitude ?? match?.spotLongitude;
         if (data.location && spotLat && spotLng) {
-          const dist = haversineMiles(data.location.latitude, data.location.longitude, spotLat, spotLng);
+          const dist = haversineDistanceMiles(data.location.latitude, data.location.longitude, spotLat, spotLng);
           const eta = Math.round(dist * 30);
           setEtaMinutes(Math.max(1, eta));
 

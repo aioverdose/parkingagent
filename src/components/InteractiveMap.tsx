@@ -13,6 +13,14 @@ export interface GeofenceCircle {
   color?: string;
 }
 
+export interface ClusterMarker {
+  lat: number;
+  lng: number;
+  label?: string;
+  tooltip?: string;
+  color?: string;
+}
+
 export default function InteractiveMap({
   center,
   onPinDrop,
@@ -20,6 +28,7 @@ export default function InteractiveMap({
   livePosition,
   spotPosition,
   geofence,
+  clusterMarkers,
   className = "",
 }: {
   center: PinPosition;
@@ -28,6 +37,7 @@ export default function InteractiveMap({
   livePosition?: PinPosition | null;
   spotPosition?: PinPosition | null;
   geofence?: GeofenceCircle | null;
+  clusterMarkers?: ClusterMarker[];
   className?: string;
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -36,6 +46,7 @@ export default function InteractiveMap({
   const liveMarkerRef = useRef<any>(null);
   const spotMarkerRef = useRef<any>(null);
   const geofenceRef = useRef<any>(null);
+  const clusterGroupRef = useRef<any>(null);
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -68,7 +79,6 @@ export default function InteractiveMap({
         }
       });
 
-      // Spot position marker (electric blue pin for parking spot)
       if (spotPosition) {
         const spotIcon = L.divIcon({
           className: "custom-spot-pin",
@@ -79,7 +89,6 @@ export default function InteractiveMap({
         spotMarkerRef.current = L.marker([spotPosition.lat, spotPosition.lng], { icon: spotIcon }).addTo(map);
       }
 
-      // Geofence circle
       if (geofence) {
         geofenceRef.current = L.circle([geofence.center.lat, geofence.center.lng], {
           radius: geofence.radiusMeters,
@@ -102,10 +111,10 @@ export default function InteractiveMap({
         mapInstanceRef.current = null;
       }
       geofenceRef.current = null;
+      clusterGroupRef.current = null;
     };
   }, [center.lat, center.lng, spotPosition?.lat, spotPosition?.lng, geofence?.center.lat, geofence?.center.lng, geofence?.radiusMeters]);
 
-  // Pin position marker
   useEffect(() => {
     if (!mapInstanceRef.current) return;
     (async () => {
@@ -124,7 +133,6 @@ export default function InteractiveMap({
     })();
   }, [pinPosition?.lat, pinPosition?.lng]);
 
-  // Live position marker (purple with pulse)
   useEffect(() => {
     if (!mapInstanceRef.current || !livePosition) return;
     (async () => {
@@ -144,6 +152,58 @@ export default function InteractiveMap({
       mapInstanceRef.current.setView([livePosition.lat, livePosition.lng], mapInstanceRef.current.getZoom());
     })();
   }, [livePosition?.lat, livePosition?.lng]);
+
+  // Cluster markers — separate effect so it doesn't interfere with the single-pin markers
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    let group: any = null;
+
+    (async () => {
+      const L = await import("leaflet");
+      await import("leaflet.markercluster");
+      await import("leaflet.markercluster/dist/MarkerCluster.css");
+      await import("leaflet.markercluster/dist/MarkerCluster.Default.css");
+
+      if (!mapInstanceRef.current) return;
+
+      // Remove previous cluster group if any
+      if (clusterGroupRef.current) {
+        mapInstanceRef.current.removeLayer(clusterGroupRef.current);
+        clusterGroupRef.current = null;
+      }
+
+      if (!clusterMarkers || clusterMarkers.length === 0) return;
+
+      group = (L as any).markerClusterGroup({
+        chunkedLoading: true,
+        maxClusterRadius: 50,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
+      });
+
+      clusterMarkers.forEach((m) => {
+        const icon = L.divIcon({
+          className: "custom-cluster-marker",
+          html: `<div style="width:20px;height:20px;background:${m.color || "#4285F4"};border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>`,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+        });
+        const marker = L.marker([m.lat, m.lng], { icon });
+        if (m.tooltip) marker.bindTooltip(m.tooltip, { permanent: false, direction: "top" });
+        group.addLayer(marker);
+      });
+
+      mapInstanceRef.current.addLayer(group);
+      clusterGroupRef.current = group;
+    })();
+
+    return () => {
+      if (group && mapInstanceRef.current) {
+        try { mapInstanceRef.current.removeLayer(group); } catch {}
+      }
+    };
+  }, [clusterMarkers]);
 
   return (
     <div ref={mapRef} className={`rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] ${className}`} style={{ minHeight: 250 }} />

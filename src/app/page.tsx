@@ -8,19 +8,6 @@ import { api } from "@/lib/api";
 import type { AuthUser } from "@/lib/api";
 import { HoverButton } from "@/components/ui/HoverButton";
 
-function FadeInUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay, ease: "easeOut" }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 export default function Home() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -32,14 +19,6 @@ export default function Home() {
   useEffect(() => {
     api.get<{ count: number; remaining: number; isFull: boolean }>("/api/signup-count").then(setSignupCount).catch(() => {});
   }, []);
-
-  const howItWorks = [
-    "Sign up and agree to Terms of Service",
-    "Get verified (email + location access)",
-    "Enter your schedule:\n  Arrival time (when you need parking)\n  Desired location (drop pin on map)\n  Car type (so we match spots that fit)",
-    "Submit \u2192 We match you with other members to find you parking",
-    "Get matched \u2192 Both users accept \u2192 You're ready!",
-  ];
 
   return (
     <div className="min-h-screen bg-white relative">
@@ -98,39 +77,9 @@ export default function Home() {
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <h1 className="text-4xl md:text-5xl font-black text-[#202124] leading-tight mb-2">
-          Street Parking Spot Optimization
+          Would you drive around for 30 minutes if someone paid you $4.99?
         </h1>
-        <p className="text-xl text-[#757575] max-w-xl mx-auto">
-          Optimize your street parking experience
-        </p>
-        <p className="text-lg text-[#202124] max-w-xl mx-auto mt-4">
-          Would you spend <span className="text-[#E94335] font-bold">$4.99</span> for 30 minutes of your time?
-        </p>
       </motion.section>
-
-      {/* How It Works */}
-      <section className="max-w-3xl mx-auto px-4 pb-8">
-        <h2 className="text-2xl font-bold text-[#202124] text-center mb-6">How It Works</h2>
-        <div className="space-y-3">
-          {howItWorks.map((step, i) => {
-            const lines = step.split("\n");
-            return (
-              <FadeInUp key={i} delay={i * 0.1}>
-                <div className="flex items-start gap-3 bg-white border border-gray-200 rounded-xl p-4">
-                  <div className="w-7 h-7 rounded-full bg-[#4285F4] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                    {i + 1}
-                  </div>
-                  <div className="text-sm text-[#202124] leading-relaxed">
-                    {lines.map((line, j) => (
-                      <p key={j}>{line}</p>
-                    ))}
-                  </div>
-                </div>
-              </FadeInUp>
-            );
-          })}
-        </div>
-      </section>
 
       {/* Benefits */}
       <section className="max-w-3xl mx-auto px-4 pb-8">
