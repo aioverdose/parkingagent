@@ -1,9 +1,10 @@
 import { db } from "@/lib/db";
 import { users, spotOffers, parkingMatchSchedules, parkingMatches } from "@/lib/db/schema";
-import { eq, and, sql, gte, lte, ne, inArray } from "drizzle-orm";
+import { eq, and, sql, gte, lte, ne, inArray, desc } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 
 export const DEFAULT_TOLERANCE_MINUTES = 15;
+export const DEFAULT_PROXIMITY_KM = 0.5;
 
 export function minutesFromMidnight(timeStr: string): number {
   const [h, m] = timeStr.split(":").map(Number);
@@ -35,6 +36,19 @@ export function vehicleCompatible(
   return true;
 }
 
+function haversineKm(
+  lat1: number, lng1: number,
+  lat2: number, lng2: number,
+): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 function hashMemberId(id: string): string {
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
@@ -62,7 +76,9 @@ export interface ParkingMatchResult {
   alarmMinutes: number;
 }
 
-export async function runMatchingForAll(): Promise<number> {
+export async function runMatchingForAll(
+  proximityKm: number = DEFAULT_PROXIMITY_KM,
+): Promise<number> {
   const schedules = await db
     .select()
     .from(parkingMatchSchedules)
@@ -79,7 +95,18 @@ export async function runMatchingForAll(): Promise<number> {
 
       if (!timesOverlap(leaver.leavingTime, seeker.arrivalLookingTime)) continue;
 
-      if (leaver.neighborhoodId && seeker.neighborhoodId && leaver.neighborhoodId !== seeker.neighborhoodId) continue;
+      // Proximity check: if both have lat/lng, compute distance
+      if (leaver.latitude != null && leaver.longitude != null &&
+          seeker.latitude != null && seeker.longitude != null) {
+        const dist = haversineKm(
+          leaver.latitude, leaver.longitude,
+          seeker.latitude, seeker.longitude,
+        );
+        if (dist > proximityKm) continue;
+      } else if (leaver.neighborhoodId && seeker.neighborhoodId &&
+                 leaver.neighborhoodId !== seeker.neighborhoodId) {
+        continue;
+      }
 
       const [leavingUser] = await db
         .select({
@@ -198,4 +225,76 @@ export async function getMatchesForMember(
   }
 
   return results;
+}
+
+export interface ParkingMatchMetrics {
+  activeSchedules: number;
+  totalSchedules: number;
+  totalParkingMatches: number;
+  pendingMatches: number;
+  confirmedMatches: number;
+  cancelledMatches: number;
+  expiredMatches: number;
+  matchSuccessRate: number;
+  recentMatches: number;
+}
+
+export async function getParkingMatchMetrics(): Promise<ParkingMatchMetrics> {
+  const [activeSchedules] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(parkingMatchSchedules)
+    .where(eq(parkingMatchSchedules.isActive, true));
+
+  const [totalSchedules] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(parkingMatchSchedules);
+
+  const [totalMatches] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(parkingMatches);
+
+  const [pending] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(parkingMatches)
+    .where(eq(parkingMatches.status, "pending"));
+
+  const [confirmed] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(parkingMatches)
+    .where(eq(parkingMatches.status, "confirmed"));
+
+  const [cancelled] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(parkingMatches)
+    .where(eq(parkingMatches.status, "cancelled"));
+
+  const [expired] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(parkingMatches)
+    .where(eq(parkingMatches.status, "expired"));
+
+  const total = Number(confirmed?.count ?? 0) + Number(cancelled?.count ?? 0) + Number(expired?.count ?? 0);
+
+  const today = new Date().toISOString().split("T")[0];
+  const [recent] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(parkingMatches)
+    .where(
+      and(
+        gte(parkingMatches.matchedAt, today),
+        inArray(parkingMatches.status, ["pending", "confirmed"]),
+      ),
+    );
+
+  return {
+    activeSchedules: Number(activeSchedules?.count ?? 0),
+    totalSchedules: Number(totalSchedules?.count ?? 0),
+    totalParkingMatches: Number(totalMatches?.count ?? 0),
+    pendingMatches: Number(pending?.count ?? 0),
+    confirmedMatches: Number(confirmed?.count ?? 0),
+    cancelledMatches: Number(cancelled?.count ?? 0),
+    expiredMatches: Number(expired?.count ?? 0),
+    matchSuccessRate: total > 0 ? Math.round((Number(confirmed.count ?? 0) / total) * 100) : 0,
+    recentMatches: Number(recent?.count ?? 0),
+  };
 }

@@ -103,6 +103,9 @@ export default function Home() {
         <p className="text-xl text-[#757575] max-w-xl mx-auto">
           Optimize your street parking experience
         </p>
+        <p className="text-lg text-[#202124] max-w-xl mx-auto mt-4">
+          Would you spend <span className="text-[#E94335] font-bold">$4.99</span> for 30 minutes of your time?
+        </p>
       </motion.section>
 
       {/* How It Works */}

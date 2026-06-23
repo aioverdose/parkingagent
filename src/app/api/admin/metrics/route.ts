@@ -1,8 +1,9 @@
 import { db } from "@/lib/db";
-import { users, matches, spotOffers, systemMetrics } from "@/lib/db/schema";
-import { eq, and, gte, sql } from "drizzle-orm";
+import { users, matches, spotOffers, systemMetrics, parkingMatchSchedules, parkingMatches } from "@/lib/db/schema";
+import { eq, and, gte, sql, inArray } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
 import { ok, err, handleError } from "@/lib/apiResponse";
+import { getParkingMatchMetrics } from "@/lib/services/parkingMatch";
 
 export async function GET() {
   try {
@@ -57,6 +58,8 @@ export async function GET() {
       .where(eq(systemMetrics.id, "default"))
       .limit(1);
 
+    const pm = await getParkingMatchMetrics();
+
     return ok({
       metrics: {
         totalMembers: Number(totalMembers?.count ?? 0),
@@ -67,6 +70,16 @@ export async function GET() {
         matchesExpiredCancelledToday: Number(expiredToday?.count ?? 0),
         averageMatchTimeSeconds: metrics?.averageMatchTimeSeconds ?? 4.2,
         averageArrivalTimeMinutes: metrics?.averageArrivalTimeMinutes ?? 6.8,
+        // Parking match metrics
+        activeSchedules: pm.activeSchedules,
+        totalSchedules: pm.totalSchedules,
+        totalParkingMatches: pm.totalParkingMatches,
+        pendingParkingMatches: pm.pendingMatches,
+        confirmedParkingMatches: pm.confirmedMatches,
+        cancelledParkingMatches: pm.cancelledMatches,
+        expiredParkingMatches: pm.expiredMatches,
+        parkingMatchSuccessRate: pm.matchSuccessRate,
+        recentParkingMatches: pm.recentMatches,
       },
     });
   } catch (error) {
