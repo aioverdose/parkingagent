@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { signup } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { neighborhoods, detectNeighborhood } from "@/lib/neighborhoods";
 
 export default function Signup() {
   const router = useRouter();
@@ -17,6 +18,8 @@ export default function Signup() {
   const [agreeTos, setAgreeTos] = useState(false);
   const [agreeLocation, setAgreeLocation] = useState(false);
   const [agreeAge, setAgreeAge] = useState(false);
+  const [neighborhood, setNeighborhood] = useState("");
+  const [gpsDetecting, setGpsDetecting] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -28,6 +31,24 @@ export default function Signup() {
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const [signupCount, setSignupCount] = useState<{ count: number; remaining: number; isFull: boolean } | null>(null);
+
+  const detectGpsNeighborhood = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      return;
+    }
+    setGpsDetecting(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const detected = detectNeighborhood(pos.coords.latitude, pos.coords.longitude);
+        setNeighborhood(detected);
+        setGpsDetecting(false);
+      },
+      () => setGpsDetecting(false),
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
+
+  useEffect(() => { detectGpsNeighborhood(); }, []);
 
   useEffect(() => {
     api.get<{ count: number; remaining: number; isFull: boolean }>("/api/signup-count").then(setSignupCount).catch(() => {});
@@ -45,7 +66,7 @@ export default function Signup() {
     setLoading(true);
     try {
       const res = await api.post<{ user: { id: string; phone: string } }>("/api/auth/register", {
-        name, email, password, phone, completedModuleIds: [],
+        name, email, password, phone, neighborhood: neighborhood || undefined, completedModuleIds: [],
       });
       setUserId(res.user.id);
       setPhoneNumber(res.user.phone);
@@ -160,6 +181,24 @@ export default function Signup() {
                   <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] focus:border-[#4285F4] outline-none transition"
                     placeholder="At least 6 characters" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#202124] mb-1">Your Area</label>
+                  <div className="flex gap-2">
+                    <select id="neighborhood" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] focus:border-[#4285F4] outline-none transition bg-white appearance-none">
+                      <option value="">Select your neighborhood...</option>
+                      {neighborhoods.neighborhoods.map((n) => (
+                        <option key={n.id} value={n.name}>{n.name}</option>
+                      ))}
+                      <option value={neighborhoods.defaultCity}>{neighborhoods.defaultCity} (other)</option>
+                    </select>
+                    <button type="button" onClick={detectGpsNeighborhood} disabled={gpsDetecting}
+                      className="px-3 py-3 border border-gray-300 rounded-xl text-sm text-[#4285F4] hover:bg-[#E8F0FE] transition-colors disabled:opacity-50 whitespace-nowrap">
+                      {gpsDetecting ? "\u23F3" : "\uD83D\uDCCD"}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-3 pt-2">

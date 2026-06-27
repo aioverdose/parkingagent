@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const rl = rateLimit(req, 5);
     if (!rl.allowed) return rateLimitedResponse(rl.resetAt);
 
-    const { name, email, password, phone, completedModuleIds } = validate(registerSchema, await req.json());
+    const { name, email, password, phone, neighborhood, completedModuleIds } = validate(registerSchema, await req.json());
 
     if (!phone) {
       return err("Phone number is required. A mobile device is needed for this app.", 400);
@@ -65,6 +65,7 @@ export async function POST(req: Request) {
       completedCourses: !!allRequiredComplete,
       phone: phone.replace(/\D/g, ""),
       phoneVerified: false,
+      neighborhood: neighborhood || null,
       joinedDate: today,
       createdAt: now,
       tier,

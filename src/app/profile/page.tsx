@@ -8,7 +8,7 @@ import { HoverButton } from "@/components/ui/HoverButton";
 import { HoverCard } from "@/components/ui/HoverCard";
 import { Badge } from "@/components/ui/Badge";
 import InteractiveMap from "@/components/InteractiveMap";
-import { neighborhoods } from "@/lib/neighborhoods";
+import { neighborhoods, detectNeighborhood } from "@/lib/neighborhoods";
 
 interface ParkingMatch {
   matchId: string;
@@ -68,6 +68,7 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
+  const [gpsDetecting, setGpsDetecting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -194,6 +195,20 @@ export default function ProfilePage() {
       setBeacons(beacons);
     } catch {}
   }
+
+  const detectGpsNeighborhood = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    setGpsDetecting(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const detected = detectNeighborhood(pos.coords.latitude, pos.coords.longitude);
+        setNeighborhood(detected);
+        setGpsDetecting(false);
+      },
+      () => setGpsDetecting(false),
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
 
   async function handleProfileSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -433,9 +448,21 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label htmlFor="neighborhood" className="block text-sm font-medium text-[#202124] mb-1">Neighborhood</label>
-                <input id="neighborhood" type="text" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} placeholder="e.g. Downtown, Midtown"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
+                <label className="block text-sm font-medium text-[#202124] mb-1">Neighborhood</label>
+                <div className="flex gap-2">
+                  <select id="neighborhood" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)}
+                    className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none bg-white appearance-none">
+                    <option value="">Select your neighborhood...</option>
+                    {neighborhoods.neighborhoods.map((n) => (
+                      <option key={n.id} value={n.name}>{n.name}</option>
+                    ))}
+                    <option value={neighborhoods.defaultCity}>{neighborhoods.defaultCity} (other)</option>
+                  </select>
+                  <button type="button" onClick={detectGpsNeighborhood} disabled={gpsDetecting}
+                    className="px-3 py-2.5 border border-gray-300 rounded-xl text-sm text-[#4285F4] hover:bg-[#E8F0FE] transition-colors disabled:opacity-50 whitespace-nowrap">
+                    {gpsDetecting ? "\u23F3" : "\uD83D\uDCCD"}
+                  </button>
+                </div>
               </div>
               <button type="submit" disabled={loading}
                 className="w-full bg-[#4285F4] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#1A73E8] transition-colors disabled:opacity-50">

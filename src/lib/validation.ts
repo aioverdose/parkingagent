@@ -41,6 +41,7 @@ export const registerSchema = z.object({
   email,
   password,
   phone: z.string().min(10, "Phone number is required. A mobile device is needed for this app."),
+  neighborhood: z.string().optional(),
   completedModuleIds: z.array(z.string()).optional(),
 });
 
@@ -58,6 +59,7 @@ export const profileUpdateSchema = z.object({
   email: z.string().email().max(255).optional(),
   currentPassword: z.string().optional(),
   newPassword: password.optional(),
+  neighborhood: z.string().optional(),
   vehicleType: vehicleTypeEnum,
   vehicleSize: vehicleSizeEnum,
   vehicleMake: z.string().max(50).optional(),

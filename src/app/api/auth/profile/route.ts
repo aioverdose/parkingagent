@@ -12,7 +12,7 @@ export async function PUT(req: Request) {
       return err("Unauthorized", 401);
     }
 
-    const { name, email, currentPassword, newPassword, vehicleType, vehicleSize, vehicleMake, vehicleModel, licensePlate } = validate(profileUpdateSchema, await req.json());
+    const { name, email, currentPassword, newPassword, neighborhood, vehicleType, vehicleSize, vehicleMake, vehicleModel, licensePlate } = validate(profileUpdateSchema, await req.json());
 
     const [user] = await db
       .select()
@@ -40,6 +40,8 @@ export async function PUT(req: Request) {
       }
       updates.email = email;
     }
+
+    if (neighborhood !== undefined) updates.neighborhood = neighborhood || null;
 
     if (vehicleType !== undefined) updates.vehicleType = vehicleType;
     if (vehicleSize !== undefined) updates.vehicleSize = vehicleSize;
