@@ -3,6 +3,7 @@ import { haversineDistanceMiles } from "@/lib/geo";
 import { users, spotAnchors } from "@/lib/db/schema";
 import { eq, and, gte, desc, sql } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
+import { detectNeighborhood } from "@/lib/neighborhoods";
 
 const LEVEL_MAP: Record<number, number> = {
   1: 0,
@@ -373,9 +374,4 @@ async function findNearbyMiners(lat: number, lng: number) {
     .slice(0, 10);
 }
 
-function detectNeighborhood(lat: number, lng: number): string {
-  if (lat >= 33.76 && lat <= 33.78 && lng >= -118.20 && lng <= -118.18) return "Belmont Shore";
-  if (lat >= 33.77 && lat <= 33.79 && lng >= -118.19 && lng <= -118.17) return "Downtown Long Beach";
-  if (lat >= 33.78 && lat <= 33.80 && lng >= -118.18 && lng <= -118.16) return "Naples";
-  return "Long Beach";
-}
+// detectNeighborhood moved to src/lib/neighborhoods.ts

@@ -3,49 +3,10 @@ import { users, spotOffers, parkingMatchSchedules, parkingMatches } from "@/lib/
 import { eq, and, sql, gte, lte, ne, inArray, desc } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 import { haversineDistanceKm } from "@/lib/geo";
+import { minutesFromMidnight, formatMinutes, timesOverlap, vehicleCompatible, anonymousMemberId } from "./matchingUtils";
 
 export const DEFAULT_TOLERANCE_MINUTES = 15;
 export const DEFAULT_PROXIMITY_KM = 0.5;
-
-export function minutesFromMidnight(timeStr: string): number {
-  const [h, m] = timeStr.split(":").map(Number);
-  return h * 60 + m;
-}
-
-export function formatMinutes(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-}
-
-export function timesOverlap(
-  leavingTime: number,
-  arrivalLookingTime: number,
-  toleranceMinutes: number = DEFAULT_TOLERANCE_MINUTES,
-): boolean {
-  return Math.abs(leavingTime - arrivalLookingTime) <= toleranceMinutes;
-}
-
-export function vehicleCompatible(
-  memberVehicleType: string | null | undefined,
-  memberVehicleSize: string | null | undefined,
-  spotVehicleType: string | null | undefined,
-  spotVehicleSize: string | null | undefined,
-): boolean {
-  if (spotVehicleType && memberVehicleType && spotVehicleType !== memberVehicleType) return false;
-  if (spotVehicleSize && memberVehicleSize && spotVehicleSize !== memberVehicleSize) return false;
-  return true;
-}
-
-function hashMemberId(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    const char = id.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash |= 0;
-  }
-  return "Member #" + Math.abs(hash).toString(16).toUpperCase().slice(0, 4);
-}
 
 export interface ParkingMatchResult {
   matchId: string;
@@ -115,8 +76,8 @@ export async function runMatchingForAll(
         .limit(1);
 
       if (leavingUser && arrivingUser && !vehicleCompatible(
-        arrivingUser.vehicleType, arrivingUser.vehicleSize,
-        leavingUser.vehicleType, leavingUser.vehicleSize,
+        { type: arrivingUser.vehicleType, size: arrivingUser.vehicleSize },
+        { type: leavingUser.vehicleType, size: leavingUser.vehicleSize },
       )) continue;
 
       // Check not already matched
@@ -202,7 +163,7 @@ export async function getMatchesForMember(
       status: row.status,
       matchState: row.matchState ?? "matched",
       matchedAt: row.matchedAt,
-      anonymousPartner: hashMemberId(partnerId),
+      anonymousPartner: anonymousMemberId(partnerId),
       partnerVehicleInfo: partner
         ? { type: partner.vehicleType, size: partner.vehicleSize }
         : null,

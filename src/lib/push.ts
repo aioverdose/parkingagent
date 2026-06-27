@@ -1,11 +1,15 @@
 import webPush from "web-push";
 
-if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-  webPush.setVapidDetails(
-    "mailto:support@spotimization.com",
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY,
-  );
+try {
+  if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    webPush.setVapidDetails(
+      "mailto:support@spotimization.com",
+      process.env.VAPID_PUBLIC_KEY,
+      process.env.VAPID_PRIVATE_KEY,
+    );
+  }
+} catch {
+  // VAPID keys not yet configured or invalid — push notifications will be unavailable
 }
 
 export { webPush };

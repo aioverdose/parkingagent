@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import dynamic from "next/dynamic";
+import InteractiveMap from "@/components/InteractiveMap";
 import type { ClusterMarker } from "@/components/InteractiveMap";
-
-const InteractiveMap = dynamic(() => import("@/components/InteractiveMap"), { ssr: false });
 
 interface MapDataPoint {
   lat: number;

@@ -260,8 +260,9 @@ button:active, a:active {
   box-shadow: var(--shadow-lg);
 }
 
-.leaflet-container {
-  background: #F0F4F8 !important;
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 0 8px rgba(124,58,237,0.2), 0 2px 8px rgba(124,58,237,0.4); }
+  50% { box-shadow: 0 0 0 16px rgba(124,58,237,0.1), 0 2px 8px rgba(124,58,237,0.4); }
 }
 
 /* Gradient text */

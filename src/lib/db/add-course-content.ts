@@ -7,7 +7,7 @@ async function addCourseContentColumn() {
   `);
 
   await db.execute(`
-    UPDATE course_modules SET content = 'In Long Beach, street parking is regulated by the city municipal code. Key rules:
+    UPDATE course_modules SET content = 'Street parking is regulated by the city municipal code. Key rules:
 • 2-hour time limits apply in most residential areas (look for white signs)
 • Permit zones require a residential permit — visitors must use guest permits
 • No-parking zones include: red curbs (fire hydrants), yellow curbs (loading), blue curbs (disabled)

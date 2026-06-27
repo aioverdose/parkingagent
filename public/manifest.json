@@ -1,17 +1,32 @@
 {
   "name": "Spotimization",
-  "short_name": "ParkAgent",
-  "description": "AI-powered street parking matching for Long Beach, CA",
+  "short_name": "Spotimization",
+  "description": "AI-powered street parking matching — never circle the block again.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#4285F4",
+  "background_color": "#0F172A",
+  "theme_color": "#2563EB",
+  "orientation": "portrait",
+  "categories": ["navigation", "lifestyle", "utilities"],
+  "prefer_related_applications": false,
   "icons": [
+    { "src": "/pwa-icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/pwa-icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
     {
-      "src": "/pwa-icon.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "name": "Find Parking",
+      "short_name": "Find",
+      "description": "Find nearby parking spots",
+      "url": "/?action=find",
+      "icons": [{ "src": "/pwa-icon.svg", "sizes": "512x512", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Offer Spot",
+      "short_name": "Offer",
+      "description": "Offer your parking spot to someone nearby",
+      "url": "/?action=offer",
+      "icons": [{ "src": "/pwa-icon.svg", "sizes": "512x512", "type": "image/svg+xml" }]
     }
   ]
 }

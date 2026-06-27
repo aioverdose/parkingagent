@@ -8,6 +8,7 @@ import { HoverButton } from "@/components/ui/HoverButton";
 import { HoverCard } from "@/components/ui/HoverCard";
 import { Badge } from "@/components/ui/Badge";
 import InteractiveMap from "@/components/InteractiveMap";
+import { neighborhoods } from "@/lib/neighborhoods";
 
 interface ParkingMatch {
   matchId: string;
@@ -85,11 +86,6 @@ export default function ProfilePage() {
   const [parkingMatches, setParkingMatches] = useState<ParkingMatch[]>([]);
   const [preScheduledConnections, setPreScheduledConnections] = useState<PreScheduledConnection[]>([]);
   const [showMatches, setShowMatches] = useState(true);
-  const [leavingTime, setLeavingTime] = useState("");
-  const [arrivalLookingTime, setArrivalLookingTime] = useState("");
-  const [t1Message, setT1Message] = useState("");
-  const [t1Error, setT1Error] = useState("");
-  const [t1Loading, setT1Loading] = useState(false);
   const [psRole, setPsRole] = useState<"arriver" | "departor" | "both">("both");
   const [psType, setPsType] = useState<"work" | "event" | "shift" | "other">("work");
   const [psDays, setPsDays] = useState<number[]>([1, 2, 3, 4, 5]);
@@ -131,11 +127,11 @@ export default function ProfilePage() {
     if (typeof navigator !== "undefined" && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => setPosition({ lat: 33.7701, lng: -118.1937 }),
+        () => setPosition({ lat: neighborhoods.defaultLat, lng: neighborhoods.defaultLng }),
         { enableHighAccuracy: true, timeout: 10000 },
       );
     } else {
-      setPosition({ lat: 33.7701, lng: -118.1937 });
+      setPosition({ lat: neighborhoods.defaultLat, lng: neighborhoods.defaultLng });
     }
     registerServiceWorker();
     requestPushPermission();
@@ -251,8 +247,8 @@ export default function ProfilePage() {
     try {
       await api.post("/api/parking-match/confirm", { matchId });
       fetchParkingMatches();
-    } catch {
-      setT1Error("Failed to confirm match.");
+    } catch (err: any) {
+      setError(err?.message || "Failed to confirm match.");
     }
   }
 
@@ -261,8 +257,8 @@ export default function ProfilePage() {
       await api.post("/api/parking-match/cancel", { matchId });
       await api.post("/api/ranking/update", { action: "cancel" });
       fetchParkingMatches();
-    } catch {
-      setT1Error("Failed to cancel match.");
+    } catch (err: any) {
+      setError(err?.message || "Failed to cancel match.");
     }
   }
 
@@ -285,29 +281,6 @@ export default function ProfilePage() {
     try {
       await api.post("/api/parking/favorite", { matchId });
     } catch {}
-  }
-
-  async function handleT1Submit(e: React.FormEvent) {
-    e.preventDefault();
-    setT1Message(""); setT1Error("");
-    if (!leavingTime || !arrivalLookingTime) {
-      setT1Error("Both arrival time and departure time are required.");
-      return;
-    }
-    setT1Loading(true);
-    try {
-      const { message } = await api.post<{ message: string }>("/api/parking-match-schedule", {
-        leavingTime,
-        arrivalLookingTime,
-        neighborhood: neighborhood || undefined,
-      });
-      setT1Message(message);
-      setLeavingTime(""); setArrivalLookingTime("");
-      fetchParkingMatches();
-    } catch (err: any) {
-      setT1Error(err.message || "Failed to submit schedule.");
-    }
-    setT1Loading(false);
   }
 
   function timeToMinutes(value: string) {
@@ -474,8 +447,8 @@ export default function ProfilePage() {
           {/* Map + Schedule Section */}
           <hr className="mb-2" />
           <div className="modern-card">
-            <h2 className="text-lg font-semibold text-[#202124] mb-1">{"\uD83D\uDDFA\uFE0F"} Desired Parking Location</h2>
-            <p className="text-xs text-[#757575] mb-4">Move the map and drop a pin where you want to park</p>
+            <h2 className="text-lg font-semibold text-[#202124] mb-1">{"\uD83D\uDDFA\uFE0F"} Parking Schedule</h2>
+            <p className="text-xs text-[#757575] mb-4">Set your schedule and drop a pin for your desired parking area</p>
 
             {position && (
               <InteractiveMap
@@ -713,35 +686,6 @@ export default function ProfilePage() {
               <div className="bg-gray-50 rounded-lg p-2"><span className="text-[#757575]">Cancels</span><p className="font-bold text-[#E94335]">{user.cancelCount || 0}</p></div>
               <div className="bg-gray-50 rounded-lg p-2"><span className="text-[#757575]">No-Shows</span><p className="font-bold text-[#E94335]">{user.noShowCount || 0}</p></div>
             </div>
-          </div>
-
-          {/* Preliminary Matching (existing) */}
-          <hr className="mb-2" />
-          <div className="modern-card">
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-semibold text-[#202124]">Preliminary Matching</h2>
-              <Badge variant="success">Free</Badge>
-            </div>
-            <p className="text-xs text-[#757575] mb-4">
-              Enter your arrival and departure times to get matched based on time and proximity.
-            </p>
-            <form onSubmit={handleT1Submit} className="space-y-4">
-              {t1Message && <p className="text-sm text-[#0F9D58] bg-[#E6F4EA] p-3 rounded-xl">{t1Message}</p>}
-              {t1Error && <p className="text-sm text-[#E94335] bg-[#FCE8E6] p-3 rounded-xl">{t1Error}</p>}
-              <div>
-                <label htmlFor="arrivalLookingTime" className="block text-sm font-medium text-[#202124] mb-1">Time you arrive and are looking for a spot</label>
-                <input id="arrivalLookingTime" type="time" value={arrivalLookingTime} onChange={(e) => setArrivalLookingTime(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
-              </div>
-              <div>
-                <label htmlFor="leavingTime" className="block text-sm font-medium text-[#202124] mb-1">Time you depart your parking spot</label>
-                <input id="leavingTime" type="time" value={leavingTime} onChange={(e) => setLeavingTime(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
-              </div>
-              <HoverButton type="submit" disabled={t1Loading} className="w-full">
-                {t1Loading ? "Submitting..." : "Submit for Matching"}
-              </HoverButton>
-            </form>
           </div>
 
           {/* Pre-Scheduled Parking Connections */}

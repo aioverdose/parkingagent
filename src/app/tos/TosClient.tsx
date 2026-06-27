@@ -41,7 +41,7 @@ export default function TosClient() {
           <section>
             <h2 className="text-xl font-bold mb-3">1. Introduction</h2>
             <p>
-              Spotimization is a member-to-member matching service for street parking in Long Beach, CA.
+              Spotimization is a member-to-member matching service for street parking.
               We help members find parking more efficiently by anonymously matching their schedules
               with other members.
             </p>
@@ -49,14 +49,14 @@ export default function TosClient() {
               Spotimization does not own, sell, or in any way make money from free public parking spots.
             </p>
             <p className="mt-2">
-              The app operates in accordance with Long Beach, CA city laws.
+              The app operates in accordance with applicable local parking laws.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-bold mb-3">2. Purpose of the App</h2>
             <p>
-              We offer our members a way to maximize efficiency when parking on the streets of Long Beach.
+              We offer our members a way to maximize efficiency when parking on public streets.
             </p>
             <p className="mt-2">
               Spotimization is a member-to-member matching service for street parking. Members can:
@@ -75,7 +75,7 @@ export default function TosClient() {
             </p>
             <p className="mt-2">
               All parking spots referenced in the app are public street parking spots governed by
-              Long Beach, CA parking regulations. The app does not control, reserve, or guarantee
+              applicable local parking regulations. The app does not control, reserve, or guarantee
               any specific public parking spot. Spotimization does not charge fees for public
               parking spots themselves.
             </p>

@@ -5,7 +5,11 @@ const REQUIRED_ENV_VARS = [
   "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET",
   "STRIPE_PRICE_MONTHLY", "STRIPE_PRICE_ANNUAL",
   "VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY",
-  "NEXT_PUBLIC_BASE_URL",
+  "NEXT_PUBLIC_BASE_URL", "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
+] as const;
+
+const OPTIONAL_ENV_VARS = [
+  "ROUTING_BACKEND", "VALHALLA_URL", "OSRM_URL",
 ] as const;
 
 // Validate env vars at server start (not during build)
@@ -30,6 +34,20 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+      {
+        source: "/manifest.json",
+        headers: [
+          { key: "Cache-Control", value: "no-cache" },
+          { key: "Content-Type", value: "application/manifest+json" },
         ],
       },
     ];

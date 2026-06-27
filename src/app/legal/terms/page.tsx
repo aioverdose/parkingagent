@@ -50,8 +50,8 @@ export default function TermsOfService() {
           <Card>
             <h2 className="font-bold text-[#202124] text-sm mb-2">4. Community Education</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
-              Spotimization provides educational courses about street parking
-              laws in Long Beach, CA. These courses are for informational
+              Spotimization provides educational courses about local street parking
+              laws. These courses are for informational
               purposes only and do not constitute legal advice. Members are
               responsible for understanding and complying with all local
               parking laws and regulations.
@@ -62,8 +62,8 @@ export default function TermsOfService() {
             <h2 className="font-bold text-[#202124] text-sm mb-2">5. Member Responsibilities</h2>
             <ul className="list-disc list-inside space-y-1 text-sm text-[#757575] leading-relaxed">
               <li>
-                Comply with all applicable laws and regulations, including Long
-                Beach street parking laws
+                Comply with all applicable laws and regulations, including local
+                street parking laws
               </li>
               <li>
                 Maintain accurate account information and membership status
@@ -112,13 +112,12 @@ export default function TermsOfService() {
           </Card>
 
           <Card>
-            <h2 className="font-bold text-[#202124] text-sm mb-2">9. Long Beach, CA Compliance</h2>
+            <h2 className="font-bold text-[#202124] text-sm mb-2">9. Local Compliance</h2>
             <p className="text-sm text-[#757575] leading-relaxed">
-              This platform is designed for use in Long Beach, California. All
-              members must comply with Long Beach municipal parking ordinances,
+              All members must comply with applicable municipal parking ordinances,
               including time limits, permit requirements, street sweeping
               schedules, and no-parking zones. Members are responsible for
-              staying informed about local parking regulations.
+              staying informed about local parking regulations in their area.
             </p>
           </Card>
 

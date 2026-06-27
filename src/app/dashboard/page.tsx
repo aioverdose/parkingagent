@@ -97,7 +97,7 @@ export default function Dashboard() {
       const { offer } = await api.post<{ offer: { id: string } }>("/api/pairing/offer", {
         latitude: position.lat,
         longitude: position.lng,
-        address: geoError ? "Long Beach, CA (approximate)" : "My current location",
+        address: geoError ? "Current location (approximate)" : "My current location",
         expectedDeparture: new Date(Date.now() + 30 * 60000).toISOString(),
         vehicleType: user.vehicleType || undefined,
         vehicleSize: user.vehicleSize || undefined,
@@ -293,7 +293,7 @@ export default function Dashboard() {
               <button onClick={handleParkingMatchDemo}
                 className="w-full bg-[#F59E0B] text-white px-7 py-4 rounded-lg font-semibold text-base shadow-[0_4px_12px_rgba(245,158,11,0.3)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.4)] hover:-translate-y-0.5 hover:bg-[#D97706] transition-all duration-300 flex items-center justify-center gap-3">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg>
-                Try Free Schedule Matching
+                Try Free Schedule Matching (Set your times)
               </button>
             </div>
 
@@ -362,7 +362,7 @@ export default function Dashboard() {
               {[
                 "Drop a pin on the map of where you're arriving.",
                 "System calculates ETA based on GPS.",
-                "Preliminary requests sent to matching users in area.",
+                "Schedule requests sent to matching users in your area.",
                 "Alerts expand in radius as you get closer if no match found.",
                 "Arrival beacon: send a beacon when arriving at an unscheduled time.",
               ].map((benefit) => (
@@ -506,7 +506,7 @@ export default function Dashboard() {
             <p className="text-sm text-[#64748B] mt-1">Checking radius: {RADII_LABELS[radiusIndex] || `${(radiusIndex + 1) * 5} blocks`}</p>
             <div className="mt-8">
               <div className="w-12 h-12 border-4 border-[#D1FAE5] border-t-[#10B981] rounded-full animate-spin mx-auto" />
-              <p className="text-sm text-[#64748B] mt-4">Sending preliminary requests to matching users...</p>
+              <p className="text-sm text-[#64748B] mt-4">Searching for matching schedules in your area...</p>
             </div>
           </div>
         )}
@@ -564,7 +564,7 @@ export default function Dashboard() {
             </div>
             <h2 className="text-xl font-bold text-[#1E293B] mt-3">No match found</h2>
             <p className="text-sm text-[#64748B] mt-2 max-w-xs mx-auto">
-              No match found in your area. Try expanding the radius or using preliminary schedule matching.
+              No match found in your area. Try expanding the radius or set up a recurring schedule.
             </p>
             <div className="mt-6 space-y-2">
               <button onClick={() => router.push("/profile")}

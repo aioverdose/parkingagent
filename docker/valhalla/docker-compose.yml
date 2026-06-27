@@ -1,0 +1,39 @@
+# Self-hosted Valhalla routing engine for Spotimization
+# Downloads OSM data for Southern California (Long Beach / LA area)
+#
+# Usage:
+#   1. Place an OSM PBF extract in ./data/ (or let the init script download it)
+#   2. docker compose up -d
+#   3. Valhalla API available at http://localhost:8002
+#
+# Valhalla endpoints used by Spotimization:
+#   POST /route          - Driving ETA (used in pairing find)
+#   POST /sources_to_targets - Matrix routing (batch ETA)
+
+services:
+  valhalla:
+    image: ghcr.io/gis-ops/docker-valhalla:latest
+    container_name: spotimization-valhalla
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./data:/custom_files
+      - ./valhalla.json:/custom_files/valhalla.json
+      - valhalla_tiles:/valhalla_tiles
+    environment:
+      # Download CA Southern region if no PBF exists, skip if already built
+      - tile_urls=https://download.geofabrik.de/north-america/us/california/southern-california-latest.osm.pbf
+      - use_tiles_ignore_size=true
+      - force_rebuild=false
+      - build_elevation=true
+      - build_admins=true
+      - build_time_zones=true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  valhalla_tiles:

@@ -54,24 +54,24 @@ const defaultContent: PageContent = {
     description:
       "Our AI agentic technology matches departing members with arriving members in real-time, creating a seamless parking experience.",
     rules: [
-      "All members must complete the short course on Long Beach street parking laws",
+      "All members must complete the short course on local street parking laws",
       "Maintain good-standing status by following community guidelines",
       "Ranking is determined by participation and reliability",
       "Only one member may claim a spot at a time",
     ],
     courseInfo:
-      "A short course on laws governing street parking for Long Beach, CA, including time limits, permit zones, no-parking zones, and participation rules.",
+      "A short course on laws governing street parking, including time limits, permit zones, no-parking zones, and participation rules.",
     ctaText: "Become a Member",
   },
   membership: {
     benefits: [
       "Access to AI agentic matching technology",
-      "Short course on Long Beach street parking laws",
+      "Short course on local street parking laws",
       "Community rules of participation",
       "Ranking system with good-standing status",
     ],
-    monthlyPrice: "$9.99–$19.99/month",
-    annualPrice: "$79–$149/year",
+    monthlyPrice: "$4.99/month",
+    annualPrice: "$49.99/year",
     ctaText: "Start Membership",
   },
   legal: {
@@ -87,8 +87,8 @@ const defaultContent: PageContent = {
 const defaultModules: CourseModule[] = [
   {
     id: "cm1",
-    title: "Long Beach Street Parking Laws",
-    description: "Understand time limits, permit zones, and no-parking zones",
+    title: "Local Street Parking Laws",
+    description: "Understand time limits, permit zones, and local parking rules",
     isActive: true,
     required: true,
     lastUpdated: "2026-06-01",

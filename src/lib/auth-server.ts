@@ -6,9 +6,11 @@ import { eq } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 import bcrypt from "bcryptjs";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "spotimization-dev-secret-change-in-production",
-);
+const rawSecret = process.env.JWT_SECRET;
+if (!rawSecret) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
+const JWT_SECRET = new TextEncoder().encode(rawSecret);
 const COOKIE_NAME = "spotimization_session";
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

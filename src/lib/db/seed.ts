@@ -115,7 +115,7 @@ async function seed() {
   await db.insert(matches).values({ id: "m-006", spotOfferId: null, departingUserId: "u5", arrivingUserId: "u2", status: "completed", matchedAt: "2026-06-18T07:30:00.000Z", arrivalAt: "2026-06-18T07:38:00.000Z", spotLatitude: 33.772, spotLongitude: -118.191 }).onConflictDoNothing();
 
   // Course modules
-  await db.insert(courseModules).values({ id: "cm1", title: "Long Beach Street Parking Laws", description: "Understand time limits, permit zones, and no-parking zones", isActive: true, required: true, lastUpdated: "2026-06-01" }).onConflictDoNothing();
+    await db.insert(courseModules).values({ id: "cm1", title: "Local Street Parking Laws", description: "Understand time limits, permit zones, and local parking rules", isActive: true, required: true, lastUpdated: "2026-06-01" }).onConflictDoNothing();
   await db.insert(courseModules).values({ id: "cm2", title: "Rules of Participation", description: "Community guidelines and good-standing requirements", isActive: true, required: true, lastUpdated: "2026-06-01" }).onConflictDoNothing();
   await db.insert(courseModules).values({ id: "cm3", title: "Ranking System Overview", description: "How ranking works and how to maintain good-standing", isActive: true, required: true, lastUpdated: "2026-06-01" }).onConflictDoNothing();
 
@@ -128,8 +128,8 @@ async function seed() {
     { page: "how-it-works", key: "title", value: "How It Works" },
     { page: "how-it-works", key: "description", value: "Our AI agentic technology matches departing members with arriving members in real-time, creating a seamless parking experience." },
     { page: "how-it-works", key: "ctaText", value: "Become a Member" },
-    { page: "membership", key: "monthlyPrice", value: "$9.99–$19.99/month" },
-    { page: "membership", key: "annualPrice", value: "$79–$149/year" },
+    { page: "membership", key: "monthlyPrice", value: "$4.99/month" },
+    { page: "membership", key: "annualPrice", value: "$49.99/year" },
     { page: "membership", key: "ctaText", value: "Start Membership" },
   ];
   for (const c of cmsEntries) {

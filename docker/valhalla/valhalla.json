@@ -1,0 +1,120 @@
+{
+  "mjolnir": {
+    "tile_dir": "/valhalla_tiles",
+    "tile_extract": "/valhalla_tiles/tar.metal",
+    "hierarchy": true,
+    "shortcut": true,
+    "admin": "/custom_files/admin.sqlite",
+    "timezone": "/custom_files/timezone.sqlite",
+    "elevation": "/custom_files/elevation"
+  },
+  "loki": {
+    "actions": ["route", "sources_to_targets", "isochrone"],
+    "logging": {
+      "type": "stdout",
+      "level": "info",
+      "color": true
+    },
+    "service": {
+      "proxy": "ipc:///tmp/valhalla_loki.ipc"
+    }
+  },
+  "thor": {
+    "logging": {
+      "type": "stdout",
+      "level": "info",
+      "color": true
+    },
+    "service": {
+      "proxy": "ipc:///tmp/valhalla_thor.ipc"
+    }
+  },
+  "odin": {
+    "logging": {
+      "type": "stdout",
+      "level": "info",
+      "color": true
+    },
+    "service": {
+      "proxy": "ipc:///tmp/valhalla_odin.ipc"
+    }
+  },
+  "skadi": {
+    "logging": {
+      "type": "stdout",
+      "level": "info",
+      "color": true
+    },
+    "service": {
+      "proxy": "ipc:///tmp/valhalla_skadi.ipc"
+    }
+  },
+  "meili": {
+    "mode": "auto",
+    "grid": {
+      "cache_size": 100240,
+      "size": 500
+    },
+    "default": {
+      "breakage_distance": 2000,
+      "search_radius": 50,
+      "geometry": false,
+      "gps_accuracy": 10,
+      "interpolation_distance": 10
+    },
+    "logging": {
+      "type": "stdout",
+      "level": "info",
+      "color": true
+    },
+    "service": {
+      "proxy": "ipc:///tmp/valhalla_meili.ipc"
+    }
+  },
+  "costing_options": {
+    "auto": {
+      "height": 2.0,
+      "width": 1.9,
+      "length": 4.5,
+      "maneuver_penalty": 5,
+      "country_crossing_penalty": 0,
+      "country_crossing_cost": 600,
+      "ferry_cost": 300,
+      "use_highways": 1,
+      "use_tolls": 0,
+      "use_primary": 1,
+      "use_living_streets": 1,
+      "use_tracks": 0,
+      "use_destination_only": 1,
+      "top_speed": 140,
+      "shortest": false
+    }
+  },
+  "service_limits": {
+    "max_route_distance": 500000,
+    "max_route_time": 36000,
+    "max_route_locations": 50,
+    "max_matrix_distance": 400000,
+    "max_matrix_locations": 50,
+    "max_exclude_locations": 50,
+    "max_reachability": 100,
+    "max_radius": 10000,
+    "max_timedistance_seconds": 100000,
+    "min_timedistance_seconds": 1,
+    "isochrone": {
+      "max_contours": 4,
+      "max_time_contour": 120,
+      "max_distance_contour": 200,
+      "max_locations": 1
+    },
+    "skadi": {
+      "max_shape": 750000,
+      "min_resample": 10
+    },
+    "status": {
+      "allow_ru": false
+    },
+    "allow_wikipedia": false,
+    "allow_way_id_table": false
+  }
+}

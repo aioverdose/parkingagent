@@ -57,7 +57,7 @@ export function ReferralSection() {
 
   const handleShareEmail = useCallback(() => {
     const subject = encodeURIComponent("Join Spotimization - Get 1 Month Free");
-    const body = encodeURIComponent(`I've been using Spotimization for hassle-free street parking in Long Beach. Use my referral link to sign up and get started: ${shareUrl}`);
+    const body = encodeURIComponent(`I've been using Spotimization for hassle-free street parking. Use my referral link to sign up and get started: ${shareUrl}`);
     window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
   }, [shareUrl]);
 

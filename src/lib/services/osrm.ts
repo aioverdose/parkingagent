@@ -1,5 +1,6 @@
-const OSRM_BASE = "https://router.project-osrm.org";
-const OSRM_TIMEOUT = 5000;
+import { env, type RoutingBackend } from "@/lib/env";
+
+const ROUTING_TIMEOUT = 5000;
 
 export interface OsrmResult {
   durationSeconds: number;
@@ -7,15 +8,14 @@ export interface OsrmResult {
   durationMinutes: number;
 }
 
-export async function getRouteEta(
-  originLat: number,
-  originLng: number,
-  destLat: number,
-  destLng: number,
+async function routeOsrm(
+  originLat: number, originLng: number,
+  destLat: number, destLng: number,
 ): Promise<OsrmResult | null> {
-  const url = `${OSRM_BASE}/route/v1/driving/${originLng},${originLat};${destLng},${destLat}?overview=false`;
+  const base = env.OSRM_URL;
+  const url = `${base}/route/v1/driving/${originLng},${originLat};${destLng},${destLat}?overview=false`;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), OSRM_TIMEOUT);
+  const timeout = setTimeout(() => controller.abort(), ROUTING_TIMEOUT);
   try {
     const res = await fetch(url, { signal: controller.signal });
     if (!res.ok) return null;
@@ -34,10 +34,65 @@ export async function getRouteEta(
   }
 }
 
+async function routeValhalla(
+  originLat: number, originLng: number,
+  destLat: number, destLng: number,
+): Promise<OsrmResult | null> {
+  const base = env.VALHALLA_URL;
+  const body = {
+    costing: "auto",
+    locations: [
+      { lat: originLat, lon: originLng },
+      { lat: destLat, lon: destLng },
+    ],
+    directions_options: { units: "kilometres" },
+  };
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ROUTING_TIMEOUT);
+  try {
+    const res = await fetch(`${base}/route`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const leg = data.trip?.legs?.[0];
+    if (!leg) return null;
+    return {
+      durationSeconds: leg.summary?.time ?? 0,
+      distanceMeters: (leg.summary?.length ?? 0) * 1000,
+      durationMinutes: Math.round((leg.summary?.time ?? 0) / 60),
+    };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function getRouter(): typeof routeOsrm {
+  switch (env.ROUTING_BACKEND) {
+    case "valhalla":
+      return routeValhalla;
+    case "osrm":
+    default:
+      return routeOsrm;
+  }
+}
+
+export async function getRouteEta(
+  originLat: number, originLng: number,
+  destLat: number, destLng: number,
+): Promise<OsrmResult | null> {
+  return getRouter()(originLat, originLng, destLat, destLng);
+}
+
 export async function getRouteEtaBatch(
   origins: Array<{ lat: number; lng: number }>,
   destination: { lat: number; lng: number },
-  concurrency = 3,
+  concurrency = 8,
 ): Promise<Array<{ originIndex: number; eta: OsrmResult | null }>> {
   const results: Array<{ originIndex: number; eta: OsrmResult | null }> = [];
   for (let i = 0; i < origins.length; i += concurrency) {

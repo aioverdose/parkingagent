@@ -26,7 +26,7 @@ export default function Membership() {
 
   const benefits = [
     { title: "AI Matching", desc: "Real-time AI pairs departing with arriving members for seamless transitions." },
-    { title: "Parking Course", desc: "Comprehensive course on Long Beach street parking laws, permits, and rules." },
+    { title: "Parking Course", desc: "Comprehensive course on local street parking laws, permits, and rules." },
     { title: "Ranking System", desc: "Earn ranking points for priority matching — higher rank means first in queue." },
     { title: "Community Rules", desc: "Clear participation guidelines to maintain good-standing status." },
   ];
@@ -45,7 +45,7 @@ export default function Membership() {
 
       <main className="max-w-5xl mx-auto px-4 pt-12 pb-20">
         <h1 className="text-3xl font-black text-center text-[#202124]">Membership</h1>
-        <p className="text-center text-[#757575] mt-2 max-w-2xl mx-auto text-sm">Join Spotimization and unlock AI-powered parking matching in Long Beach, CA.</p>
+        <p className="text-center text-[#757575] mt-2 max-w-2xl mx-auto text-sm">Join Spotimization and unlock AI-powered parking matching in your city.</p>
 
         {/* Benefits */}
         <div className="mt-10 grid sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
@@ -63,7 +63,7 @@ export default function Membership() {
           <div className="grid sm:grid-cols-2 gap-6">
             <Card className="text-center" hover>
               <h3 className="font-semibold text-[#757575] text-sm">Monthly</h3>
-              <p className="text-4xl font-black text-[#4285F4] mt-3">$14.99</p>
+              <p className="text-4xl font-black text-[#4285F4] mt-3">$4.99</p>
               <p className="text-xs text-[#757575] mt-1">per month</p>
               <ul className="mt-5 space-y-2 text-xs text-left">
                 {["AI matching technology", "Parking laws course", "Community participation", "Ranking system access"].map((item) => (
@@ -77,8 +77,8 @@ export default function Membership() {
             <Card className="text-center border-[#4285F4]/30 relative" hover>
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0F9D58] text-white text-xs font-bold px-3 py-1 rounded-full">Best Value</div>
               <h3 className="font-semibold text-[#757575] text-sm">Annual</h3>
-              <p className="text-4xl font-black text-[#0F9D58] mt-3">$119</p>
-              <p className="text-xs text-[#757575] mt-1">$9.92/month — save 33%</p>
+              <p className="text-4xl font-black text-[#0F9D58] mt-3">$49.99</p>
+              <p className="text-xs text-[#757575] mt-1">$4.17/month — save 16%</p>
               <ul className="mt-5 space-y-2 text-xs text-left">
                 {["Everything in Monthly", "Priority AI matching", "Early access to new cities", "Cancel anytime"].map((item) => (
                   <li key={item} className="flex items-center gap-2"><span className="text-[#0F9D58]">✓</span> {item}</li>

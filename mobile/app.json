@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Spotimization",
+    "slug": "spotimization",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "spotimization",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0F172A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.spotimization.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Spotimization uses your location to find nearby parking spots and navigate you to them.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Spotimization uses your location in the background to notify you when you're near your matched spot."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0F172A",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "FOREGROUND_SERVICE_LOCATION"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Spotimization uses your location to match you with departing drivers.",
+          "locationAlwaysPermission": "Spotimization uses your location in the background to alert you when your spot is ready."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#2563EB"
+        }
+      ]
+    ]
+  }
+}

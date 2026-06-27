@@ -7,7 +7,10 @@ import {
 import { eq, sql } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 import bcrypt from "bcryptjs";
+import { neighborhoods } from "@/lib/neighborhoods";
 import { ok, err, handleError } from "@/lib/apiResponse";
+
+const DEFAULT_CITY = neighborhoods.defaultCity;
 
 export async function POST() {
   try {
@@ -28,7 +31,7 @@ export async function POST() {
     await db.execute(
       sql`
         INSERT INTO users (id, name, email, password_hash, role, is_member, is_admin, ranking_score, status, membership_type, completed_courses, tier, ranking, match_count, cancel_count, no_show_count, neighborhood, joined_date, created_at)
-        VALUES (${"admin-001"}, ${"Admin"}, ${"admin@spotimization.com"}, ${adminHash}, ${"admin"}, ${true}, ${true}, ${100}, ${"good-standing"}, ${"annual"}, ${true}, ${"premium"}, ${5}, ${0}, ${0}, ${0}, ${"Long Beach"}, ${"2026-01-01"}, ${now})
+        VALUES (${"admin-001"}, ${"Admin"}, ${"admin@spotimization.com"}, ${adminHash}, ${"admin"}, ${true}, ${true}, ${100}, ${"good-standing"}, ${"annual"}, ${true}, ${"premium"}, ${5}, ${0}, ${0}, ${0}, ${DEFAULT_CITY}, ${"2026-01-01"}, ${now})
         ON CONFLICT (id) DO UPDATE SET email = ${"admin@spotimization.com"}, password_hash = ${adminHash}, is_admin = ${true}, role = ${"admin"}
       `
     );
@@ -39,7 +42,7 @@ export async function POST() {
       passwordHash: testHash, role: "member", isMember: true, isAdmin: false,
       rankingScore: 85, status: "good-standing", membershipType: "monthly",
       completedCourses: true, tier: "free", ranking: 5,
-      matchCount: 0, cancelCount: 0, noShowCount: 0, neighborhood: "Long Beach",
+        matchCount: 0, cancelCount: 0, noShowCount: 0, neighborhood: DEFAULT_CITY,
       joinedDate: "2026-06-18", createdAt: now,
     }).onConflictDoNothing();
 
@@ -61,7 +64,7 @@ export async function POST() {
         status: (m as any).st || "good-standing", membershipType: m.mp,
         completedCourses: (m as any).co !== false,
         tier: "free", ranking: Math.min(5, Math.max(1, Math.floor(m.rs / 20))),
-        matchCount: 0, cancelCount: 0, noShowCount: 0, neighborhood: "Long Beach",
+      matchCount: 0, cancelCount: 0, noShowCount: 0, neighborhood: DEFAULT_CITY,
         joinedDate: m.jd, createdAt: now, latitude: m.lat, longitude: m.lng,
       } as any).onConflictDoNothing();
     }
@@ -87,7 +90,7 @@ export async function POST() {
     await db.insert(matches).values({ id: "m-006", spotOfferId: null, departingUserId: "u5", arrivingUserId: "u2", status: "completed", matchedAt: "2026-06-18T07:30:00.000Z", arrivalAt: "2026-06-18T07:38:00.000Z", spotLatitude: 33.772, spotLongitude: -118.191 }).onConflictDoNothing();
 
     // Course modules
-    await db.insert(courseModules).values({ id: "cm1", title: "Long Beach Street Parking Laws", description: "Understand time limits, permit zones, and no-parking zones", isActive: true, required: true, lastUpdated: "2026-06-01" }).onConflictDoNothing();
+    await db.insert(courseModules).values({ id: "cm1", title: "Local Street Parking Laws", description: "Understand time limits, permit zones, and no-parking zones", isActive: true, required: true, lastUpdated: "2026-06-01" }).onConflictDoNothing();
     await db.insert(courseModules).values({ id: "cm2", title: "Rules of Participation", description: "Community guidelines and good-standing requirements", isActive: true, required: true, lastUpdated: "2026-06-01" }).onConflictDoNothing();
     await db.insert(courseModules).values({ id: "cm3", title: "Ranking System Overview", description: "How ranking works and how to maintain good-standing", isActive: true, required: true, lastUpdated: "2026-06-01" }).onConflictDoNothing();
 

@@ -3,13 +3,16 @@ import { users, parkingMatchSchedules } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 import bcrypt from "bcryptjs";
-import { minutesFromMidnight, runMatchingForAll } from "@/lib/services/parkingMatch";
+import { runMatchingForAll } from "@/lib/services/parkingMatch";
+import { minutesFromMidnight } from "@/lib/services/matchingUtils";
+import { neighborhoods } from "@/lib/neighborhoods";
 import { ok, err, handleError } from "@/lib/apiResponse";
 
 export async function POST() {
   try {
     const now = new Date().toISOString();
     const passwordHash = await bcrypt.hash("demopass", 10);
+    const neighborhood = neighborhoods.neighborhoods[1]?.name || "Downtown";
 
     // ── Demo Member A: "Alex Rivera" ────────────────────────────
     // Premium member, top scout
@@ -42,7 +45,7 @@ export async function POST() {
         matchCount: 8,
         cancelCount: 0,
         noShowCount: 0,
-        neighborhood: "Downtown Long Beach",
+        neighborhood,
         anchorCount: 15,
         successfulMatches: 12,
         failedMatches: 1,
@@ -82,7 +85,7 @@ export async function POST() {
         matchCount: 3,
         cancelCount: 1,
         noShowCount: 0,
-        neighborhood: "Downtown Long Beach",
+        neighborhood,
         anchorCount: 8,
         successfulMatches: 6,
         failedMatches: 2,
@@ -122,7 +125,7 @@ export async function POST() {
         matchCount: 1,
         cancelCount: 0,
         noShowCount: 0,
-        neighborhood: "Downtown Long Beach",
+        neighborhood,
         anchorCount: 3,
         successfulMatches: 2,
         failedMatches: 0,
@@ -135,7 +138,6 @@ export async function POST() {
     }
 
     // ── Demo Schedules ─────────────────────────────────────────
-    const neighborhood = "Downtown Long Beach";
 
     // Deactivate existing demo schedules
     await db

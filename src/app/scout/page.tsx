@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { HoverButton } from "@/components/ui/HoverButton";
 import { HoverCard } from "@/components/ui/HoverCard";
 import { Badge } from "@/components/ui/Badge";
+import { neighborhoods } from "@/lib/neighborhoods";
 
 interface ScoutProfile {
   id: string;
@@ -66,10 +67,10 @@ export default function ScoutPage() {
     if (typeof navigator !== "undefined" && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => { setGeoError("Using default location"); setPosition({ lat: 33.77, lng: -118.19 }); },
+        () => { setGeoError("Using default location"); setPosition({ lat: neighborhoods.defaultLat, lng: neighborhoods.defaultLng }); },
         { enableHighAccuracy: true, timeout: 10000 },
       );
-    } else { setGeoError("Geolocation not available"); setPosition({ lat: 33.77, lng: -118.19 }); }
+    } else { setGeoError("Geolocation not available"); setPosition({ lat: neighborhoods.defaultLat, lng: neighborhoods.defaultLng }); }
   }, []);
 
   async function fetchProfile() {

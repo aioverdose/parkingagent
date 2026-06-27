@@ -13,7 +13,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx src/lib/db/seed.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "icons": "node scripts/generate-pwa-icons.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -27,8 +28,7 @@
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.40.0",
     "jose": "^6.2.3",
-    "leaflet": "^1.9.4",
-    "leaflet.markercluster": "^1.5.3",
+    "maplibre-gl": "^5.24.0",
     "next": "16.2.9",
     "pg": "^8.22.0",
     "postgres": "^3.4.9",
@@ -47,8 +47,6 @@
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
-    "@types/leaflet": "^1.9.21",
-    "@types/leaflet.markercluster": "^1.5.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

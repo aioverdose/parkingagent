@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/Badge";
 import InteractiveMap from "@/components/InteractiveMap";
 import type { GeofenceCircle } from "@/components/InteractiveMap";
 import { haversineDistanceMiles } from "@/lib/geo";
+import { neighborhoods } from "@/lib/neighborhoods";
 
 const POLL_INTERVAL = 3000;
 const GEOFENCE_RADIUS_M = 75;
@@ -238,7 +239,7 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
         {/* Map */}
         <div className="rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] mb-6">
           <InteractiveMap
-            center={{ lat: 33.7701, lng: -118.1937 }}
+            center={{ lat: neighborhoods.defaultLat, lng: neighborhoods.defaultLng }}
             onPinDrop={() => {}}
             pinPosition={null}
             spotPosition={

@@ -5,7 +5,7 @@ import { useState } from "react";
 const faqs = [
   {
     q: "What is Spotimization?",
-    a: "Spotimization is a membership platform that uses AI agentic matching technology to help members find street parking in Long Beach, CA. We connect departing members with arriving members to make parking easier.",
+    a: "Spotimization is a membership platform that uses AI agentic matching technology to help members find street parking more efficiently. We connect departing members with arriving members to make parking easier.",
   },
   {
     q: "Does Spotimization own parking spots?",
@@ -21,15 +21,15 @@ const faqs = [
   },
   {
     q: "What does membership cost?",
-    a: "Monthly membership ranges from $9.99 to $19.99/month. Annual membership ranges from $79 to $149/year. Membership includes access to matching technology, educational courses, and the community platform.",
+    a: "Membership is $4.99/month or $49.99/year. Includes access to matching technology, educational courses, and the community platform. The first 100 users received a free 1-year membership.",
   },
   {
     q: "Is there a course requirement?",
-    a: "Yes. All members must complete a short course on Long Beach street parking laws, including time limits, permit zones, no-parking zones, and community participation rules.",
+    a: "Yes. All members must complete a short course on local street parking laws, including time limits, permit zones, no-parking zones, and community participation rules.",
   },
   {
     q: "What areas does Spotimization serve?",
-    a: "Spotimization is currently focused on Long Beach, California. We plan to expand to other cities in the future.",
+    a: "Spotimization is currently focused on select neighborhoods. We plan to expand to more areas in the future.",
   },
   {
     q: "How do I become a member?",
