@@ -71,26 +71,65 @@ export default function Home() {
 
       {/* Hero */}
       <motion.section
-        className="max-w-5xl mx-auto px-4 pt-16 pb-12 text-center"
+        className="max-w-5xl mx-auto px-4 pt-16 pb-8 text-center"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <h1 className="text-4xl md:text-5xl font-black text-[#202124] leading-tight mb-2">
-          Would you drive around for 30 minutes if someone paid you $4.99?
+        <h1 className="text-4xl md:text-5xl font-black text-[#202124] leading-tight mb-4">
+          Find parking before you leave.
         </h1>
+        <p className="text-lg text-[#757575] max-w-2xl mx-auto">
+          Tell us where and when you need to park. We match you with someone leaving the same spot at the right time.
+        </p>
       </motion.section>
+
+      {/* How It Works */}
+      <section className="max-w-4xl mx-auto px-4 pb-12">
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="bg-[#F8F9FA] border border-gray-200 rounded-2xl p-6 text-center">
+            <div className="w-10 h-10 bg-[#E8F0FE] rounded-full flex items-center justify-center mx-auto mb-3 text-[#4285F4] font-black text-lg">1</div>
+            <h3 className="font-bold text-[#202124] mb-1">Set your schedule</h3>
+            <p className="text-sm text-[#757575]">Pick your area, arrival time, and when you leave. One-off or recurring.</p>
+          </div>
+          <div className="bg-[#F8F9FA] border border-gray-200 rounded-2xl p-6 text-center">
+            <div className="w-10 h-10 bg-[#E6F4EA] rounded-full flex items-center justify-center mx-auto mb-3 text-[#0F9D58] font-black text-lg">2</div>
+            <h3 className="font-bold text-[#202124] mb-1">Get matched</h3>
+            <p className="text-sm text-[#757575]">We find someone departing from a spot that fits your time window.</p>
+          </div>
+          <div className="bg-[#F8F9FA] border border-gray-200 rounded-2xl p-6 text-center">
+            <div className="w-10 h-10 bg-[#FEF3E8] rounded-full flex items-center justify-center mx-auto mb-3 text-[#F9A825] font-black text-lg">3</div>
+            <h3 className="font-bold text-[#202124] mb-1">Claim your spot</h3>
+            <p className="text-sm text-[#757575]">Anonymous handoff. No money exchanged. A spot waiting when you arrive.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Use Cases */}
+      <section className="max-w-3xl mx-auto px-4 pb-8">
+        <div className="bg-gradient-to-r from-[#E8F0FE] to-[#E6F4EA] border border-[#4285F4]/20 rounded-2xl p-6 divide-y divide-[#4285F4]/10">
+          <div className="pb-4 mb-4">
+            <h3 className="font-bold text-[#202124]">{"\u26A1"} Short-term</h3>
+            <p className="text-sm text-[#757575] mt-1">You're leaving your spot now — someone nearby grabs it instantly.</p>
+          </div>
+          <div className="pb-4 mb-4">
+            <h3 className="font-bold text-[#202124]">{"\uD83D\uDD04"} Recurring</h3>
+            <p className="text-sm text-[#757575] mt-1">Same commute every day? Set your weekly schedule and get matched automatically.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-[#202124]">{"\u2B50"} Premium</h3>
+            <p className="text-sm text-[#757575] mt-1">Real-time offers for high-demand areas. Guaranteed spot. $4.99/month.</p>
+          </div>
+        </div>
+      </section>
 
       {/* Benefits */}
       <section className="max-w-3xl mx-auto px-4 pb-8">
-        <div className="bg-gradient-to-r from-[#E8F0FE] to-[#E6F4EA] border border-[#4285F4]/20 rounded-2xl p-6">
-          <h2 className="text-lg font-bold text-[#202124] text-center mb-4">Key Benefits</h2>
-          <ul className="space-y-3 text-sm text-[#202124]">
-            <li className="flex items-center gap-2">{"\u2705"} <span><strong>Free for first 100 users</strong> \u2014 1 year free membership, then $4.99/month</span></li>
-            <li className="flex items-center gap-2">{"\u2705"} <span>No money exchanged between members</span></li>
-            <li className="flex items-center gap-2">{"\u2705"} <span>Completely anonymous (Member #1234, not your name)</span></li>
-          </ul>
-        </div>
+        <ul className="space-y-3 text-sm text-[#202124] text-center">
+          <li className="flex items-center justify-center gap-2">{"\u2705"} <span><strong>Free for first 100 users</strong> \u2014 1 year free membership, then $4.99/month</span></li>
+          <li className="flex items-center justify-center gap-2">{"\u2705"} <span>No money exchanged between members</span></li>
+          <li className="flex items-center justify-center gap-2">{"\u2705"} <span>Completely anonymous (Member #1234, not your name)</span></li>
+        </ul>
       </section>
 
       {/* Signup Counter + CTA */}
