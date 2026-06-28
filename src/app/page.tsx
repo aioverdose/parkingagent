@@ -21,7 +21,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white relative">
+    <div className="min-h-screen bg-[#F8FAFC] relative">
       <div className="fixed inset-0 -z-10 opacity-[0.06] bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1587293852726-70cdb56c2866?q=80&w=2000')" }} />
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
@@ -70,19 +70,16 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <motion.section
-        className="max-w-5xl mx-auto px-4 pt-16 pb-8 text-center"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      >
-        <h1 className="text-4xl md:text-5xl font-black text-[#202124] leading-tight mb-4">
-          Find parking before you leave.
-        </h1>
-        <p className="text-lg text-[#757575] max-w-2xl mx-auto">
-          Tell us where and when you need to park. We match you with someone leaving the same spot at the right time.
-        </p>
-      </motion.section>
+      <div className="modern-hero px-6 py-12 sm:px-10 sm:py-16 text-center mb-10">
+        <div className="relative z-10">
+          <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight mb-4">
+            Find parking before you leave.
+          </h1>
+          <p className="text-white/90 max-w-2xl mx-auto text-lg">
+            Tell us where and when you need to park. We match you with someone leaving a spot near your destination.
+          </p>
+        </div>
+      </div>
 
       {/* How It Works */}
       <section className="max-w-4xl mx-auto px-4 pb-12">
@@ -114,11 +111,11 @@ export default function Home() {
           </div>
           <div className="pb-4 mb-4">
             <h3 className="font-bold text-[#202124]">{"\uD83D\uDD04"} Recurring</h3>
-            <p className="text-sm text-[#757575] mt-1">Same commute every day? Set your weekly schedule and get matched automatically.</p>
+            <p className="text-sm text-[#757575] mt-1">On a regular commute? Set your weekly schedule and get matched automatically.</p>
           </div>
           <div>
             <h3 className="font-bold text-[#202124]">{"\u2B50"} Premium</h3>
-            <p className="text-sm text-[#757575] mt-1">Real-time offers for high-demand areas. Guaranteed spot. $4.99/month.</p>
+            <p className="text-sm text-[#757575] mt-1">Real-time offers for high-demand areas. $4.99/month.</p>
           </div>
         </div>
       </section>

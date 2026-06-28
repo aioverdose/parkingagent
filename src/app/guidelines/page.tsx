@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/Card";
 
 export default function CommunityGuidelines() {
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
           <a href="/" className="text-lg font-bold tracking-tight"><span className="text-[#4285F4]">Spotimization</span></a>
@@ -14,8 +14,12 @@ export default function CommunityGuidelines() {
       </nav>
 
       <main className="flex-1 max-w-3xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-black text-[#202124]">Community Guidelines</h1>
-        <p className="text-sm text-[#BDBDBD] mt-2">Last updated: June 20, 2026</p>
+        <div className="modern-hero px-6 py-10 sm:px-10 sm:py-14 text-center mb-8">
+          <div className="relative z-10">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white">Community Guidelines</h1>
+            <p className="text-white/90 mt-3 text-lg">Last updated: June 20, 2026</p>
+          </div>
+        </div>
 
         <div className="mt-8 space-y-6">
           <Card>

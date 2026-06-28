@@ -49,7 +49,7 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between max-w-5xl mx-auto px-4 py-3">
           <a href="/" className="text-xl font-bold tracking-tight">
@@ -68,12 +68,12 @@ export default function FAQ() {
       </nav>
 
       <main className="flex-1 max-w-3xl mx-auto px-4 py-12">
-        <h1 className="text-3xl sm:text-4xl font-black text-center text-[#202124]">
-          FAQ
-        </h1>
-        <p className="text-center text-[#757575] mt-2">
-          Frequently asked questions about Spotimization.
-        </p>
+        <div className="modern-hero px-6 py-10 sm:px-10 sm:py-14 text-center mb-10">
+          <div className="relative z-10">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white">FAQ</h1>
+            <p className="text-white/90 mt-3 text-lg">Frequently asked questions about Spotimization.</p>
+          </div>
+        </div>
 
         <div className="mt-10 space-y-3">
           {faqs.map((faq, i) => (

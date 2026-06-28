@@ -74,21 +74,22 @@ export default function AccountGuide() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <HelpNav current="docs" />
 
       <main className="max-w-3xl mx-auto px-4 py-12">
+        <div className="modern-hero px-6 py-10 sm:px-10 sm:py-14 text-center mb-10">
+          <div className="relative z-10">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white">Account Guide</h1>
+            <p className="text-white/90 mt-3 text-lg">Rankings, matches, connections, and settings</p>
+          </div>
+        </div>
         <button onClick={() => router.push("/docs")} className="text-sm text-[#4285F4] hover:underline mb-6 flex items-center gap-1">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back to Docs
         </button>
-
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-[#202124]">Account Guide</h1>
-          <p className="text-[#757575] mt-2">Rankings, matches, connections, and settings</p>
-        </div>
 
         <div className="space-y-8">
           {sections.map((section) => (

@@ -72,13 +72,15 @@ export default function HowItWorks() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <HelpNav current="how-it-works" />
 
       <main className="max-w-3xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-[#202124]">How It Works</h1>
-          <p className="text-[#757575] mt-2">Six simple steps to a seamless parking exchange</p>
+        <div className="modern-hero px-6 py-10 sm:px-10 sm:py-14 text-center mb-10">
+          <div className="relative z-10">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white">How It Works</h1>
+            <p className="text-white/90 mt-3 text-lg">Six simple steps to a seamless parking exchange</p>
+          </div>
         </div>
 
         {/* Progress indicator */}

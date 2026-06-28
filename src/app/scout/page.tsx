@@ -112,7 +112,7 @@ export default function ScoutPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-sm text-[#757575]">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
             <a href="/dashboard" className="text-lg font-bold tracking-tight">spotimization</a>

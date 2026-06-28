@@ -58,13 +58,15 @@ export default function DocsPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <HelpNav current="docs" />
 
       <main className="max-w-5xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-[#202124]">Documentation</h1>
-          <p className="text-[#757575] mt-2">Everything you need to know about using spotimization</p>
+        <div className="modern-hero px-6 py-10 sm:px-10 sm:py-14 text-center mb-10">
+          <div className="relative z-10">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white">Documentation</h1>
+            <p className="text-white/90 mt-3 text-lg">Everything you need to know about using spotimization</p>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">

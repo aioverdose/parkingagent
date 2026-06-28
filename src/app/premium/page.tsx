@@ -43,7 +43,7 @@ export default function PremiumPage() {
   const isPremium = user?.tier === "premium" || user?.isPremium === true;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
           <a href="/" className="text-lg font-bold tracking-tight">
@@ -91,14 +91,11 @@ export default function PremiumPage() {
           </div>
         ) : (
           <>
-            <div className="text-center mb-12">
-              <div className="w-20 h-20 bg-[#FFF3E0] rounded-full flex items-center justify-center mx-auto">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#F9A825" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+            <div className="modern-hero px-6 py-10 sm:px-10 sm:py-14 text-center mb-10">
+              <div className="relative z-10">
+                <h1 className="text-4xl sm:text-5xl font-bold text-white">Upgrade to Premium</h1>
+                <p className="text-white/90 mt-3 text-lg">GPS-based ETA, interactive map, arrival beacon, and priority matching.</p>
               </div>
-              <h1 className="text-3xl font-black text-[#202124] mt-6">Upgrade to Premium</h1>
-              <p className="text-[#757575] mt-2 max-w-md mx-auto">
-                Get real-time parking service with GPS-based ETA, interactive map pin drop, arrival beacon, and priority matching.
-              </p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4 mb-12">

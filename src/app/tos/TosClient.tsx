@@ -24,7 +24,7 @@ export default function TosClient() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
           <a href="/" className="text-lg font-bold tracking-tight">
@@ -34,8 +34,12 @@ export default function TosClient() {
       </nav>
 
       <main className="max-w-3xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-black text-[#202124] mb-2">Terms of Service</h1>
-        <p className="text-sm text-[#757575] mb-8">Effective as of June 19, 2026</p>
+        <div className="modern-hero px-6 py-10 sm:px-10 sm:py-14 text-center mb-10">
+          <div className="relative z-10">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white">Terms of Service</h1>
+            <p className="text-white/90 mt-3 text-lg">Effective as of June 19, 2026</p>
+          </div>
+        </div>
 
         <div className="space-y-8 text-sm text-[#202124] leading-relaxed">
           <section>

@@ -49,13 +49,15 @@ export default function Troubleshooting() {
   const toggle = (id: string) => setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <HelpNav current="troubleshooting" />
 
       <main className="max-w-3xl mx-auto px-4 py-12">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-[#202124]">Troubleshooting</h1>
-          <p className="text-[#757575] mt-2">Common issues and solutions</p>
+        <div className="modern-hero px-6 py-10 sm:px-10 sm:py-14 text-center mb-10">
+          <div className="relative z-10">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white">Troubleshooting</h1>
+            <p className="text-white/90 mt-3 text-lg">Common issues and solutions</p>
+          </div>
         </div>
 
         <div className="relative mb-10">

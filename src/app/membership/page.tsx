@@ -32,7 +32,7 @@ export default function Membership() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
           <a href="/" className="text-lg font-bold tracking-tight">Spotimization</a>
@@ -44,8 +44,12 @@ export default function Membership() {
       </nav>
 
       <main className="max-w-5xl mx-auto px-4 pt-12 pb-20">
-        <h1 className="text-3xl font-black text-center text-[#202124]">Membership</h1>
-        <p className="text-center text-[#757575] mt-2 max-w-2xl mx-auto text-sm">Join Spotimization and unlock AI-powered parking matching in your city.</p>
+        <div className="modern-hero px-6 py-10 sm:px-10 sm:py-14 text-center mb-10">
+          <div className="relative z-10">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white">Membership</h1>
+            <p className="text-white/90 mt-3 text-lg">Join Spotimization and unlock AI-powered parking matching in your city.</p>
+          </div>
+        </div>
 
         {/* Benefits */}
         <div className="mt-10 grid sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
