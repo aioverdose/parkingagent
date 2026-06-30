@@ -49,22 +49,11 @@ const steps = [
     num: 5,
     icon: (
       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10m10 0h-3m3 0h3m-8-4h3" />
-      </svg>
-    ),
-    title: "Track in Real-Time",
-    text: "Uber-style live tracking shows arriving user's location",
-  },
-  {
-    num: 6,
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
-    title: "Seamless Exchange",
-    text: "Arriving user positioned \u2192 departing user starts car \u2192 exchange complete",
+    title: "Claim Your Spot",
+    text: "Both parties confirmed — the spot is yours when you arrive.",
   },
 ];
 
@@ -79,7 +68,7 @@ export default function HowItWorks() {
         <div className="modern-hero px-6 py-10 sm:px-10 sm:py-14 text-center mb-10">
           <div className="relative z-10">
             <h1 className="text-4xl sm:text-5xl font-bold text-white">How It Works</h1>
-            <p className="text-white/90 mt-3 text-lg">Six simple steps to a seamless parking exchange</p>
+            <p className="text-white/90 mt-3 text-lg">Five simple steps to get matched with a parking spot</p>
           </div>
         </div>
 
@@ -90,7 +79,7 @@ export default function HowItWorks() {
               <div className="w-8 h-8 rounded-full bg-[#4285F4] text-white flex items-center justify-center text-xs font-bold">
                 {s.num}
               </div>
-              {s.num < 6 && <div className="w-8 h-0.5 bg-[#4285F4]/30" />}
+              {s.num < 5 && <div className="w-8 h-0.5 bg-[#4285F4]/30" />}
             </div>
           ))}
         </div>
@@ -113,7 +102,7 @@ export default function HowItWorks() {
                 <div className="flex-1 pt-2">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-bold text-[#4285F4]">Step {step.num}</span>
-                    <span className="text-xs text-[#757575]">of 6</span>
+                    <span className="text-xs text-[#757575]">of 5</span>
                   </div>
                   <h3 className="text-lg font-bold text-[#202124]">{step.title}</h3>
                   <p className="text-sm text-[#757575] mt-1 leading-relaxed">{step.text}</p>

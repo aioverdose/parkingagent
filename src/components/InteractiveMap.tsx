@@ -73,6 +73,9 @@ export default function InteractiveMap({
   const spotMarkerRef = useRef<maplibregl.Marker | null>(null);
   const geofenceSourceRef = useRef<string | null>(null);
   const clusterMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const onPinDropRef = useRef(onPinDrop);
+  onPinDropRef.current = onPinDrop;
+  const mapReadyRef = useRef(false);
 
   // Init map
   useEffect(() => {
@@ -91,10 +94,12 @@ export default function InteractiveMap({
 
     map.on("click", (e) => {
       const { lng, lat } = e.lngLat;
-      onPinDrop(lat, lng);
+      onPinDropRef.current(lat, lng);
     });
 
     map.on("load", () => {
+      mapReadyRef.current = true;
+
       // Add geofence source and layer
       map.addSource("geofence", {
         type: "geojson",
@@ -132,7 +137,7 @@ export default function InteractiveMap({
   // Pin marker
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map || !map.loaded()) return;
+    if (!map || !mapReadyRef.current) return;
 
     if (pinMarkerRef.current) {
       pinMarkerRef.current.remove();

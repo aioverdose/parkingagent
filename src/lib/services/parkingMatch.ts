@@ -23,6 +23,7 @@ export interface ParkingMatchResult {
   spotLatitude: number | null;
   spotLongitude: number | null;
   alarmMinutes: number;
+  scheduleId: string;
 }
 
 export async function runMatchingForAll(
@@ -170,6 +171,7 @@ export async function getMatchesForMember(
       spotLatitude: leavingSchedule?.latitude ?? null,
       spotLongitude: leavingSchedule?.longitude ?? null,
       alarmMinutes: row.alarmMinutes,
+      scheduleId: ls[0]?.id ?? "",
     });
   }
 

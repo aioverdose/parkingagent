@@ -267,7 +267,7 @@ export default function LiveTracking({ params }: { params: Promise<{ matchId: st
                   {etaMinutes} min
                 </p>
                 <p className="text-xs text-[#64748B] mt-2">
-                  Last updated: {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : "waiting..."}
+                  Last updated: {lastUpdate ? new Date(lastUpdate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : "waiting..."}
                 </p>
               </div>
             ) : (
@@ -473,5 +473,7 @@ function AlarmSection({
 function formatTime(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 || 12;
+  return `${h12}:${m.toString().padStart(2, "0")} ${period}`;
 }

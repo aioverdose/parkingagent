@@ -8,27 +8,24 @@ interface MapDataPoint {
   lat: number;
   lng: number;
   label: string;
-  type: "member" | "offer" | "anchor";
+  type: "member" | "offer";
 }
 
-type LayerKey = "members" | "offers" | "anchors";
+type LayerKey = "members" | "offers";
 
 const LAYER_COLORS: Record<string, string> = {
   member: "#4285F4",
   offer: "#0F9D58",
-  anchor: "#E94335",
 };
 
 export default function AdminMap() {
   const [layers, setLayers] = useState<Record<LayerKey, MapDataPoint[]>>({
     members: [],
     offers: [],
-    anchors: [],
   });
   const [visibleLayers, setVisibleLayers] = useState<Record<LayerKey, boolean>>({
     members: true,
     offers: true,
-    anchors: false,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -38,23 +35,20 @@ export default function AdminMap() {
     try {
       setLoading(true);
       setError("");
-      const [membersRes, offersRes, anchorsRes] = await Promise.all([
+      const [membersRes, offersRes] = await Promise.all([
         fetch("/api/admin/map?type=members"),
         fetch("/api/admin/map?type=offers"),
-        fetch("/api/admin/map?type=anchors"),
       ]);
-      if (!membersRes.ok || !offersRes.ok || !anchorsRes.ok) {
+      if (!membersRes.ok || !offersRes.ok) {
         throw new Error("Failed to load map data");
       }
-      const [members, offers, anchors] = await Promise.all([
+      const [members, offers] = await Promise.all([
         membersRes.json(),
         offersRes.json(),
-        anchorsRes.json(),
       ]);
       setLayers({
         members: members.data ?? [],
         offers: offers.data ?? [],
-        anchors: anchors.data ?? [],
       });
     } catch (e: any) {
       setError(e.message || "Failed to load map data");
@@ -94,7 +88,6 @@ export default function AdminMap() {
   const counts = {
     members: layers.members.length,
     offers: layers.offers.length,
-    anchors: layers.anchors.length,
   };
 
   return (
@@ -102,7 +95,7 @@ export default function AdminMap() {
       <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between flex-wrap gap-2">
         <h3 className="font-semibold text-[#202124] text-sm">Geo Map</h3>
         <div className="flex items-center gap-3 text-xs">
-          {(["members", "offers", "anchors"] as LayerKey[]).map((key) => (
+          {(["members", "offers"] as LayerKey[]).map((key) => (
             <label key={key} className="flex items-center gap-1.5 cursor-pointer select-none">
               <input
                 type="checkbox"
@@ -112,7 +105,7 @@ export default function AdminMap() {
               />
               <span
                 className="w-2.5 h-2.5 rounded-full inline-block"
-                style={{ backgroundColor: LAYER_COLORS[key === "members" ? "member" : key === "offers" ? "offer" : "anchor"] }}
+                style={{ backgroundColor: LAYER_COLORS[key === "members" ? "member" : "offer"] }}
               />
               {key.charAt(0).toUpperCase() + key.slice(1)} ({counts[key]})
             </label>

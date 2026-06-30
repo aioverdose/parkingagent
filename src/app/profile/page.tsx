@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { getStoredUser, fetchCurrentUser } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { HoverButton } from "@/components/ui/HoverButton";
@@ -14,6 +15,7 @@ interface ParkingMatch {
   matchId: string;
   leavingMemberId: string;
   arrivingMemberId: string;
+  scheduleId: string;
   leavingTime: number;
   arrivalLookingTime: number;
   toleranceMinutes: number;
@@ -26,15 +28,8 @@ interface ParkingMatch {
   confirmed?: boolean;
   rated?: boolean;
   rating?: number;
-}
-
-interface BeaconRequest {
-  id: string;
-  departureTime: string;
-  radius: number;
-  status: string;
-  matchedMemberId: string | null;
-  createdAt: string;
+  spotLatitude?: number | null;
+  spotLongitude?: number | null;
 }
 
 interface PreScheduledConnection {
@@ -51,7 +46,9 @@ interface PreScheduledConnection {
 function formatTime(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 || 12;
+  return `${h12}:${m.toString().padStart(2, "0")} ${period}`;
 }
 
 function RankingStars({ ranking }: { ranking: number }) {
@@ -86,7 +83,6 @@ export default function ProfilePage() {
   // Existing match / beacon state
   const [parkingMatches, setParkingMatches] = useState<ParkingMatch[]>([]);
   const [preScheduledConnections, setPreScheduledConnections] = useState<PreScheduledConnection[]>([]);
-  const [showMatches, setShowMatches] = useState(true);
   const [psRole, setPsRole] = useState<"arriver" | "departor" | "both">("both");
   const [psType, setPsType] = useState<"work" | "event" | "shift" | "other">("work");
   const [psDays, setPsDays] = useState<number[]>([1, 2, 3, 4, 5]);
@@ -101,19 +97,16 @@ export default function ProfilePage() {
   const [psError, setPsError] = useState("");
   const [psLoading, setPsLoading] = useState(false);
 
-  // Beacon
-  const [beaconDepartureTime, setBeaconDepartureTime] = useState("");
-  const [beaconMessage, setBeaconMessage] = useState("");
-  const [beaconError, setBeaconError] = useState("");
-  const [beaconLoading, setBeaconLoading] = useState(false);
-  const [beacons, setBeacons] = useState<BeaconRequest[]>([]);
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Spot marking state
+  const [showSpotMap, setShowSpotMap] = useState<Record<string, boolean>>({});
+  const [spotPinPositions, setSpotPinPositions] = useState<Record<string, { lat: number; lng: number } | null>>({});
+  const [spotSaved, setSpotSaved] = useState<Record<string, boolean>>({});
+  const [spotSaving, setSpotSaving] = useState<Record<string, boolean>>({});
 
   // Post-match state
   const [ratingValue, setRatingValue] = useState<Record<string, number>>({});
-
-  const isPremium = user?.tier === "premium" || user?.isPremium === true;
-  const isFree1Year = user?.tier === "free_1year";
 
   useEffect(() => {
     if (!user) { router.push("/signup"); return; }
@@ -186,13 +179,6 @@ export default function ProfilePage() {
     try {
       const { connections } = await api.get<{ connections: PreScheduledConnection[] }>("/api/matching/my-connections");
       setPreScheduledConnections(connections);
-    } catch {}
-  }
-
-  async function fetchBeacons() {
-    try {
-      const { beacons } = await api.get<{ beacons: BeaconRequest[] }>("/api/beacon/my-beacons");
-      setBeacons(beacons);
     } catch {}
   }
 
@@ -277,6 +263,32 @@ export default function ProfilePage() {
     }
   }
 
+  function handleShowSpotMap(matchId: string) {
+    setShowSpotMap((prev) => ({ ...prev, [matchId]: true }));
+  }
+
+  async function handleSpotPinDrop(matchId: string, lat: number, lng: number) {
+    setSpotPinPositions((prev) => ({ ...prev, [matchId]: { lat, lng } }));
+  }
+
+  async function handleSaveSpot(matchId: string, scheduleId: string) {
+    const pos = spotPinPositions[matchId];
+    if (!pos) return;
+    setSpotSaving((prev) => ({ ...prev, [matchId]: true }));
+    try {
+      await fetch("/api/parking-match-schedule", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scheduleId, latitude: pos.lat, longitude: pos.lng }),
+      });
+      setSpotSaved((prev) => ({ ...prev, [matchId]: true }));
+    } catch {
+      console.error("Failed to save spot");
+    } finally {
+      setSpotSaving((prev) => ({ ...prev, [matchId]: false }));
+    }
+  }
+
   async function handleConfirmParking(matchId: string, success: boolean) {
     try {
       await api.post("/api/parking/confirm", { matchId, success });
@@ -357,35 +369,6 @@ export default function ProfilePage() {
     }
   }
 
-  async function handleBeaconSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setBeaconMessage(""); setBeaconError("");
-    if (!beaconDepartureTime || !position) {
-      setBeaconError("Arrival time and location are required.");
-      return;
-    }
-    setBeaconLoading(true);
-    try {
-      const { message, beaconId } = await api.post<{ message: string; beaconId: string }>("/api/beacon/activate", {
-        departureTime: beaconDepartureTime,
-        latitude: position.lat,
-        longitude: position.lng,
-      });
-      setBeaconMessage(message);
-      setBeaconDepartureTime("");
-      fetchBeacons();
-      setTimeout(async () => {
-        try {
-          await api.post("/api/beacon/search", { beaconId });
-          fetchBeacons();
-        } catch {}
-      }, 2000);
-    } catch (err: any) {
-      setBeaconError(err.message || "Failed to send beacon.");
-    }
-    setBeaconLoading(false);
-  }
-
   const matchStats = {
     total: parkingMatches.length,
     confirmed: parkingMatches.filter((m) => m.status === "confirmed").length,
@@ -405,8 +388,6 @@ export default function ProfilePage() {
           <a href="/" className="text-2xl font-bold tracking-tight text-[#2563EB]">spotimization</a>
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#757575]">{user.name}</span>
-            {isPremium && <Badge variant="success">Premium</Badge>}
-              {isFree1Year && <Badge variant="success">1 Year Free</Badge>}
             {user.signupNumber && user.signupNumber <= 100 && (
               <Badge variant="info">Early Adopter</Badge>
             )}
@@ -481,6 +462,7 @@ export default function ProfilePage() {
               <InteractiveMap
                 center={position}
                 onPinDrop={(lat, lng) => setPinPosition({ lat, lng })}
+                pinPosition={pinPosition}
                 className="w-full h-64 mb-4"
               />
             )}
@@ -534,49 +516,7 @@ export default function ProfilePage() {
             </form>
           </div>
 
-          {/* Arrival Beacon */}
-          <hr className="mb-2" />
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-semibold text-[#202124]">Arrival Beacon</h2>
-            </div>
-            <p className="text-xs text-[#757575] mb-4">
-              If you are arriving at an unscheduled time we will send a beacon to find any matches.
-            </p>
-            <form onSubmit={handleBeaconSubmit} className="space-y-4">
-              {beaconMessage && <p className="text-sm text-[#0F9D58] bg-[#E6F4EA] p-3 rounded-xl">{beaconMessage}</p>}
-              {beaconError && <p className="text-sm text-[#E94335] bg-[#FCE8E6] p-3 rounded-xl">{beaconError}</p>}
-              <div>
-                <label htmlFor="beaconDepartureTime" className="block text-sm font-medium text-[#202124] mb-1">Arrival time</label>
-                <input id="beaconDepartureTime" type="time" value={beaconDepartureTime} onChange={(e) => setBeaconDepartureTime(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4285F4] outline-none" />
-              </div>
-              <HoverButton type="submit" disabled={beaconLoading} className="w-full">
-                {beaconLoading ? "Sending..." : "Send Beacon"}
-              </HoverButton>
-            </form>
-            {beacons.length > 0 && (
-              <div className="mt-6 space-y-2">
-                <h3 className="font-semibold text-sm text-[#202124]">Your beacon requests</h3>
-                {beacons.slice().reverse().map((b) => {
-                  const statusVariant = b.status === "matched" ? "success" : b.status === "expired" ? "error" : "warning";
-                  return (
-                    <HoverCard key={b.id} className="text-xs">
-                      <div className="flex items-center justify-between mb-1">
-                        <Badge variant={statusVariant}>{b.status}</Badge>
-                        <span className="text-[10px] text-[#757575]">Radius: {b.radius} blocks</span>
-                      </div>
-                      <div className="space-y-0.5 text-[#757575]">
-                        <p><span className="text-[#202124] font-medium">Arrival time:</span> {b.departureTime}</p>
-                        <p><span className="text-[#202124] font-medium">Created:</span> {new Date(b.createdAt).toLocaleDateString()}</p>
-                        {b.matchedMemberId && <p><span className="text-[#0F9D58] font-medium">Matched with:</span> Member #{b.matchedMemberId.slice(0, 4).toUpperCase()}</p>}
-                      </div>
-                    </HoverCard>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          
 
           {/* Your Matches */}
           {parkingMatches.length > 0 && (
@@ -614,16 +554,6 @@ export default function ProfilePage() {
                           </div>
                         )}
 
-                        {/* Live Track Button */}
-                        {m.status === "confirmed" && (
-                          <div className="mt-1.5">
-                            <button onClick={() => router.push(`/live/${m.matchId}`)}
-                              className="text-[10px] bg-[#4285F4] text-white px-2.5 py-1 rounded-lg font-medium hover:bg-[#1A73E8] w-full">
-                              {"\uD83D\uDCCD"} Live Track
-                            </button>
-                          </div>
-                        )}
-
                         {/* Post-match parking confirmation */}
                         {m.status === "confirmed" && m.confirmed === false && (
                           <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
@@ -635,6 +565,52 @@ export default function ProfilePage() {
                                 className="text-xs bg-[#E94335] text-white px-3 py-1.5 rounded-lg hover:bg-[#c62828]">No {"\u274C"}</button>
                             </div>
                           </div>
+                        )}
+
+                        {/* Live Track — departing user tracks arriving user's GPS */}
+                        {m.status === "confirmed" && isLeaver && (
+                          <Link href={`/live/${m.matchId}`} className="block mt-2">
+                            <button className="w-full text-xs bg-[#4285F4] text-white px-3 py-1.5 rounded-lg hover:bg-[#3367D6] font-medium">
+                              {"\uD83D\uDCCD"} Live Track — see your match's arrival
+                            </button>
+                          </Link>
+                        )}
+
+                        {/* Mark My Spot — arriving user saves exact parking spot */}
+                        {m.confirmed && !isLeaver && !spotSaved[m.matchId] && (
+                          <div className="mt-2 bg-green-50 border border-green-200 rounded-lg p-3">
+                            <p className="font-semibold text-[#202124] mb-2">{"\uD83D\uDCCD"} Mark Your Parking Spot</p>
+                            <p className="text-[10px] text-[#757575] mb-2">
+                              Drop a pin on the exact spot so the next person can find it when you leave.
+                            </p>
+                            {showSpotMap[m.matchId] ? (
+                              <div className="h-40 rounded-lg overflow-hidden mb-2">
+                                <InteractiveMap
+                                  center={{ lat: position?.lat || 34.0522, lng: position?.lng || -118.2437 }}
+                                  pinPosition={spotPinPositions[m.matchId] || null}
+                                  onPinDrop={(lat, lng) => handleSpotPinDrop(m.matchId, lat, lng)}
+                                />
+                              </div>
+                            ) : (
+                              <button onClick={() => handleShowSpotMap(m.matchId)}
+                                className="text-xs bg-[#0F9D58] text-white px-3 py-1.5 rounded-lg hover:bg-[#34A853]">
+                                Drop Pin on Map
+                              </button>
+                            )}
+                            {spotPinPositions[m.matchId] && (
+                              <button
+                                onClick={() => handleSaveSpot(m.matchId, m.scheduleId)}
+                                disabled={spotSaving[m.matchId]}
+                                className="mt-1 text-xs bg-[#4285F4] text-white px-3 py-1.5 rounded-lg hover:bg-[#3367D6] font-medium disabled:opacity-50"
+                              >
+                                {spotSaving[m.matchId] ? "Saving..." : "Save Spot Location"}
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {spotSaved[m.matchId] && (
+                          <p className="text-[#0F9D58] font-medium mt-1 text-[10px]">{"\u2705"} Spot location saved</p>
                         )}
 
                         {/* Rating */}

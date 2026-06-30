@@ -106,19 +106,9 @@ export default function Home() {
       {/* Use Cases */}
       <section className="max-w-3xl mx-auto px-4 pb-8">
         <div className="modern-hero px-6 py-8 sm:px-8 text-center">
-          <div className="relative z-10 space-y-6 divide-y divide-white/10">
-            <div>
-              <h3 className="font-bold text-white">{"\u26A1"} Short-term</h3>
-              <p className="text-white/80 text-sm mt-1">You're leaving your spot now — someone nearby grabs it instantly.</p>
-            </div>
-            <div className="pt-6">
-              <h3 className="font-bold text-white">{"\uD83D\uDD04"} Recurring</h3>
-              <p className="text-white/80 text-sm mt-1">On a regular commute? Set your weekly schedule and get matched automatically.</p>
-            </div>
-            <div className="pt-6">
-              <h3 className="font-bold text-white">{"\u2B50"} Premium</h3>
-              <p className="text-white/80 text-sm mt-1">Real-time offers for high-demand areas. $4.99/month.</p>
-            </div>
+          <div className="relative z-10">
+            <h3 className="font-bold text-white">{"\uD83D\uDD04"} Recurring Schedule Matching</h3>
+            <p className="text-white/80 text-sm mt-2">On a regular commute? Set your weekly schedule, vehicle type, and area — we match you automatically with compatible members.</p>
           </div>
         </div>
       </section>

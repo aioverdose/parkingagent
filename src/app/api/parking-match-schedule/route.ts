@@ -1,10 +1,11 @@
 import { db } from "@/lib/db";
 import { parkingMatchSchedules } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { verifySession } from "@/lib/auth-server";
 import { v4 as uuid } from "uuid";
 import { minutesFromMidnight } from "@/lib/services/matchingUtils";
 import { runMatchingForAll } from "@/lib/services/parkingMatch";
+import { z } from "zod";
 import { validate, parkingMatchScheduleSchema } from "@/lib/validation";
 import { rateLimit, rateLimitedResponse } from "@/lib/rateLimit";
 import { ok, err, handleError } from "@/lib/apiResponse";
@@ -81,5 +82,50 @@ export async function GET(req: Request) {
     return ok({ schedules });
   } catch (error) {
     return handleError(error, "Parking match schedules GET error");
+  }
+}
+
+const updateSpotSchema = z.object({
+  scheduleId: z.string().min(1),
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+});
+
+export async function PATCH(req: Request) {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      return err("Unauthorized", 401);
+    }
+
+    const { scheduleId, latitude, longitude } = validate(updateSpotSchema, await req.json());
+
+    const [schedule] = await db
+      .select()
+      .from(parkingMatchSchedules)
+      .where(
+        and(
+          eq(parkingMatchSchedules.id, scheduleId),
+          eq(parkingMatchSchedules.memberId, session.userId),
+        ),
+      )
+      .limit(1);
+
+    if (!schedule) {
+      return err("Schedule not found", 404);
+    }
+
+    await db
+      .update(parkingMatchSchedules)
+      .set({
+        latitude,
+        longitude,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(parkingMatchSchedules.id, scheduleId));
+
+    return ok({ message: "Spot location updated" });
+  } catch (error) {
+    return handleError(error, "Update spot error");
   }
 }
